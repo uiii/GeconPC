@@ -1,0 +1,9 @@
+*.swp
+/nbproject/private/
+build
+*_
+GeconPC.*
+tools
+tmp
+*.autosave
+res
