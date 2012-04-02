@@ -217,7 +217,7 @@ function premake.qt.ui_depends(filepath)
 end
 
 function premake.qt.uic(footer, fileprj, filepath)
-    local ui_header = _s('$(UIDIR)/ui_%s.h',  _MAKE.esc(path.getbasename(fileprj)))
+    local ui_header = _s('$(UIDIR)/ui_%s.hpp',  _MAKE.esc(path.getbasename(fileprj)))
     local target = { _s('%s: %s', ui_header, _MAKE.esc(fileprj)) }
     for dep in premake.qt.ui_depends(filepath) do
         table.insert(target, " \\\n "..path.join(path.getdirectory(fileprj), dep))
@@ -823,7 +823,7 @@ newapis {
         scope = "config"
     },
 
-    -- Directory where ui_*.h files are written (by default objdir)
+    -- Directory where ui_*.hpp files are written (by default objdir)
     uidir =
     {
         kind = "path",

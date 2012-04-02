@@ -6,7 +6,7 @@ end
 
 function require_pkg(pkg)
     if os.execute("pkg-config --exists " .. pkg) ~= 0 then
-        error(pkg .. "is required")
+        error(pkg .. " is required (cannot find " .. pkg .. ".pc file)")
     end
 
     buildoptions { "`pkg-config --cflags " .. pkg .. "`" }

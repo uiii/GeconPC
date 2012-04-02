@@ -3,7 +3,8 @@
 build
 *_
 GeconPC.*
-tools
 tmp
 *.autosave
 res
+bin
+lib
