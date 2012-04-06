@@ -17,60 +17,50 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GECON_NEWOBJECTDIALOG_HPP
-#define GECON_NEWOBJECTDIALOG_HPP
+#ifndef GECON_SETTINGSDIALOG_HPP
+#define GECON_SETTINGSDIALOG_HPP
 
 #include <QDialog>
-#include <QTimer>
-#include <QThread>
-#include <QPainter>
+#include <QMetaType>
 
 #include "ControlInfo.hpp"
-#include "Capture.hpp"
+
+namespace Gecon
+{
+    typedef V4L2VideoDevicePolicy<Image<RGB> > DevicePolicy;
+}
+
+Q_DECLARE_METATYPE(Gecon::DevicePolicy::DeviceAdapter)
 
 namespace Gecon
 {
     namespace Ui
     {
-        class NewObjectDialog;
+        class SettingsDialog;
     }
 
-    class NewObjectDialog : public QDialog
+    class SettingsDialog : public QDialog
     {
         Q_OBJECT
 
+        typedef ControlInfo::DevicePolicy::DeviceAdapter DeviceAdapter;
+
     public:
-        typedef ControlInfo::ObjectPolicy::Object Object;
-        typedef ControlInfo::DevicePolicy::Snapshot Snapshot;
-
-        explicit NewObjectDialog(ControlInfo::Control* control, QWidget *parent = 0);
-        ~NewObjectDialog();
-
-        Object* object() const;
+        explicit SettingsDialog(ControlInfo::Control* control, QWidget *parent = 0);
+        ~SettingsDialog();
 
     public slots:
-        void startCapture();
-        void stopCapture();
-
-        void displayImage();
-
-        void grabObject(QMouseEvent* event);
-
         int exec();
-
-        void newObject();
+        void updateDeviceList();
+        void selectDevice(int index);
 
     private:
-        Capture capture_;
-        QTimer captureTimer_;
-
-        Snapshot rawImage_;
-
-        ControlInfo::ObjectPolicy::ObjectPtr object_;
-
         ControlInfo::Control* control_;
 
-        Ui::NewObjectDialog *ui_;
+        ControlInfo::DevicePolicy devicePolicy_;
+
+        Ui::SettingsDialog *ui;
     };
 } // namespace Gecon
-#endif // GECON_NEWOBJECTDIALOG_HPP
+
+#endif // SETTINGSDIALOG_HPP

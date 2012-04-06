@@ -17,60 +17,57 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GECON_NEWOBJECTDIALOG_HPP
-#define GECON_NEWOBJECTDIALOG_HPP
+#ifndef GECON_CAPTURE_HPP
+#define GECON_CAPTURE_HPP
 
-#include <QDialog>
-#include <QTimer>
 #include <QThread>
-#include <QPainter>
+#include <QImage>
 
 #include "ControlInfo.hpp"
-#include "Capture.hpp"
 
 namespace Gecon
 {
-    namespace Ui
-    {
-        class NewObjectDialog;
-    }
-
-    class NewObjectDialog : public QDialog
+    class Capture : public QThread
     {
         Q_OBJECT
 
     public:
-        typedef ControlInfo::ObjectPolicy::Object Object;
         typedef ControlInfo::DevicePolicy::Snapshot Snapshot;
 
-        explicit NewObjectDialog(ControlInfo::Control* control, QWidget *parent = 0);
-        ~NewObjectDialog();
+        typedef ControlInfo::ObjectPolicy::Object Object;
+        typedef ControlInfo::ObjectPolicy::ObjectPtr ObjectPtr;
+        typedef ControlInfo::ObjectPolicy::ObjectSet ObjectSet;
 
-        Object* object() const;
+        Capture();
+
+        void setDevice(ControlInfo::DevicePolicy::DeviceAdapter device);
+        void setObject(ObjectPtr object);
+
+        const QImage& image() const;
+        const Snapshot& rawImage() const;
+
+        void run();
 
     public slots:
-        void startCapture();
-        void stopCapture();
+        void start();
+        void stop();
 
-        void displayImage();
+        void captureImage();
 
-        void grabObject(QMouseEvent* event);
-
-        int exec();
-
-        void newObject();
+    private slots:
+        void afterRun();
 
     private:
-        Capture capture_;
-        QTimer captureTimer_;
+        Snapshot raw_;
+        QImage img_;
 
-        Snapshot rawImage_;
+        ObjectPtr object_;
 
-        ControlInfo::ObjectPolicy::ObjectPtr object_;
+        bool stop_;
 
-        ControlInfo::Control* control_;
-
-        Ui::NewObjectDialog *ui_;
+        ControlInfo::DevicePolicy::DeviceAdapter device_;
+        ControlInfo::ObjectPolicy objectPolicy_;
     };
 } // namespace Gecon
-#endif // GECON_NEWOBJECTDIALOG_HPP
+
+#endif // GECON_CAPTURE_HPP

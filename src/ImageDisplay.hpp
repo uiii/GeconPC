@@ -17,17 +17,32 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
+#ifndef GECON_IMAGEDISPLAY_HPP
+#define GECON_IMAGEDISPLAY_HPP
 
-#include <QApplication>
-#include "MainWindow.hpp"
+#include <QLabel>
+#include <QMouseEvent>
 
-int main(int argc, char* argv[])
+#include "Gecon/Image.hpp"
+
+namespace Gecon
 {
-    QApplication app(argc, argv);
+    class ImageDisplay : public QLabel
+    {
+        Q_OBJECT
 
-    Gecon::MainWindow window;
-    window.show();
+    public:
+        explicit ImageDisplay(QWidget *parent = 0);
+        
+    signals:
+        void clicked(QMouseEvent* ev);
 
-    return app.exec();
-}
+    public slots:
+        void displayImage(const QImage& image);
+
+    protected:
+        void mousePressEvent(QMouseEvent *ev);
+    };
+} // namespace Gecon
+
+#endif // GECON_IMAGEDISPLAY_HPP

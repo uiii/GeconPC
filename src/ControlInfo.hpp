@@ -17,17 +17,25 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
+#ifndef CONTROLINFO_HPP
+#define CONTROLINFO_HPP
 
-#include <QApplication>
-#include "MainWindow.hpp"
+#include <Gecon/Control.hpp>
+#include <Gecon/Image.hpp>
+#include <Gecon/V4L2VideoDevicePolicy.hpp>
+#include <Gecon/ColorObjectPolicy.hpp>
+#include <Gecon/GesturePolicy.hpp>
 
-int main(int argc, char* argv[])
+namespace Gecon
 {
-    QApplication app(argc, argv);
+    struct ControlInfo
+    {
+        typedef Gecon::V4L2VideoDevicePolicy<Gecon::Image<Gecon::RGB> > DevicePolicy;
+        typedef Gecon::ColorObjectPolicy ObjectPolicy;
+        typedef Gecon::GesturePolicy<ObjectPolicy::Object> GesturePolicy;
 
-    Gecon::MainWindow window;
-    window.show();
-
-    return app.exec();
+        typedef Gecon::Control<DevicePolicy, ObjectPolicy, GesturePolicy> Control;
+    };
 }
+
+#endif // CONTROLINFO_HPP

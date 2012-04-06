@@ -40,7 +40,7 @@ build: configure
 	@cd ${BUILD_DIR} && ${MAKE} config=$(config) --no-print-directory
 
 run:
-	-@${BIN_DIR}/GeconPC
+	-@${GDB} ${BIN_DIR}/GeconPC
 
 install:
 #@${MAKE} -f ${CONFIG_DIR}/install/install.mk --no-print-directory
@@ -50,7 +50,7 @@ uninstall:
 
 clean:
 	@echo "Cleaning..."
-	@if [ -d ${BUILD_DIR} ]; \
+	-@if [ -f ${BUILD_DIR}/Makefile ]; \
 		then cd ${BUILD_DIR} && ${MAKE} clean --no-print-directory; \
 	fi
 	@rm -rf bin
