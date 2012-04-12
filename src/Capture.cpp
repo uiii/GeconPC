@@ -35,9 +35,14 @@ namespace Gecon
         device_ = device;
     }
 
-    void Capture::setObject(ObjectPtr object)
+    void Capture::setObjectColor(Object::Color color)
     {
-        object_ = object;
+        object_ = new Object(color);
+    }
+
+    void Capture::reset()
+    {
+        object_ = 0;
     }
 
     const QImage& Capture::image() const

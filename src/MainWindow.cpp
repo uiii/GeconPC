@@ -20,32 +20,68 @@
 #include "MainWindow.hpp"
 #include "ui_MainWindow.hpp"
 
+#include <QMenu>
+
+#include "SettingsDialog.hpp"
+#include "ObjectDialog.hpp"
+#include "StateGestureDialog.hpp"
+#include "RelationGestureDialog.hpp"
+
 namespace Gecon
 {
     MainWindow::MainWindow(QWidget *parent):
         QMainWindow(parent),
         settingsDialog_(new SettingsDialog(&control_)),
-        newObjectDialog_(new NewObjectDialog(&control_)),
-        ui(new Ui::MainWindow)
+        objectDialog_(new ObjectDialog(&objectModel_)),
+        stateGestureDialog_(new StateGestureDialog(&gestureModel_, &objectModel_)),
+        relationGestureDialog_(new RelationGestureDialog),
+        ui_(new Ui::MainWindow)
     {
-        ui->setupUi(this);
+        StateGestureWrapper::dialog = stateGestureDialog_;
 
-        connect(ui->newObjectButton, SIGNAL(clicked()), this, SLOT(newObject()));
-        connect(ui->actionSettings, SIGNAL(triggered()), settingsDialog_, SLOT(exec()));
+        ui_->setupUi(this);
+
+        ui_->objectView->setModel(&objectModel_);
+        ui_->gestureView->setModel(&gestureModel_);
+
+        initNewGestureMenu();
+
+        connect(ui_->newObjectButton, SIGNAL(clicked()), this, SLOT(newObject()));
+        connect(ui_->actionSettings, SIGNAL(triggered()), settingsDialog_, SLOT(exec()));
+        connect(ui_->gestureView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editGesture(QModelIndex)));
     }
 
     MainWindow::~MainWindow()
     {
-        delete ui;
+        delete ui_;
     }
 
     void MainWindow::newObject()
     {
-        int result = newObjectDialog_->exec();
+        objectDialog_->newObject(control_.device());
+    }
 
-        if(result == QDialog::Accepted)
-        {
-            // TODO newObjectDialog_->object();
-        }
+    void MainWindow::editGesture(const QModelIndex& index)
+    {
+        GestureWrapper* gesture = gestureModel_.data(index, Qt::UserRole).value<GestureWrapper*>();
+        gesture->edit();
+    }
+
+    void MainWindow::initNewGestureMenu()
+    {
+        QMenu* newGestureMenu = new QMenu(ui_->newGestureButton);
+
+        QAction* newStateGestureAction = new QAction("State gesture", newGestureMenu);
+        QAction* newRelationGestureAction = new QAction("Relation gesture", newGestureMenu);
+        QAction* newMotionGestureAction = new QAction("Motion gesture", newGestureMenu);
+
+        newGestureMenu->addAction(newStateGestureAction);
+        newGestureMenu->addAction(newRelationGestureAction);
+        newGestureMenu->addAction(newMotionGestureAction);
+
+        ui_->newGestureButton->setMenu(newGestureMenu);
+
+        connect(newStateGestureAction, SIGNAL(triggered()), stateGestureDialog_, SLOT(newGesture()));
+        connect(newRelationGestureAction, SIGNAL(triggered()), relationGestureDialog_, SLOT(newGesture()));
     }
 } // namespace Gecon

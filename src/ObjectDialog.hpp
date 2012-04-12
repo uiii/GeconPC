@@ -17,8 +17,8 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GECON_NEWOBJECTDIALOG_HPP
-#define GECON_NEWOBJECTDIALOG_HPP
+#ifndef GECON_OBJECTDIALOG_HPP
+#define GECON_OBJECTDIALOG_HPP
 
 #include <QDialog>
 #include <QTimer>
@@ -27,38 +27,39 @@
 
 #include "ControlInfo.hpp"
 #include "Capture.hpp"
+#include "ObjectModel.hpp"
 
 namespace Gecon
 {
     namespace Ui
     {
-        class NewObjectDialog;
+        class ObjectDialog;
     }
 
-    class NewObjectDialog : public QDialog
+    class ObjectDialog : public QDialog
     {
         Q_OBJECT
 
     public:
         typedef ControlInfo::ObjectPolicy::Object Object;
+        typedef ControlInfo::DevicePolicy::DeviceAdapter DeviceAdapter;
         typedef ControlInfo::DevicePolicy::Snapshot Snapshot;
 
-        explicit NewObjectDialog(ControlInfo::Control* control, QWidget *parent = 0);
-        ~NewObjectDialog();
-
-        Object* object() const;
+        explicit ObjectDialog(ObjectModel* objectModel, QWidget *parent = 0);
+        ~ObjectDialog();
 
     public slots:
-        void startCapture();
+        void startCapture(DeviceAdapter device);
         void stopCapture();
 
         void displayImage();
 
-        void grabObject(QMouseEvent* event);
+        void grabColor(QMouseEvent* event);
+
+        int newObject(DeviceAdapter device);
+        void addObject();
 
         int exec();
-
-        void newObject();
 
     private:
         Capture capture_;
@@ -66,11 +67,12 @@ namespace Gecon
 
         Snapshot rawImage_;
 
-        ControlInfo::ObjectPolicy::ObjectPtr object_;
+        Object::Color objectColor_;
+        bool colorGrabbed_;
 
-        ControlInfo::Control* control_;
+        ObjectModel* objectModel_;
 
-        Ui::NewObjectDialog *ui_;
+        Ui::ObjectDialog *ui_;
     };
 } // namespace Gecon
-#endif // GECON_NEWOBJECTDIALOG_HPP
+#endif // GECON_OBJECTDIALOG_HPP

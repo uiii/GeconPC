@@ -24,8 +24,8 @@
 
 #include "ControlInfo.hpp"
 
-#include "SettingsDialog.hpp"
-#include "NewObjectDialog.hpp"
+#include "ObjectModel.hpp"
+#include "GestureModel.hpp"
 
 namespace Gecon
 {
@@ -33,6 +33,11 @@ namespace Gecon
     {
         class MainWindow;
     }
+
+    class SettingsDialog;
+    class ObjectDialog;
+    class StateGestureDialog;
+    class RelationGestureDialog;
 
     class MainWindow : public QMainWindow
     {
@@ -44,14 +49,23 @@ namespace Gecon
 
     public slots:
         void newObject();
+        void editGesture(const QModelIndex& index);
 
     private:
+        void initNewGestureMenu();
+
         ControlInfo::Control control_;
 
-        SettingsDialog* settingsDialog_;
-        NewObjectDialog* newObjectDialog_;
+        ObjectModel objectModel_;
+        GestureModel gestureModel_;
 
-        Ui::MainWindow *ui;
+        SettingsDialog* settingsDialog_;
+        ObjectDialog* objectDialog_;
+
+        StateGestureDialog* stateGestureDialog_;
+        RelationGestureDialog* relationGestureDialog_;
+
+        Ui::MainWindow *ui_;
     };
 } // namespace Gecon
 #endif // GECON_MAINWINDOW_HPP

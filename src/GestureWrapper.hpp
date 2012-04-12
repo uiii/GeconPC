@@ -17,32 +17,25 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GECON_IMAGEDISPLAY_HPP
-#define GECON_IMAGEDISPLAY_HPP
+#ifndef GECON_GESTUREWRAPPER_HPP
+#define GECON_GESTUREWRAPPER_HPP
 
-#include <QLabel>
-#include <QMouseEvent>
-
-#include <Gecon/Image.hpp>
+#include <QString>
+#include <QMetaType>
 
 namespace Gecon
 {
-    class ImageDisplay : public QLabel
+    class GestureWrapper
     {
-        Q_OBJECT
-
     public:
-        explicit ImageDisplay(QWidget *parent = 0);
-        
-    signals:
-        void clicked(QMouseEvent* ev);
+        GestureWrapper();
+        virtual ~GestureWrapper();
 
-    public slots:
-        void displayImage(const QImage& image);
-
-    protected:
-        void mousePressEvent(QMouseEvent *ev);
+        virtual const QString& name() const = 0;
+        virtual void edit() = 0;
     };
 } // namespace Gecon
 
-#endif // GECON_IMAGEDISPLAY_HPP
+Q_DECLARE_METATYPE(Gecon::GestureWrapper*)
+
+#endif // GECON_GESTUREWRAPPER_HPP

@@ -17,59 +17,47 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GECON_CAPTURE_HPP
-#define GECON_CAPTURE_HPP
+#ifndef GECON_OBJECTMODEL_HPP
+#define GECON_OBJECTMODEL_HPP
 
-#include <QThread>
-#include <QImage>
+#include <QAbstractListModel>
+#include <QColor>
 
 #include "ControlInfo.hpp"
+#include "ObjectWrapper.hpp"
 
 namespace Gecon
 {
-    class Capture : public QThread
+    class ObjectModel : public QAbstractListModel
     {
         Q_OBJECT
 
     public:
-        typedef ControlInfo::DevicePolicy::Snapshot Snapshot;
-
-        typedef ControlInfo::ObjectPolicy::Object Object;
+        typedef Gecon::Color<RGB> Color;
         typedef ControlInfo::ObjectPolicy::ObjectPtr ObjectPtr;
         typedef ControlInfo::ObjectPolicy::ObjectSet ObjectSet;
 
-        Capture();
+        typedef QList<ObjectWrapper> ObjectWrapperList;
 
-        void setDevice(ControlInfo::DevicePolicy::DeviceAdapter device);
-        void setObjectColor(Object::Color color);
+        ObjectModel();
 
-        void reset();
+        int rowCount(const QModelIndex& parent) const;
+        QVariant data(const QModelIndex& index, int role) const;
 
-        const QImage& image() const;
-        const Snapshot& rawImage() const;
+        QModelIndex index(const ObjectWrapper& object) const;
 
-        void run();
+        int size() const;
 
-    public slots:
-        void start();
-        void stop();
+        void addObject(const ObjectWrapper& object);
+        void removeObject(const QModelIndex& index);
 
-        void captureImage();
-
-    private slots:
-        void afterRun();
+        const ObjectSet& rawObjects();
 
     private:
-        Snapshot raw_;
-        QImage img_;
+        ObjectWrapperList objects_;
 
-        ObjectPtr object_;
-
-        bool stop_;
-
-        ControlInfo::DevicePolicy::DeviceAdapter device_;
-        ControlInfo::ObjectPolicy objectPolicy_;
+        ObjectSet rawObjects_;
     };
 } // namespace Gecon
 
-#endif // GECON_CAPTURE_HPP
+#endif // GECON_OBJECTMODEL_HPP

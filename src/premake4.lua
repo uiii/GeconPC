@@ -15,7 +15,15 @@ project "GeconPC"
         "main.cpp",
         "MainWindow.*",
         "ImageDisplay.*",
-        "NewObjectDialog.*",
+        "ObjectDialog.*",
+        "StateGestureDialog.*",
+        "RelationGestureDialog.*",
         "SettingsDialog.*",
-        "Capture.*"
+        "Capture.*",
+        "ObjectModel.*",
+        "ObjectWrapper.*",
+        "GestureModel.*",
+        "GestureWrapper.*",
+        "StateGestureWrapper.*",
+        "ObjectPropertyStateSettings.*"
     }

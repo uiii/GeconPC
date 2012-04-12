@@ -17,32 +17,42 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GECON_IMAGEDISPLAY_HPP
-#define GECON_IMAGEDISPLAY_HPP
+#ifndef GECON_OBJECTWRAPPER_HPP
+#define GECON_OBJECTWRAPPER_HPP
 
-#include <QLabel>
-#include <QMouseEvent>
+#include <QString>
+#include <QColor>
+#include <QMetaType>
 
-#include <Gecon/Image.hpp>
+#include "Gecon/ColorObjectPolicy.hpp"
 
 namespace Gecon
 {
-    class ImageDisplay : public QLabel
+    class ObjectWrapper
     {
-        Q_OBJECT
-
     public:
-        explicit ImageDisplay(QWidget *parent = 0);
-        
-    signals:
-        void clicked(QMouseEvent* ev);
+        typedef ColorObjectPolicy::Object RawObject;
+        typedef ColorObjectPolicy::ObjectPtr RawObjectPtr;
 
-    public slots:
-        void displayImage(const QImage& image);
+        ObjectWrapper();
+        ObjectWrapper(const QString& name, RawObject::Color color);
 
-    protected:
-        void mousePressEvent(QMouseEvent *ev);
+        const QString& name() const;
+        QColor color() const;
+        RawObjectPtr rawObject() const;
+
+    private:
+        QString name_;
+        RawObject::Color color_;
+
+        RawObjectPtr rawObject_;
     };
+
+    bool operator==(const ObjectWrapper& left, const ObjectWrapper& right);
+    //bool operator<(const ObjectWrapper& left, const ObjectWrapper& right);
+
 } // namespace Gecon
 
-#endif // GECON_IMAGEDISPLAY_HPP
+Q_DECLARE_METATYPE(Gecon::ObjectWrapper)
+
+#endif // GECON_OBJECTWRAPPER_HPP

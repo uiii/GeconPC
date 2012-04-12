@@ -17,19 +17,19 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "NewObjectDialog.hpp"
-#include "ui_NewObjectDialog.hpp"
+#include "ObjectDialog.hpp"
+#include "ui_ObjectDialog.hpp"
 
 #include <QPainter>
 #include <QMessageBox>
 
 namespace Gecon
 {
-    NewObjectDialog::NewObjectDialog(ControlInfo::Control* control, QWidget *parent):
+    ObjectDialog::ObjectDialog(ObjectModel* objectModel, QWidget *parent):
         QDialog(parent),
-        object_(0),
-        control_(control),
-        ui_(new Ui::NewObjectDialog)
+        colorGrabbed_(false),
+        objectModel_(objectModel),
+        ui_(new Ui::ObjectDialog)
     {
         ui_->setupUi(this);
         setFixedSize(size());
@@ -37,50 +37,78 @@ namespace Gecon
         captureTimer_.setSingleShot(30);
 
         connect(this, SIGNAL(finished(int)), this, SLOT(stopCapture()));
-        connect(ui_->buttonBox, SIGNAL(accepted()), this, SLOT(newObject()));
+        connect(ui_->buttonBox, SIGNAL(accepted()), this, SLOT(addObject()));
 
         connect(&captureTimer_, SIGNAL(timeout()), &capture_, SLOT(captureImage()));
         connect(&capture_, SIGNAL(finished()), this, SLOT(displayImage()));
 
-        connect(ui_->display, SIGNAL(clicked(QMouseEvent*)), this, SLOT(grabObject(QMouseEvent*)));
+        connect(ui_->display, SIGNAL(clicked(QMouseEvent*)), this, SLOT(grabColor(QMouseEvent*)));
     }
 
-    NewObjectDialog::~NewObjectDialog()
+    ObjectDialog::~ObjectDialog()
     {
         delete ui_;
     }
 
-    int NewObjectDialog::exec()
+    int ObjectDialog::exec()
     {
-        startCapture();
+        return QDialog::Rejected;
+    }
+
+    int ObjectDialog::newObject(ObjectDialog::DeviceAdapter device)
+    {
+        colorGrabbed_ = false;
+
+        startCapture(device);
 
         return QDialog::exec();
     }
 
-    void NewObjectDialog::newObject()
+    void ObjectDialog::addObject()
     {
-        // TODO
+        if(! colorGrabbed_)
+        {
+            QMessageBox::critical(this, "Color object error", "No object selected!", QMessageBox::Ok);
+            return;
+        }
 
-        accept();
+        try
+        {
+            QString name = ui_->objectName->text();
+            if(name.isEmpty())
+            {
+                name = "Object";
+            }
+
+            ObjectWrapper object(name, objectColor_);
+
+            objectModel_->addObject(object);
+
+            accept();
+        }
+        catch(...)
+        {
+            // TODO
+        }
     }
 
-    void NewObjectDialog::startCapture()
+    void ObjectDialog::startCapture(ObjectDialog::DeviceAdapter device)
     {
-        capture_.setDevice(control_->device());
-        capture_.setObject(0);
+        capture_.reset();
+        capture_.setDevice(device);
 
         capture_.start();
         capture_.captureImage();
         capture_.wait();
     }
 
-    void NewObjectDialog::stopCapture()
+    void ObjectDialog::stopCapture()
     {
         captureTimer_.stop();
         capture_.stop();
     }
 
-    void NewObjectDialog::displayImage()
+    void ObjectDialog::displayImage()
     {
         rawImage_ = capture_.rawImage();
         ui_->display->displayImage(capture_.image());
@@ -91,10 +119,12 @@ namespace Gecon
         }
     }
 
-    void NewObjectDialog::grabObject(QMouseEvent *event)
+    void ObjectDialog::grabColor(QMouseEvent *event)
     {
-        object_ = new Object(rawImage_.at(event->pos().x(), event->pos().y()));
+        objectColor_ = rawImage_.at(event->pos().x(), event->pos().y());
 
-        capture_.setObject(object_);
+        capture_.setObjectColor(objectColor_);
+
+        colorGrabbed_ = true;
     }
 } // namespace Gecon

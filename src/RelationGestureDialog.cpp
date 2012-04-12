@@ -17,32 +17,31 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GECON_IMAGEDISPLAY_HPP
-#define GECON_IMAGEDISPLAY_HPP
+#include "RelationGestureDialog.hpp"
+#include "ui_RelationGestureDialog.hpp"
 
-#include <QLabel>
-#include <QMouseEvent>
-
-#include <Gecon/Image.hpp>
-
-namespace Gecon
-{
-    class ImageDisplay : public QLabel
+namespace Gecon {
+    
+    RelationGestureDialog::RelationGestureDialog(QWidget *parent) :
+        QDialog(parent),
+        ui(new Ui::RelationGestureDialog)
     {
-        Q_OBJECT
+        ui->setupUi(this);
+    }
+    
+    RelationGestureDialog::~RelationGestureDialog()
+    {
+        delete ui;
+    }
 
-    public:
-        explicit ImageDisplay(QWidget *parent = 0);
-        
-    signals:
-        void clicked(QMouseEvent* ev);
+    int RelationGestureDialog::newGesture()
+    {
+        return QDialog::exec();
+    }
 
-    public slots:
-        void displayImage(const QImage& image);
-
-    protected:
-        void mousePressEvent(QMouseEvent *ev);
-    };
+    int RelationGestureDialog::exec()
+    {
+        return QDialog::Rejected;
+    }
+    
 } // namespace Gecon
-
-#endif // GECON_IMAGEDISPLAY_HPP
