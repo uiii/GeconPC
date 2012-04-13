@@ -5,6 +5,7 @@ project "GeconPC"
     targetdir "../bin"
 
     uses "QtGui"
+    uses "QtTest"
 
     require_pkg_config()
     require_pkg("GeconFramework")
@@ -18,8 +19,10 @@ project "GeconPC"
         "ObjectDialog.*",
         "StateGestureDialog.*",
         "RelationGestureDialog.*",
+        "MotionGestureDialog.*",
         "SettingsDialog.*",
         "Capture.*",
+        "ObjectPolicy.*",
         "ObjectModel.*",
         "ObjectWrapper.*",
         "GestureModel.*",

@@ -22,6 +22,8 @@
 
 #include <QPainter>
 #include <QMessageBox>
+#include <QtConcurrentRun>
+#include <QtTest/QTest>
 
 namespace Gecon
 {
@@ -39,8 +41,10 @@ namespace Gecon
         connect(this, SIGNAL(finished(int)), this, SLOT(stopCapture()));
         connect(ui_->buttonBox, SIGNAL(accepted()), this, SLOT(addObject()));
 
-        connect(&captureTimer_, SIGNAL(timeout()), &capture_, SLOT(captureImage()));
-        connect(&capture_, SIGNAL(finished()), this, SLOT(displayImage()));
+        //connect(&captureTimer_, SIGNAL(timeout()), &capture_, SLOT(captureImage()));
+        //connect(&capture_, SIGNAL(finished()), this, SLOT(displayImage()));
+
+        connect(control_.signaler(), SIGNAL(objectsRecognized(Image,Image,ObjectSet)), this, SLOT(displayImage(Image,Image,ObjectSet)), Qt::BlockingQueuedConnection);
 
         connect(ui_->display, SIGNAL(clicked(QMouseEvent*)), this, SLOT(grabColor(QMouseEvent*)));
     }
@@ -94,28 +98,60 @@ namespace Gecon
 
     void ObjectDialog::startCapture(ObjectDialog::DeviceAdapter device)
     {
-        capture_.reset();
+        /*capture_.reset();
         capture_.setDevice(device);
 
         capture_.start();
         capture_.captureImage();
-        capture_.wait();
+        capture_.wait();*/
+
+        control_.setDevice(device);
+        control_.start();
     }
 
     void ObjectDialog::stopCapture()
     {
-        captureTimer_.stop();
-        capture_.stop();
+        /*captureTimer_.stop();
+        capture_.stop();*/
+
+        qDebug("before stop");
+        QtConcurrent::run(&control_, &ControlInfo::Control::stop);
+        qDebug("after stop");
     }
 
-    void ObjectDialog::displayImage()
+    void ObjectDialog::displayImage(Image original, Image segmented, ObjectSet objects)
     {
-        rawImage_ = capture_.rawImage();
-        ui_->display->displayImage(capture_.image());
+        qDebug("recognize");
+        //rawImage_ = capture_.rawImage();
+        rawImage_ = original;
+        QImage img = QImage((const uchar*)&(original.rawData()[0]), original.width(), original.height(), original.width() * 3, QImage::Format_RGB888);
+
+        if(colorGrabbed_ && object_.isVisible())
+        {
+            QPainter painter(&img);
+
+            // paint object's border
+            const Object::Border& border = object_.border();
+
+            QPolygon borderPolygon;
+            for(const Object::Point& point : border)
+            {
+                borderPolygon << QPoint(point.x, point.y);
+            }
+
+            painter.save();
+            painter.setPen(Qt::blue);
+            painter.setBrush(QBrush(Qt::blue, Qt::DiagCrossPattern));
+            painter.setBrush(QBrush(Qt::blue, Qt::Dense6Pattern));
+            painter.drawPolygon(borderPolygon);
+            painter.restore();
+        }
+
+        ui_->display->displayImage(img);
 
         if(isVisible())
         {
-            captureTimer_.start();
+            //captureTimer_.start();
         }
     }
 
@@ -123,7 +159,23 @@ namespace Gecon
     {
         objectColor_ = rawImage_.at(event->pos().x(), event->pos().y());
 
-        capture_.setObjectColor(objectColor_);
+        //capture_.setObjectColor(objectColor_);
+
+        ControlInfo::ObjectPolicy::ObjectSet objects;
+        object_ = Object(objectColor_);
+        objects.insert(&object_);
+        control_.prepareObjects(objects);
+
+        QtConcurrent::run(&control_, &ControlInfo::Control::restart);
+
+        /*ControlInfo::GesturePolicy::GestureSet gestures;
+        std::function<bool(const bool&)> f =
+                std::bind(std::equal_to<bool>(), std::placeholders::_1, true);
+        gesture_ = ObjectStateGesture<Object, bool>(&object_, &Object::isVisible, f);
+        gestures.insert(&gesture_);
+        control_.prepareGestures(gestures);*/
+
+        //gesture_.stateEnterEvent().connect();
 
         colorGrabbed_ = true;
     }

@@ -17,32 +17,52 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GECON_IMAGEDISPLAY_HPP
-#define GECON_IMAGEDISPLAY_HPP
+#ifndef GECON_MOTIONGESTUREDIALOG_HPP
+#define GECON_MOTIONGESTUREDIALOG_HPP
 
-#include <QLabel>
-#include <QMouseEvent>
+#include <QDialog>
+#include <QTimer>
 
-#include <Gecon/Image.hpp>
+#include "Capture.hpp"
 
 namespace Gecon
 {
-    class ImageDisplay : public QLabel
+    namespace Ui
+    {
+        class MotionGestureDialog;
+    }
+    
+    class MotionGestureDialog : public QDialog
     {
         Q_OBJECT
-
-    public:
-        explicit ImageDisplay(QWidget *parent = 0);
         
-    signals:
-        void clicked(QMouseEvent* ev);
+    public:
+        typedef ControlInfo::DevicePolicy::DeviceAdapter DeviceAdapter;
+
+        explicit MotionGestureDialog(QWidget *parent = 0);
+        ~MotionGestureDialog();
 
     public slots:
-        void displayImage(const QImage& image);
+        void startCapture();
+        void stopCapture();
 
-    protected:
-        void mousePressEvent(QMouseEvent* ev);
+        void displayImage();
+
+        void countdown();
+
+        int newGesture(DeviceAdapter device);
+
+        int exec();
+        
+    private:
+        Capture capture_;
+
+        QTimer captureTimer_;
+
+        QTimer countdownTimer_;
+        int countdownCount_;
+
+        Ui::MotionGestureDialog *ui_;
     };
 } // namespace Gecon
-
-#endif // GECON_IMAGEDISPLAY_HPP
+#endif // GECON_MOTIONGESTUREDIALOG_HPP

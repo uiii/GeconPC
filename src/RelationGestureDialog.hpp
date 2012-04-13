@@ -22,6 +22,8 @@
 
 #include <QDialog>
 
+#include "ObjectModel.hpp"
+
 namespace Gecon {
     
     namespace Ui {
@@ -33,7 +35,7 @@ namespace Gecon {
         Q_OBJECT
         
     public:
-        explicit RelationGestureDialog(QWidget *parent = 0);
+        explicit RelationGestureDialog(ObjectModel* objectModel, QWidget *parent = 0);
         ~RelationGestureDialog();
 
     public slots:
@@ -42,7 +44,9 @@ namespace Gecon {
         int exec();
         
     private:
-        Ui::RelationGestureDialog *ui;
+        ObjectModel* objectModel_;
+
+        Ui::RelationGestureDialog *ui_;
     };
     
     

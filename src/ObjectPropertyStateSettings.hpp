@@ -23,6 +23,7 @@
 #include <QWidget>
 #include <QComboBox>
 #include <QSpinBox>
+#include <QLabel>
 
 #include <functional>
 
@@ -38,7 +39,7 @@ namespace Gecon
         typedef ControlInfo::ObjectPolicy::Object Object;
         typedef ControlInfo::ObjectPolicy::ObjectPtr ObjectPtr;
 
-        ObjectPropertyStateSettings(const QString& propertyName, QWidget* parent = 0);
+        ObjectPropertyStateSettings(const QString& propertyName, QWidget* widget);
         virtual ~ObjectPropertyStateSettings();
 
         virtual const QString& propertyName();
@@ -52,11 +53,17 @@ namespace Gecon
 
         virtual GesturePtr toGesture(ObjectWrapper object) = 0;
 
-    protected:
-        QWidget* widget_;
-
     private:
+        QWidget* widget_;
         QString propertyName_;
+    };
+
+    class VisibilityStateSettingsWidget : public QWidget
+    {
+    public:
+        VisibilityStateSettingsWidget(QWidget* parent);
+
+        QComboBox* visibilityOptions;
     };
 
     class VisibilityStateSettings : public ObjectPropertyStateSettings
@@ -75,7 +82,24 @@ namespace Gecon
     private:
         int visibilityOptionsIndex_;
 
-        QComboBox* visibilityOptions_;
+        VisibilityStateSettingsWidget* widget_;
+    };
+
+    class PositionStateSettingsWidget : public QWidget
+    {
+        Q_OBJECT
+
+    public:
+        PositionStateSettingsWidget(QWidget* parent);
+
+        QComboBox* relation;
+        QSpinBox* distance;
+        QLabel* from;
+        QSpinBox* positionX;
+        QSpinBox* positionY;
+
+    public slots:
+        void relationChanged();
     };
 
     class PositionStateSettings : public ObjectPropertyStateSettings
@@ -93,12 +117,20 @@ namespace Gecon
 
     private:
         int relationIndex_;
+        int distance_;
         int positionXValue_;
         int positionYValue_;
 
-        QComboBox* relation_;
-        QSpinBox* positionX_;
-        QSpinBox* positionY_;
+        PositionStateSettingsWidget* widget_;
+    };
+
+    class AngleStateSettingsWidget : public QWidget
+    {
+    public:
+        AngleStateSettingsWidget(QWidget* parent);
+
+        QComboBox* relationOptions;
+        QSpinBox* angle;
     };
 
     class AngleStateSettings : public ObjectPropertyStateSettings
@@ -123,8 +155,7 @@ namespace Gecon
         int relationOptionsIndex_;
         int angleValue_;
 
-        QComboBox* relationOptions_;
-        QSpinBox* angle_;
+        AngleStateSettingsWidget* widget_;
     };
 
 } // namespace Gecon

@@ -17,32 +17,44 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GECON_IMAGEDISPLAY_HPP
-#define GECON_IMAGEDISPLAY_HPP
+#ifndef GECON_OBJECTPOLICY_HPP
+#define GECON_OBJECTPOLICY_HPP
 
-#include <QLabel>
-#include <QMouseEvent>
+#include <QObject>
 
+#include <Gecon/ColorObjectPolicy.hpp>
 #include <Gecon/Image.hpp>
 
 namespace Gecon
 {
-    class ImageDisplay : public QLabel
+    class ObjectPolicySignaler : public QObject
     {
         Q_OBJECT
 
     public:
-        explicit ImageDisplay(QWidget *parent = 0);
-        
+        typedef Gecon::Image<RGB> Image;
+        typedef ColorObjectPolicy::ObjectSet ObjectSet;
+
+        void emitObjectsRecognized(Image original, Image segmented, const ObjectSet& objects);
+
     signals:
-        void clicked(QMouseEvent* ev);
+        void objectsRecognized(Image original, Image segmented, const ObjectSet& objects);
+    };
 
-    public slots:
-        void displayImage(const QImage& image);
+    class ObjectPolicy : public ColorObjectPolicy
+    {
+    public:
+        typedef Gecon::Image<RGB> Image;
 
-    protected:
-        void mousePressEvent(QMouseEvent* ev);
+        ObjectPolicy();
+
+        ObjectSet recognizeObjects(const Image& image);
+
+        ObjectPolicySignaler* signaler() const;
+
+    private:
+        ObjectPolicySignaler* signaler_;
     };
 } // namespace Gecon
 
-#endif // GECON_IMAGEDISPLAY_HPP
+#endif // GECON_OBJECTPOLICY_HPP

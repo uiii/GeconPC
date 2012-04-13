@@ -38,6 +38,7 @@ namespace Gecon
     class ObjectDialog;
     class StateGestureDialog;
     class RelationGestureDialog;
+    class MotionGestureDialog;
 
     class MainWindow : public QMainWindow
     {
@@ -49,6 +50,8 @@ namespace Gecon
 
     public slots:
         void newObject();
+        void newMotionGesture();
+
         void editGesture(const QModelIndex& index);
 
     private:
@@ -64,6 +67,7 @@ namespace Gecon
 
         StateGestureDialog* stateGestureDialog_;
         RelationGestureDialog* relationGestureDialog_;
+        MotionGestureDialog* motionGestureDialog_;
 
         Ui::MainWindow *ui_;
     };

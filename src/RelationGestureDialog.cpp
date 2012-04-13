@@ -22,16 +22,20 @@
 
 namespace Gecon {
     
-    RelationGestureDialog::RelationGestureDialog(QWidget *parent) :
+    RelationGestureDialog::RelationGestureDialog(ObjectModel *objectModel, QWidget *parent) :
         QDialog(parent),
-        ui(new Ui::RelationGestureDialog)
+        objectModel_(objectModel),
+        ui_(new Ui::RelationGestureDialog)
     {
-        ui->setupUi(this);
+        ui_->setupUi(this);
+
+        ui_->leftObject->setModel(objectModel_);
+        ui_->rightObject->setModel(objectModel_);
     }
     
     RelationGestureDialog::~RelationGestureDialog()
     {
-        delete ui;
+        delete ui_;
     }
 
     int RelationGestureDialog::newGesture()

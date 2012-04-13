@@ -17,26 +17,31 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CONTROLINFO_HPP
-#define CONTROLINFO_HPP
-
-#include <Gecon/Control.hpp>
-#include <Gecon/Image.hpp>
-#include <Gecon/V4L2VideoDevicePolicy.hpp>
-#include <Gecon/GesturePolicy.hpp>
-
 #include "ObjectPolicy.hpp"
 
 namespace Gecon
 {
-    struct ControlInfo
+    ObjectPolicy::ObjectPolicy():
+        signaler_(new ObjectPolicySignaler)
     {
-        typedef Gecon::V4L2VideoDevicePolicy<Gecon::Image<Gecon::RGB> > DevicePolicy;
-        typedef Gecon::ObjectPolicy ObjectPolicy;
-        typedef Gecon::GesturePolicy<ObjectPolicy::Object> GesturePolicy;
+    }
 
-        typedef Gecon::Control<DevicePolicy, ObjectPolicy, GesturePolicy> Control;
-    };
-}
+    ColorObjectPolicy::ObjectSet ObjectPolicy::recognizeObjects(const Image& image)
+    {
+        ObjectSet objects = ColorObjectPolicy::recognizeObjects(image);
 
-#endif // CONTROLINFO_HPP
+        emit signaler_->emitObjectsRecognized(image, ColorObjectPolicy::image(), objects); // TODO segmented image
+
+        return objects;
+    }
+
+    ObjectPolicySignaler* ObjectPolicy::signaler() const
+    {
+        return signaler_;
+    }
+
+    void ObjectPolicySignaler::emitObjectsRecognized(ObjectPolicySignaler::Image original, ObjectPolicySignaler::Image segmented, const ObjectPolicySignaler::ObjectSet &objects)
+    {
+        emit objectsRecognized(original, segmented, objects);
+    }
+} // namespace Gecon

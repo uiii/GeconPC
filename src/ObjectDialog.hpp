@@ -29,6 +29,8 @@
 #include "Capture.hpp"
 #include "ObjectModel.hpp"
 
+#include <Gecon/ObjectStateGesture.hpp>
+
 namespace Gecon
 {
     namespace Ui
@@ -42,8 +44,11 @@ namespace Gecon
 
     public:
         typedef ControlInfo::ObjectPolicy::Object Object;
+        typedef ControlInfo::GesturePolicy::Gesture Gesture;
         typedef ControlInfo::DevicePolicy::DeviceAdapter DeviceAdapter;
         typedef ControlInfo::DevicePolicy::Snapshot Snapshot;
+        typedef Gecon::Image<RGB> Image;
+        typedef ControlInfo::ObjectPolicy::ObjectSet ObjectSet;
 
         explicit ObjectDialog(ObjectModel* objectModel, QWidget *parent = 0);
         ~ObjectDialog();
@@ -52,7 +57,7 @@ namespace Gecon
         void startCapture(DeviceAdapter device);
         void stopCapture();
 
-        void displayImage();
+        void displayImage(Image original, Image segmented, ObjectSet objects);
 
         void grabColor(QMouseEvent* event);
 
@@ -65,10 +70,15 @@ namespace Gecon
         Capture capture_;
         QTimer captureTimer_;
 
+        ControlInfo::Control control_;
+
         Snapshot rawImage_;
 
         Object::Color objectColor_;
         bool colorGrabbed_;
+
+        Object object_;
+        ObjectStateGesture<Object, bool> gesture_;
 
         ObjectModel* objectModel_;
 

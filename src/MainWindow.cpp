@@ -26,6 +26,7 @@
 #include "ObjectDialog.hpp"
 #include "StateGestureDialog.hpp"
 #include "RelationGestureDialog.hpp"
+#include "MotionGestureDialog.hpp"
 
 namespace Gecon
 {
@@ -34,7 +35,8 @@ namespace Gecon
         settingsDialog_(new SettingsDialog(&control_)),
         objectDialog_(new ObjectDialog(&objectModel_)),
         stateGestureDialog_(new StateGestureDialog(&gestureModel_, &objectModel_)),
-        relationGestureDialog_(new RelationGestureDialog),
+        relationGestureDialog_(new RelationGestureDialog(&objectModel_)),
+        motionGestureDialog_(new MotionGestureDialog),
         ui_(new Ui::MainWindow)
     {
         StateGestureWrapper::dialog = stateGestureDialog_;
@@ -61,6 +63,11 @@ namespace Gecon
         objectDialog_->newObject(control_.device());
     }
 
+    void MainWindow::newMotionGesture()
+    {
+        motionGestureDialog_->newGesture(control_.device());
+    }
+
     void MainWindow::editGesture(const QModelIndex& index)
     {
         GestureWrapper* gesture = gestureModel_.data(index, Qt::UserRole).value<GestureWrapper*>();
@@ -83,5 +90,6 @@ namespace Gecon
 
         connect(newStateGestureAction, SIGNAL(triggered()), stateGestureDialog_, SLOT(newGesture()));
         connect(newRelationGestureAction, SIGNAL(triggered()), relationGestureDialog_, SLOT(newGesture()));
+        connect(newMotionGestureAction, SIGNAL(triggered()), this, SLOT(newMotionGesture()));
     }
 } // namespace Gecon
