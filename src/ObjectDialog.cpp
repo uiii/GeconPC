@@ -36,13 +36,8 @@ namespace Gecon
         ui_->setupUi(this);
         setFixedSize(size());
 
-        captureTimer_.setSingleShot(30);
-
         connect(this, SIGNAL(finished(int)), this, SLOT(stopCapture()));
         connect(ui_->buttonBox, SIGNAL(accepted()), this, SLOT(addObject()));
-
-        //connect(&captureTimer_, SIGNAL(timeout()), &capture_, SLOT(captureImage()));
-        //connect(&capture_, SIGNAL(finished()), this, SLOT(displayImage()));
 
         connect(control_.signaler(), SIGNAL(objectsRecognized(Image,Image,ObjectSet)), this, SLOT(displayImage(Image,Image,ObjectSet)), Qt::BlockingQueuedConnection);
 
@@ -121,8 +116,6 @@ namespace Gecon
 
     void ObjectDialog::displayImage(Image original, Image segmented, ObjectSet objects)
     {
-        qDebug("recognize");
-        //rawImage_ = capture_.rawImage();
         rawImage_ = original;
         QImage img = QImage((const uchar*)&(original.rawData()[0]), original.width(), original.height(), original.width() * 3, QImage::Format_RGB888);
 
@@ -148,18 +141,11 @@ namespace Gecon
         }
 
         ui_->display->displayImage(img);
-
-        if(isVisible())
-        {
-            //captureTimer_.start();
-        }
     }
 
     void ObjectDialog::grabColor(QMouseEvent *event)
     {
         objectColor_ = rawImage_.at(event->pos().x(), event->pos().y());
-
-        //capture_.setObjectColor(objectColor_);
 
         ControlInfo::ObjectPolicy::ObjectSet objects;
         object_ = Object(objectColor_);

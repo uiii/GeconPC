@@ -67,9 +67,6 @@ namespace Gecon
         int exec();
 
     private:
-        Capture capture_;
-        QTimer captureTimer_;
-
         ControlInfo::Control control_;
 
         Snapshot rawImage_;
@@ -78,7 +75,7 @@ namespace Gecon
         bool colorGrabbed_;
 
         Object object_;
-        ObjectStateGesture<Object, bool> gesture_;
+        //ObjectStateGesture<Object, bool> gesture_;
 
         ObjectModel* objectModel_;
 

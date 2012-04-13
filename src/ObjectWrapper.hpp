@@ -43,7 +43,7 @@ namespace Gecon
 
     private:
         QString name_;
-        RawObject::Color color_;
+        QColor color_;
 
         RawObjectPtr rawObject_;
     };

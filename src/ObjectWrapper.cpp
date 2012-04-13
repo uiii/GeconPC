@@ -30,6 +30,8 @@ namespace Gecon
         name_(name),
         rawObject_(new RawObject(color))
     {
+        Color<RGB> rgb = color;
+        color_ = QColor(rgb.r, rgb.g, rgb.b);
     }
 
     const QString& ObjectWrapper::name() const
@@ -39,8 +41,7 @@ namespace Gecon
 
     QColor ObjectWrapper::color() const
     {
-        Color<RGB> rgb = color_;
-        return QColor(rgb.r, rgb.g, rgb.b);
+        return color_;
     }
 
     ObjectWrapper::RawObjectPtr ObjectWrapper::rawObject() const
