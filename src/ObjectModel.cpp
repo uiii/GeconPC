@@ -25,6 +25,14 @@ namespace Gecon
     {
     }
 
+    ObjectModel::~ObjectModel()
+    {
+        for(ObjectWrapper* object : objects_)
+        {
+            delete object;
+        }
+    }
+
     int ObjectModel::rowCount(const QModelIndex&) const
     {
         return size();
@@ -37,15 +45,15 @@ namespace Gecon
             return QVariant();
         }
 
-        ObjectWrapper object = objects_.at(index.row());
+        ObjectWrapper* object = objects_.at(index.row());
 
         if(role == Qt::DisplayRole)
         {
-            return object.name();
+            return object->name();
         }
         else if(role == Qt::DecorationRole)
         {
-            return object.color();
+            return object->color();
         }
         else if(role == Qt::UserRole)
         {
@@ -57,7 +65,7 @@ namespace Gecon
         }
     }
 
-    QModelIndex ObjectModel::index(const ObjectWrapper &object) const
+    QModelIndex ObjectModel::index(ObjectWrapper *object) const
     {
         return createIndex(objects_.indexOf(object), 0);
     }
@@ -67,7 +75,7 @@ namespace Gecon
         return objects_.size();
     }
 
-    void ObjectModel::addObject(const ObjectWrapper& object)
+    void ObjectModel::addObject(const QString& name, RawObject::Color color)
     {
         // TODO
         /*if(objects_.find(object->color()) != objects_.end())
@@ -75,10 +83,12 @@ namespace Gecon
             // throw
         }*/
 
-        rawObjects_.insert(object.rawObject());
+        ObjectWrapper* object = new ObjectWrapper(name, color);
+
+        rawObjects_.insert(object->rawObject());
 
         ObjectWrapperList::iterator it = std::find_if(objects_.begin(), objects_.end(),
-            [&](const ObjectWrapper& item){ return QString::localeAwareCompare(object.name(), item.name()) < 0; }
+            [&](ObjectWrapper* item){ return QString::localeAwareCompare(object->name(), item->name()) < 0; }
         );
 
         beginInsertRows(QModelIndex(), it - objects_.begin(), it - objects_.begin());

@@ -25,6 +25,8 @@
 #include <QMessageBox>
 
 #include "StateGestureWrapper.hpp"
+#include "GestureModel.hpp"
+#include "ObjectModel.hpp"
 
 namespace Gecon {
     
@@ -111,7 +113,7 @@ namespace Gecon {
         {
             gestureModel_->addStateGesture(
                 name,
-                ui_->object->itemData(ui_->object->currentIndex()).value<ObjectWrapper>(),
+                ui_->object->itemData(ui_->object->currentIndex()).value<ObjectWrapper*>(),
                 currentStateSettings_
             );
 
@@ -138,10 +140,10 @@ namespace Gecon {
         try
         {
             QModelIndex index = gestureModel_->index(editedGesture_);
-            gestureModel_->removeStateGesture(index);
+            gestureModel_->removeGesture(index);
             gestureModel_->addStateGesture(
                 name,
-                ui_->object->itemData(ui_->object->currentIndex()).value<ObjectWrapper>(),
+                ui_->object->itemData(ui_->object->currentIndex()).value<ObjectWrapper*>(),
                 currentStateSettings_
             );
 
@@ -163,7 +165,7 @@ namespace Gecon {
         if(button == QMessageBox::Ok)
         {
             QModelIndex index = gestureModel_->index(editedGesture_);
-            gestureModel_->removeStateGesture(index);
+            gestureModel_->removeGesture(index);
 
             accept();
         }

@@ -20,23 +20,38 @@
 #include "MotionGestureDialog.hpp"
 #include "ui_MotionGestureDialog.hpp"
 
+#include <QPainter>
+#include <QMessageBox>
+#include <QtConcurrentRun>
+
+#include "ObjectWrapper.hpp"
+#include "ObjectModel.hpp"
+#include "GestureModel.hpp"
+#include "MotionGestureWrapper.hpp"
+
 namespace Gecon
 {
-    MotionGestureDialog::MotionGestureDialog(QWidget *parent) :
+    MotionGestureDialog::MotionGestureDialog(GestureModel* gestureModel, ObjectModel *objectModel, QWidget *parent) :
         QDialog(parent),
+        objectModel_(objectModel),
+        object_(0),
+        gestureModel_(gestureModel),
+        editedGesture_(0),
+        recording_(false),
+        motionRecorder_(0),
         ui_(new Ui::MotionGestureDialog)
     {
         ui_->setupUi(this);
 
-        captureTimer_.setSingleShot(30);
-        countdownTimer_.setInterval(1000);
+        ui_->object->setModel(objectModel_);
 
-        connect(&captureTimer_, SIGNAL(timeout()), &capture_, SLOT(captureImage()));
-        connect(&capture_, SIGNAL(finished()), this, SLOT(displayImage()));
+        initReadyButton_();
 
-        connect(&countdownTimer_, SIGNAL(timeout()), this, SLOT(countdown()));
-
+        connect(this, SIGNAL(finished(int)), this, SLOT(stopCapture()));
+        connect(ui_->object, SIGNAL(currentIndexChanged(int)), this, SLOT(selectObject(int)));
         connect(ui_->recordMotionButton, SIGNAL(clicked()), this, SLOT(startCapture()));
+        connect(ui_->buttonBox, SIGNAL(accepted()), this, SLOT(addGesture()));
+        connect(ui_->deleteButton, SIGNAL(clicked()), this, SLOT(deleteGesture()));
     }
     
     MotionGestureDialog::~MotionGestureDialog()
@@ -44,49 +59,393 @@ namespace Gecon
         delete ui_;
     }
 
+    int MotionGestureDialog::newGesture()
+    {
+        if(! objectModel_->size())
+        {
+            QMessageBox::critical(parentWidget(), "Object error", "No objects available", QMessageBox::Ok);
+
+            return QDialog::Rejected;
+        }
+
+        reset();
+
+        disconnect(ui_->buttonBox, SIGNAL(accepted()), this, 0);
+        connect(ui_->buttonBox, SIGNAL(accepted()), this, SLOT(addGesture()));
+
+        return QDialog::exec();
+    }
+
+    int MotionGestureDialog::editGesture(MotionGestureWrapper* gesture)
+    {
+        reset();
+
+        editedGesture_ = gesture;
+
+        ui_->object->setCurrentIndex(objectModel_->index(editedGesture_->object()).row());
+        ui_->gestureName->setText(editedGesture_->name());
+
+        recordedMotion_ = gesture->motion();
+        displayRecordedMotion();
+
+        ui_->deleteButton->show();
+
+        disconnect(ui_->buttonBox, SIGNAL(accepted()), this, 0);
+        connect(ui_->buttonBox, SIGNAL(accepted()), this, SLOT(updateGesture()));
+
+        return QDialog::exec();
+    }
+
+    void MotionGestureDialog::addGesture()
+    {
+        if(recordedMotion_.empty())
+        {
+            QMessageBox::critical(this, "Motion error", "No motion recorded!", QMessageBox::Ok);
+            return;
+        }
+
+        QString name = ui_->gestureName->text();
+        if(name.isEmpty())
+        {
+            name = "Motion gesture";
+        }
+
+        try
+        {
+            gestureModel_->addMotionGesture(
+                name,
+                ui_->object->itemData(ui_->object->currentIndex()).value<ObjectWrapper*>(),
+                recordedMotion_
+            );
+
+            accept();
+        }
+        catch(...)
+        {
+            // TODO
+        }
+    }
+
+    void MotionGestureDialog::updateGesture()
+    {
+        MotionGestureWrapper gestureBackup(*editedGesture_);
+
+        QString name = ui_->gestureName->text();
+        if(name.isEmpty())
+        {
+            name = "Motion gesture";
+        }
+
+        try
+        {
+            QModelIndex index = gestureModel_->index(editedGesture_);
+            gestureModel_->removeGesture(index);
+            gestureModel_->addMotionGesture(
+                name,
+                ui_->object->itemData(ui_->object->currentIndex()).value<ObjectWrapper*>(),
+                recordedMotion_
+            );
+
+            accept();
+        }
+        catch(...)
+        {
+            gestureModel_->addMotionGesture(gestureBackup.name(), gestureBackup.object(), gestureBackup.motion());
+
+            // TODO
+        }
+    }
+
+    void MotionGestureDialog::deleteGesture()
+    {
+        QMessageBox::StandardButton button = QMessageBox::question(this, tr("Delete question"),
+            tr("Do you really want to delete gesture '%1'").arg(editedGesture_->name()), QMessageBox::Ok | QMessageBox::Cancel);
+
+        if(button == QMessageBox::Ok)
+        {
+            QModelIndex index = gestureModel_->index(editedGesture_);
+            gestureModel_->removeGesture(index);
+
+            accept();
+        }
+    }
+
     void MotionGestureDialog::startCapture()
     {
-        capture_.reset();
+        ui_->object->setEnabled(false);
 
-        capture_.start();
-        capture_.captureImage();
-        capture_.wait();
+        connect(ui_->display, SIGNAL(imageDisplayed()), this, SLOT(firstImageDisplayed()));
+        connect(control_.signaler().get(), SIGNAL(objectsRecognized(Image,Image,ObjectSet)), this, SLOT(displayImage(Image,Image,ObjectSet)), Qt::BlockingQueuedConnection);
 
-        countdownCount_ = 3;
-        countdownTimer_.start();
+        control_.start();
     }
 
     void MotionGestureDialog::stopCapture()
     {
-        captureTimer_.stop();
-        capture_.stop();
+        disconnect(ui_->recordMotionButton, SIGNAL(clicked()), this, SLOT(stopCapture()));
+        connect(ui_->recordMotionButton, SIGNAL(clicked()), this, SLOT(startCapture()));
+
+        if(recording_)
+        {
+            stopRecording();
+        }
+
+        disconnect(control_.signaler().get(), SIGNAL(objectsRecognized(Image,Image,ObjectSet)), this, SLOT(displayImage(Image,Image,ObjectSet)));
+
+        QCoreApplication::processEvents();
+
+        QtConcurrent::run(&control_, &ControlInfo::Control::stop);
+        control_.prepareGestures(ControlInfo::GesturePolicy::GestureSet());
+
+        readyLabel_->hide();
+        readyButton_->hide();
+        ui_->recordMotionButton->setChecked(false);
+        ui_->object->setEnabled(true);
+
+        ui_->display->reset();
+        displayRecordedMotion();
     }
 
-    void MotionGestureDialog::displayImage()
+    void MotionGestureDialog::startRecording()
     {
-        ui_->display->displayImage(capture_.image());
+        recording_ = true;
 
-        if(isVisible())
+        motionRecorder_ = new MotionRecorder(object_->rawObject());
+
+        connect(motionRecorder_->signaler().get(), SIGNAL(motionUpdated(const MotionRecorder::Motion&)),
+                this, SLOT(motionUpdated(const MotionRecorder::Motion&)), Qt::BlockingQueuedConnection);
+        connect(motionRecorder_->signaler().get(), SIGNAL(motionRecorded(const MotionRecorder::Motion&, const MotionRecorder::MoveSequence&)),
+                this, SLOT(motionRecorded(const MotionRecorder::Motion&, const MotionRecorder::MoveSequence&)), Qt::BlockingQueuedConnection);
+
+        ControlInfo::GesturePolicy::GestureSet gestures;
+        gestures.insert(motionRecorder_);
+        control_.prepareGestures(gestures);
+
+        QtConcurrent::run(&control_, &ControlInfo::Control::restart);
+
+        readyLabel_->hide();
+        readyButton_->hide();
+    }
+
+    void MotionGestureDialog::stopRecording()
+    {
+        recording_ = false;
+
+        currentlyRecordedMotion_.clear();
+
+        disconnect(motionRecorder_->signaler().get(), SIGNAL(motionUpdated(const MotionRecorder::Motion&)),
+                this, SLOT(motionUpdated(const MotionRecorder::Motion&)));
+        disconnect(motionRecorder_->signaler().get(), SIGNAL(motionRecorded(const MotionRecorder::Motion&, const MotionRecorder::MoveSequence&)),
+                this, SLOT(motionRecorded(const MotionRecorder::Motion&, const MotionRecorder::MoveSequence&)));
+
+        QCoreApplication::processEvents();
+    }
+
+    void MotionGestureDialog::motionUpdated(const MotionRecorder::Motion &motion)
+    {
+        if(recording_)
         {
-            captureTimer_.start();
+            currentlyRecordedMotion_ = motion;
         }
     }
 
-    void MotionGestureDialog::countdown()
+    void MotionGestureDialog::motionRecorded(const MotionRecorder::Motion& motion, const MotionRecorder::MoveSequence& moves)
     {
-        /*ui_->display->
-        countdownCount_*/
+        if(recording_)
+        {
+            std::cout << "motion recorded" << std::endl;
+
+            recordedMotion_ = motion;
+            recordedMoves_ = moves;
+
+            stopRecording();
+            stopCapture();
+        }
     }
 
-    int MotionGestureDialog::newGesture(DeviceAdapter device)
+    void MotionGestureDialog::displayImage(Image original, Image segmented, ObjectSet obejcts)
     {
-        capture_.setDevice(device);
+        //rawImage_ = original;
+        QImage img = QImage((const uchar*)&(original.rawData()[0]), original.width(), original.height(), original.width() * 3, QImage::Format_RGB888);
 
-        return QDialog::exec();
+        if(object_ && object_->rawObject()->isVisible())
+        {
+            QPainter painter(&img);
+
+            // paint object's border
+            const Object::Border& border = object_->rawObject()->border();
+
+            QPolygon borderPolygon;
+            for(const Object::Point& point : border)
+            {
+                borderPolygon << QPoint(point.x, point.y);
+            }
+
+            painter.save();
+            painter.setPen(Qt::blue);
+            painter.setBrush(QBrush(Qt::blue, Qt::DiagCrossPattern));
+            painter.setBrush(QBrush(Qt::blue, Qt::Dense6Pattern));
+            painter.drawPolygon(borderPolygon);
+            painter.restore();
+
+            // paint object's convex hull
+            const Object::ConvexHull& convexHull = object_->rawObject()->convexHull();
+
+            QPolygon convexHullPolygon;
+            for(const Object::Point& point : convexHull)
+            {
+                convexHullPolygon << QPoint(point.x, point.y);
+            }
+
+            painter.save();
+            painter.setPen(Qt::green);
+            painter.drawPolygon(convexHullPolygon);
+            painter.restore();
+
+            // paint object's bounding box
+            const Object::BoundingBox& boundingBox = object_->rawObject()->boundingBox();
+
+            painter.save();
+            painter.setPen(Qt::red);
+
+            painter.translate(boundingBox.position.x, boundingBox.position.y);
+            painter.rotate(-(boundingBox.angle));
+            painter.translate(-boundingBox.width / 2.0, -boundingBox.height / 2.0);
+
+            painter.drawRect(0, 0, boundingBox.width, boundingBox.height);
+
+            painter.restore();
+
+            // paint object's motion
+            QPolygon motion;
+            for(const Object::Point& point : currentlyRecordedMotion_)
+            {
+                motion << QPoint(point.x, point.y);
+            }
+
+            painter.save();
+            QLinearGradient gradient;
+            gradient.setColorAt(0, Qt::white);
+            gradient.setColorAt(1, Qt::red);
+            painter.setPen(QPen(QBrush(gradient), 2));
+
+            painter.drawPolyline(motion);
+
+            painter.restore();
+        }
+
+        ui_->display->displayImage(img);
+    }
+
+    void MotionGestureDialog::displayRecordedMotion()
+    {
+        if(! recordedMotion_.empty())
+        {
+            QPolygon motion;
+            for(const Object::Point& point : recordedMotion_)
+            {
+                motion << QPoint(point.x, point.y);
+            }
+
+            double ratio = 1.0;
+            if(motion.boundingRect().height() > motion.boundingRect().width())
+            {
+                ratio = 0.9 * ui_->display->height() / motion.boundingRect().height();
+            }
+            else
+            {
+                ratio = 0.9 * ui_->display->height() / motion.boundingRect().width();
+            }
+
+            QImage img(ui_->display->size(), QImage::Format_RGB888);
+            img.fill(Qt::white);
+
+            QPainter painter(&img);
+            painter.setRenderHint(QPainter::Antialiasing);
+
+            motion.translate(- motion.boundingRect().topLeft());
+
+            double moveX = (ui_->display->width() - ratio * motion.boundingRect().width()) / 2;
+            double moveY = (ui_->display->height() - ratio * motion.boundingRect().height()) / 2;
+
+            painter.save();
+            painter.setPen(QPen(Qt::red, 2.0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            painter.translate(moveX, moveY);
+            painter.scale(ratio, ratio);
+            painter.drawPolyline(motion);
+            painter.restore();
+
+            ui_->display->displayImage(img);
+        }
+    }
+
+    void MotionGestureDialog::firstImageDisplayed()
+    {
+        disconnect(ui_->display, SIGNAL(imageDisplayed()), this, SLOT(firstImageDisplayed()));
+
+        disconnect(ui_->recordMotionButton, SIGNAL(clicked()), this, SLOT(startCapture()));
+        connect(ui_->recordMotionButton, SIGNAL(clicked()), this, SLOT(stopCapture()));
+
+        readyLabel_->show();
+        readyButton_->show();
+    }
+
+    void MotionGestureDialog::selectObject(int index)
+    {
+        object_ = ui_->object->itemData(ui_->object->currentIndex()).value<ObjectWrapper*>();
+
+        ObjectSet objects;
+        objects.insert(object_->rawObject());
+        control_.prepareObjects(objects);
+    }
+
+    void MotionGestureDialog::setDevice(MotionGestureDialog::DeviceAdapter device)
+    {
+        control_.setDevice(device);
+    }
+
+    void MotionGestureDialog::reset()
+    {
+        recordedMotion_.clear();
+
+        ui_->display->reset();
+        ui_->object->setCurrentIndex(0);
+        ui_->gestureName->setText(QString());
+        ui_->deleteButton->hide();
     }
 
     int MotionGestureDialog::exec()
     {
         return QDialog::Rejected;
+    }
+
+    void MotionGestureDialog::initReadyButton_()
+    {
+        readyLabel_ = new QLabel("Prepare object and click <strong>Ready!</strong> to record motion.");
+        readyLabel_->setStyleSheet(
+                "color: red;"
+                "background-color: rgb(255,255,255,200);"
+                "border: 1px solid black;"
+                "border-radius: 5px;"
+                "padding: 3px;"
+                "font-size: 12pt;"
+        );
+        readyLabel_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        readyLabel_->hide();
+
+        readyButton_ = new QPushButton(tr("Ready!"));
+        readyButton_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        readyButton_->hide();
+
+        QVBoxLayout* layout = new QVBoxLayout(ui_->display);
+        layout->addStretch();
+        layout->addWidget(readyLabel_);
+        layout->addWidget(readyButton_);
+        layout->addStretch();
+
+        layout->setAlignment(readyLabel_, Qt::AlignHCenter);
+        layout->setAlignment(readyButton_, Qt::AlignHCenter);
+
+        connect(readyButton_, SIGNAL(clicked()), this, SLOT(startRecording()));
     }
 } // namespace Gecon

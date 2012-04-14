@@ -25,6 +25,8 @@
 #include <QtConcurrentRun>
 #include <QtTest/QTest>
 
+#include "ObjectModel.hpp"
+
 namespace Gecon
 {
     ObjectDialog::ObjectDialog(ObjectModel* objectModel, QWidget *parent):
@@ -34,14 +36,12 @@ namespace Gecon
         ui_(new Ui::ObjectDialog)
     {
         ui_->setupUi(this);
-        setFixedSize(size());
 
         connect(this, SIGNAL(finished(int)), this, SLOT(stopCapture()));
         connect(ui_->buttonBox, SIGNAL(accepted()), this, SLOT(addObject()));
 
-        connect(control_.signaler(), SIGNAL(objectsRecognized(Image,Image,ObjectSet)), this, SLOT(displayImage(Image,Image,ObjectSet)), Qt::BlockingQueuedConnection);
-
-        connect(ui_->display, SIGNAL(clicked(QMouseEvent*)), this, SLOT(grabColor(QMouseEvent*)));
+        connect(control_.signaler().get(), SIGNAL(objectsRecognized(Image,Image,ObjectSet)), this, SLOT(displayImage(Image,Image,ObjectSet)), Qt::BlockingQueuedConnection);
+        connect(ui_->display, SIGNAL(imageDisplayed()), this, SLOT(firstImageDisplayed()));
     }
 
     ObjectDialog::~ObjectDialog()
@@ -54,11 +54,11 @@ namespace Gecon
         return QDialog::Rejected;
     }
 
-    int ObjectDialog::newObject(ObjectDialog::DeviceAdapter device)
+    int ObjectDialog::newObject()
     {
-        colorGrabbed_ = false;
+        reset();
 
-        startCapture(device);
+        startCapture();
 
         return QDialog::exec();
     }
@@ -71,17 +71,15 @@ namespace Gecon
             return;
         }
 
+        QString name = ui_->objectName->text();
+        if(name.isEmpty())
+        {
+            name = "Object";
+        }
+
         try
         {
-            QString name = ui_->objectName->text();
-            if(name.isEmpty())
-            {
-                name = "Object";
-            }
-
-            ObjectWrapper object(name, objectColor_);
-
-            objectModel_->addObject(object);
+            objectModel_->addObject(name, objectColor_);
 
             accept();
         }
@@ -91,7 +89,18 @@ namespace Gecon
         }
     }
 
-    void ObjectDialog::startCapture(ObjectDialog::DeviceAdapter device)
+    void ObjectDialog::setDevice(ObjectDialog::DeviceAdapter device)
+    {
+        control_.setDevice(device);
+    }
+
+    void ObjectDialog::reset()
+    {
+        colorGrabbed_ = false;
+        ui_->objectName->setText(QString());
+    }
+
+    void ObjectDialog::startCapture()
     {
         /*capture_.reset();
         capture_.setDevice(device);
@@ -99,8 +108,8 @@ namespace Gecon
         capture_.start();
         capture_.captureImage();
         capture_.wait();*/
+        ui_->display->reset();
 
-        control_.setDevice(device);
         control_.start();
     }
 
@@ -138,9 +147,43 @@ namespace Gecon
             painter.setBrush(QBrush(Qt::blue, Qt::Dense6Pattern));
             painter.drawPolygon(borderPolygon);
             painter.restore();
+
+            // paint object's convex hull
+            const Object::ConvexHull& convexHull = object_.convexHull();
+
+            QPolygon convexHullPolygon;
+            for(const Object::Point& point : convexHull)
+            {
+                convexHullPolygon << QPoint(point.x, point.y);
+            }
+
+            painter.save();
+            painter.setPen(Qt::green);
+            painter.drawPolygon(convexHullPolygon);
+            painter.restore();
+
+            // paint object's bounding box
+            const Object::BoundingBox& boundingBox = object_.boundingBox();
+
+            painter.save();
+            painter.setPen(Qt::red);
+
+            painter.translate(boundingBox.position.x, boundingBox.position.y);
+            painter.rotate(-(boundingBox.angle));
+            painter.translate(-boundingBox.width / 2.0, -boundingBox.height / 2.0);
+
+            painter.drawRect(0, 0, boundingBox.width, boundingBox.height);
+
+            painter.restore();
         }
 
         ui_->display->displayImage(img);
+    }
+
+    void ObjectDialog::firstImageDisplayed()
+    {
+        disconnect(ui_->display, SIGNAL(imageDisplayed()), this, SLOT(firstImageDisplayed()));
+        connect(ui_->display, SIGNAL(clicked(QMouseEvent*)), this, SLOT(grabColor(QMouseEvent*)));
     }
 
     void ObjectDialog::grabColor(QMouseEvent *event)
@@ -152,16 +195,17 @@ namespace Gecon
         objects.insert(&object_);
         control_.prepareObjects(objects);
 
-        QtConcurrent::run(&control_, &ControlInfo::Control::restart);
-
         /*ControlInfo::GesturePolicy::GestureSet gestures;
         std::function<bool(const bool&)> f =
                 std::bind(std::equal_to<bool>(), std::placeholders::_1, true);
         gesture_ = ObjectStateGesture<Object, bool>(&object_, &Object::isVisible, f);
         gestures.insert(&gesture_);
-        control_.prepareGestures(gestures);*/
+        control_.prepareGestures(gestures);
 
-        //gesture_.stateEnterEvent().connect();
+        gesture_.stateEnterEvent().connect([&](const decltype(gesture_)::Event*){reject();});*/
+
+        QtConcurrent::run(&control_, &ControlInfo::Control::restart);
+        //control_.restart();
 
         colorGrabbed_ = true;
     }

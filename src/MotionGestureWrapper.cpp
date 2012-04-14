@@ -17,28 +17,40 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GECON_GESTUREWRAPPER_HPP
-#define GECON_GESTUREWRAPPER_HPP
+#include "MotionGestureWrapper.hpp"
 
-#include <QString>
-#include <QMetaType>
+#include "MotionGestureDialog.hpp"
 
 namespace Gecon
 {
-    class GestureWrapper
+    MotionGestureDialog* MotionGestureWrapper::dialog = 0;
+
+    MotionGestureWrapper::MotionGestureWrapper(const QString &name, ObjectWrapper *object, const Motion& motion):
+        GestureWrapper(name),
+        object_(object),
+        motion_(motion)
     {
-    public:
-        GestureWrapper(const QString& name);
-        virtual ~GestureWrapper();
+    }
 
-        virtual const QString& name() const;
-        virtual void edit() = 0;
+    MotionGestureWrapper::~MotionGestureWrapper()
+    {
+    }
 
-    private:
-        QString name_;
-    };
+    ObjectWrapper *MotionGestureWrapper::object() const
+    {
+        return object_;
+    }
+
+    const MotionGestureWrapper::Motion &MotionGestureWrapper::motion() const
+    {
+        return motion_;
+    }
+
+    void MotionGestureWrapper::edit()
+    {
+        if(dialog)
+        {
+            dialog->editGesture(this);
+        }
+    }
 } // namespace Gecon
-
-Q_DECLARE_METATYPE(Gecon::GestureWrapper*)
-
-#endif // GECON_GESTUREWRAPPER_HPP

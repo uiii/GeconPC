@@ -17,38 +17,43 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GECON_STATEGESTUREWRAPPER_HPP
-#define GECON_STATEGESTUREWRAPPER_HPP
+#ifndef GECON_MOTIONGESTUREWRAPPER_HPP
+#define GECON_MOTIONGESTUREWRAPPER_HPP
 
-#include "ObjectWrapper.hpp"
-#include "ObjectPropertyStateSettings.hpp"
+#include "ControlInfo.hpp"
 
 #include "GestureWrapper.hpp"
+#include "ObjectWrapper.hpp"
+
+#include <Gecon/ObjectMotionGesture.hpp>
 
 namespace Gecon
 {
-    class StateGestureDialog; // forward declaration
+    class MotionGestureDialog; // forward declaration
 
-    class StateGestureWrapper : public GestureWrapper
+    class MotionGestureWrapper : public GestureWrapper
     {
     public:
-        static StateGestureDialog* dialog;
+        typedef ObjectMotionGesture<ControlInfo::ObjectPolicy::Object> RawGesture;
+        typedef RawGesture::Motion Motion;
 
-        StateGestureWrapper(const QString& name, ObjectWrapper* object, const ObjectPropertyStateSettings* stateSettings);
-        StateGestureWrapper(const StateGestureWrapper& another);
-        virtual ~StateGestureWrapper();
+        static MotionGestureDialog* dialog;
+
+        MotionGestureWrapper(const QString& name, ObjectWrapper* object, const Motion& motion);
+
+        virtual ~MotionGestureWrapper();
 
         ObjectWrapper* object() const;
-        ObjectPropertyStateSettings* stateSettings() const;
+        const Motion& motion() const;
 
         void edit();
 
     private:
         ObjectWrapper* object_;
-        ObjectPropertyStateSettings* stateSettings_;
+        Motion motion_;
 
-        ControlInfo::GesturePolicy::GesturePtr rawStateGesture_;
+        ControlInfo::GesturePolicy::GesturePtr rawMotionGesture_;
     };
 } // namespace Gecon
 
-#endif // GECON_STATEGESTUREWRAPPER_HPP
+#endif // GECON_MOTIONGESTUREWRAPPER_HPP

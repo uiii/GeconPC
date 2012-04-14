@@ -22,7 +22,7 @@
 namespace Gecon
 {
     ObjectPolicy::ObjectPolicy():
-        signaler_(new ObjectPolicySignaler)
+        signaler_(std::make_shared<ObjectPolicySignaler>())
     {
     }
 
@@ -35,7 +35,7 @@ namespace Gecon
         return objects;
     }
 
-    ObjectPolicySignaler* ObjectPolicy::signaler() const
+    const std::shared_ptr<ObjectPolicySignaler>& ObjectPolicy::signaler() const
     {
         return signaler_;
     }

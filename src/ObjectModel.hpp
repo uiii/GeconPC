@@ -33,30 +33,31 @@ namespace Gecon
         Q_OBJECT
 
     public:
-        typedef Gecon::Color<RGB> Color;
         typedef ControlInfo::ObjectPolicy::ObjectPtr ObjectPtr;
-        typedef ControlInfo::ObjectPolicy::ObjectSet ObjectSet;
+        typedef ControlInfo::ObjectPolicy::Object RawObject;
+        typedef ControlInfo::ObjectPolicy::ObjectSet RawObjectSet;
 
-        typedef QList<ObjectWrapper> ObjectWrapperList;
+        typedef QList<ObjectWrapper*> ObjectWrapperList;
 
         ObjectModel();
+        virtual ~ObjectModel();
 
         int rowCount(const QModelIndex& parent) const;
         QVariant data(const QModelIndex& index, int role) const;
 
-        QModelIndex index(const ObjectWrapper& object) const;
+        QModelIndex index(ObjectWrapper* object) const;
 
         int size() const;
 
-        void addObject(const ObjectWrapper& object);
+        void addObject(const QString& name, RawObject::Color color);
         void removeObject(const QModelIndex& index);
 
-        const ObjectSet& rawObjects();
+        const RawObjectSet& rawObjects();
 
     private:
         ObjectWrapperList objects_;
 
-        ObjectSet rawObjects_;
+        RawObjectSet rawObjects_;
     };
 } // namespace Gecon
 

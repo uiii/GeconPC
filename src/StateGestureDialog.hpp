@@ -25,9 +25,6 @@
 //#include "Gecon/ColorObject.hpp"
 //#include "Gecon/ObjectStateCondition.hpp"
 
-#include "GestureModel.hpp"
-#include "ObjectModel.hpp"
-
 namespace Gecon
 {
     namespace Ui
@@ -36,6 +33,9 @@ namespace Gecon
     }
 
     class StateGestureWrapper; // forward declaration
+    class GestureModel;
+    class ObjectModel;
+    class ObjectPropertyStateSettings;
 
     class StateGestureDialog : public QDialog
     {

@@ -20,6 +20,8 @@
 #ifndef GECON_OBJECTPOLICY_HPP
 #define GECON_OBJECTPOLICY_HPP
 
+#include <memory>
+
 #include <QObject>
 
 #include <Gecon/ColorObjectPolicy.hpp>
@@ -50,10 +52,10 @@ namespace Gecon
 
         ObjectSet recognizeObjects(const Image& image);
 
-        ObjectPolicySignaler* signaler() const;
+        const std::shared_ptr<ObjectPolicySignaler>& signaler() const;
 
     private:
-        ObjectPolicySignaler* signaler_;
+        std::shared_ptr<ObjectPolicySignaler> signaler_;
     };
 } // namespace Gecon
 

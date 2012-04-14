@@ -53,6 +53,6 @@ namespace Gecon
 
 } // namespace Gecon
 
-Q_DECLARE_METATYPE(Gecon::ObjectWrapper)
+Q_DECLARE_METATYPE(Gecon::ObjectWrapper*)
 
 #endif // GECON_OBJECTWRAPPER_HPP

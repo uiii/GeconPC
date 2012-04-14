@@ -32,6 +32,11 @@ namespace Gecon
         {
             delete stateGesture;
         }
+
+        for(MotionGestureWrapper* motionGesture : motionGestures_)
+        {
+            delete motionGesture;
+        }
     }
 
     int GestureModel::rowCount(const QModelIndex &parent) const
@@ -46,7 +51,17 @@ namespace Gecon
             return QVariant();
         }
 
-        GestureWrapper* gesture = stateGestures_.at(index.row());
+        int row = index.row();
+
+        GestureWrapper* gesture = 0;
+        if(row < stateGestures_.size())
+        {
+            gesture = stateGestures_.at(row);
+        }
+        else if((row -= stateGestures_.size()) < motionGestures_.size())
+        {
+            gesture = motionGestures_.at(row);
+        }
 
         if(role == Qt::DisplayRole)
         {
@@ -64,15 +79,23 @@ namespace Gecon
 
     QModelIndex GestureModel::index(GestureWrapper* gesture) const
     {
-        return createIndex(stateGestures_.indexOf(static_cast<StateGestureWrapper*>(gesture)), 0);
+        QModelIndex index;
+        index = createIndex(stateGestures_.indexOf(static_cast<StateGestureWrapper*>(gesture)), 0);
+
+        if(! index.isValid())
+        {
+            index = createIndex(motionGestures_.indexOf(static_cast<MotionGestureWrapper*>(gesture)), 0);
+        }
+
+        return index;
     }
 
     int GestureModel::size() const
     {
-        return stateGestures_.size(); // + other gestures
+        return stateGestures_.size() + motionGestures_.size();
     }
 
-    void GestureModel::addStateGesture(const QString& name, const ObjectWrapper& object, const ObjectPropertyStateSettings* stateSettings)
+    void GestureModel::addStateGesture(const QString& name, ObjectWrapper *object, const ObjectPropertyStateSettings* stateSettings)
     {
         StateGestureWrapper* stateGesture = new StateGestureWrapper(name, object, stateSettings);
 
@@ -87,7 +110,22 @@ namespace Gecon
         endInsertRows();
     }
 
-    void GestureModel::removeStateGesture(const QModelIndex &index)
+    void GestureModel::addMotionGesture(const QString &name, ObjectWrapper *object, const MotionGestureWrapper::Motion& motion)
+    {
+        MotionGestureWrapper* motionGesture = new MotionGestureWrapper(name, object, motion);
+
+        MotionGestureWrapperList::iterator it = std::find_if(motionGestures_.begin(), motionGestures_.end(),
+            [&](const MotionGestureWrapper* item){ return QString::localeAwareCompare(motionGesture->name(), item->name()) < 0; }
+        );
+
+        beginInsertRows(QModelIndex(), it - motionGestures_.begin(), it - motionGestures_.begin());
+
+        motionGestures_.insert(it, motionGesture);
+
+        endInsertRows();
+    }
+
+    void GestureModel::removeGesture(const QModelIndex &index)
     {
         if(! index.isValid() || index.row() >= size())
         {
@@ -96,7 +134,16 @@ namespace Gecon
 
         beginRemoveRows(QModelIndex(), index.row(), index.row());
 
-        stateGestures_.removeAt(index.row());
+        int row = index.row();
+
+        if(row < stateGestures_.size())
+        {
+            stateGestures_.removeAt(row);
+        }
+        else if((row -= stateGestures_.size()) < motionGestures_.size())
+        {
+            motionGestures_.removeAt(row);
+        }
 
         endRemoveRows();
     }

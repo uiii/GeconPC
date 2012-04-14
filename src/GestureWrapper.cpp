@@ -21,11 +21,17 @@
 
 namespace Gecon
 {
-    GestureWrapper::GestureWrapper()
+    GestureWrapper::GestureWrapper(const QString& name):
+        name_(name)
     {
     }
 
     GestureWrapper::~GestureWrapper()
     {
+    }
+
+    const QString &GestureWrapper::name() const
+    {
+        return name_;
     }
 } // namespace Gecon

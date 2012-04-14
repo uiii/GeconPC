@@ -21,9 +21,10 @@
 #define GECON_MOTIONGESTUREDIALOG_HPP
 
 #include <QDialog>
-#include <QTimer>
+#include <QLabel>
+#include <QPushButton>
 
-#include "Capture.hpp"
+#include "MotionRecorder.hpp"
 
 namespace Gecon
 {
@@ -31,36 +32,74 @@ namespace Gecon
     {
         class MotionGestureDialog;
     }
-    
+
+    class ObjectModel; // forward declaration
+    class ObjectWrapper;
+    class GestureModel;
+    class MotionGestureWrapper;
+
     class MotionGestureDialog : public QDialog
     {
         Q_OBJECT
         
     public:
         typedef ControlInfo::DevicePolicy::DeviceAdapter DeviceAdapter;
+        typedef Gecon::Image<RGB> Image;
+        typedef ControlInfo::ObjectPolicy::Object Object;
+        typedef ControlInfo::ObjectPolicy::ObjectSet ObjectSet;
 
-        explicit MotionGestureDialog(QWidget *parent = 0);
+        explicit MotionGestureDialog(GestureModel* gestureModel, ObjectModel* objectModel, QWidget *parent = 0);
         ~MotionGestureDialog();
 
     public slots:
+        int newGesture();
+        int editGesture(MotionGestureWrapper* gesture);
+
+        void addGesture();
+        void updateGesture();
+        void deleteGesture();
+
         void startCapture();
         void stopCapture();
 
-        void displayImage();
+        void startRecording();
+        void stopRecording();
 
-        void countdown();
+        void motionUpdated(const MotionRecorder::Motion& motion);
+        void motionRecorded(const MotionRecorder::Motion& motion, const MotionRecorder::MoveSequence& moves);
 
-        int newGesture(DeviceAdapter device);
+        void displayImage(Image original, Image segmented, ObjectSet obejcts);
+        void displayRecordedMotion();
+
+        void firstImageDisplayed();
+
+        void selectObject(int index);
+
+        void setDevice(DeviceAdapter device);
+
+        void reset();
 
         int exec();
-        
+
     private:
-        Capture capture_;
+        void initReadyButton_();
 
-        QTimer captureTimer_;
+        ControlInfo::Control control_;
 
-        QTimer countdownTimer_;
-        int countdownCount_;
+        ObjectModel* objectModel_;
+        ObjectWrapper* object_;
+
+        GestureModel* gestureModel_;
+        MotionGestureWrapper* editedGesture_;
+
+        bool recording_;
+        MotionRecorder* motionRecorder_;
+        MotionRecorder::Motion currentlyRecordedMotion_;
+        MotionRecorder::Motion recordedMotion_;
+        MotionRecorder::MoveSequence recordedMoves_;
+
+        QLabel* readyLabel_;
+        QPushButton* readyButton_;
 
         Ui::MotionGestureDialog *ui_;
     };

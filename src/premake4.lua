@@ -20,6 +20,8 @@ project "GeconPC"
         "StateGestureDialog.*",
         "RelationGestureDialog.*",
         "MotionGestureDialog.*",
+        "MotionGestureWrapper.*",
+        "MotionRecorder.*",
         "SettingsDialog.*",
         "Capture.*",
         "ObjectPolicy.*",

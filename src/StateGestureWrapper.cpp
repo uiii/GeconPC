@@ -25,16 +25,16 @@ namespace Gecon
 {
     StateGestureDialog* StateGestureWrapper::dialog = 0;
 
-    StateGestureWrapper::StateGestureWrapper(const QString& name, const ObjectWrapper &object, const ObjectPropertyStateSettings *stateSettings):
-        name_(name),
+    StateGestureWrapper::StateGestureWrapper(const QString& name, ObjectWrapper* object, const ObjectPropertyStateSettings *stateSettings):
+        GestureWrapper(name),
         object_(object),
         stateSettings_(stateSettings->clone())
     {
-        rawStateGesture_ = stateSettings_->toGesture(object_);
+        rawStateGesture_ = stateSettings_->toGesture(*object_);
     }
 
     StateGestureWrapper::StateGestureWrapper(const StateGestureWrapper& another):
-        StateGestureWrapper(another.name_, another.object_, another.stateSettings_)
+        StateGestureWrapper(another.name(), another.object_, another.stateSettings_)
     {
     }
 
@@ -43,12 +43,7 @@ namespace Gecon
         delete stateSettings_;
     }
 
-    const QString &StateGestureWrapper::name() const
-    {
-        return name_;
-    }
-
-    const ObjectWrapper &StateGestureWrapper::object() const
+    ObjectWrapper* StateGestureWrapper::object() const
     {
         return object_;
     }

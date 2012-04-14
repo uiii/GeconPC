@@ -49,10 +49,9 @@ namespace Gecon
         ~MainWindow();
 
     public slots:
-        void newObject();
-        void newMotionGesture();
-
         void editGesture(const QModelIndex& index);
+
+        void updateDialogs();
 
     private:
         void initNewGestureMenu();

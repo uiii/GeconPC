@@ -23,6 +23,7 @@
 #include <QAbstractListModel>
 
 #include "StateGestureWrapper.hpp"
+#include "MotionGestureWrapper.hpp"
 
 namespace Gecon
 {
@@ -32,6 +33,7 @@ namespace Gecon
 
     public:
         typedef QList<StateGestureWrapper*> StateGestureWrapperList;
+        typedef QList<MotionGestureWrapper*> MotionGestureWrapperList;
 
         explicit GestureModel(QObject *parent = 0);
         virtual ~GestureModel();
@@ -43,8 +45,10 @@ namespace Gecon
 
         int size() const;
 
-        void addStateGesture(const QString& name, const ObjectWrapper& object, const ObjectPropertyStateSettings* stateSettings);
-        void removeStateGesture(const QModelIndex& index);
+        void addStateGesture(const QString& name, ObjectWrapper* object, const ObjectPropertyStateSettings* stateSettings);
+        void addMotionGesture(const QString& name, ObjectWrapper* object, const MotionGestureWrapper::Motion& motion);
+
+        void removeGesture(const QModelIndex& index);
 
     signals:
         
@@ -52,6 +56,7 @@ namespace Gecon
 
     private:
         StateGestureWrapperList stateGestures_;
+        MotionGestureWrapperList motionGestures_;
     };
 } // namespace Gecon
 

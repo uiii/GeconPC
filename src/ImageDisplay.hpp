@@ -36,9 +36,11 @@ namespace Gecon
         
     signals:
         void clicked(QMouseEvent* ev);
+        void imageDisplayed();
 
     public slots:
         void displayImage(const QImage& image);
+        void reset();
 
     protected:
         void mousePressEvent(QMouseEvent* ev);

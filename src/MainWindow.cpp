@@ -36,20 +36,24 @@ namespace Gecon
         objectDialog_(new ObjectDialog(&objectModel_)),
         stateGestureDialog_(new StateGestureDialog(&gestureModel_, &objectModel_)),
         relationGestureDialog_(new RelationGestureDialog(&objectModel_)),
-        motionGestureDialog_(new MotionGestureDialog),
+        motionGestureDialog_(new MotionGestureDialog(&gestureModel_, &objectModel_)),
         ui_(new Ui::MainWindow)
     {
         StateGestureWrapper::dialog = stateGestureDialog_;
+        MotionGestureWrapper::dialog = motionGestureDialog_;
 
         ui_->setupUi(this);
 
         ui_->objectView->setModel(&objectModel_);
         ui_->gestureView->setModel(&gestureModel_);
 
+        updateDialogs();
+
         initNewGestureMenu();
 
-        connect(ui_->newObjectButton, SIGNAL(clicked()), this, SLOT(newObject()));
+        connect(ui_->newObjectButton, SIGNAL(clicked()), objectDialog_, SLOT(newObject()));
         connect(ui_->actionSettings, SIGNAL(triggered()), settingsDialog_, SLOT(exec()));
+        connect(settingsDialog_, SIGNAL(finished(int)), this, SLOT(updateDialogs()));
         connect(ui_->gestureView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editGesture(QModelIndex)));
     }
 
@@ -58,20 +62,16 @@ namespace Gecon
         delete ui_;
     }
 
-    void MainWindow::newObject()
-    {
-        objectDialog_->newObject(control_.device());
-    }
-
-    void MainWindow::newMotionGesture()
-    {
-        motionGestureDialog_->newGesture(control_.device());
-    }
-
     void MainWindow::editGesture(const QModelIndex& index)
     {
         GestureWrapper* gesture = gestureModel_.data(index, Qt::UserRole).value<GestureWrapper*>();
         gesture->edit();
+    }
+
+    void MainWindow::updateDialogs()
+    {
+        objectDialog_->setDevice(control_.device());
+        motionGestureDialog_->setDevice(control_.device());
     }
 
     void MainWindow::initNewGestureMenu()
@@ -90,6 +90,6 @@ namespace Gecon
 
         connect(newStateGestureAction, SIGNAL(triggered()), stateGestureDialog_, SLOT(newGesture()));
         connect(newRelationGestureAction, SIGNAL(triggered()), relationGestureDialog_, SLOT(newGesture()));
-        connect(newMotionGestureAction, SIGNAL(triggered()), this, SLOT(newMotionGesture()));
+        connect(newMotionGestureAction, SIGNAL(triggered()), motionGestureDialog_, SLOT(newGesture()));
     }
 } // namespace Gecon

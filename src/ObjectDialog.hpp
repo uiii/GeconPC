@@ -26,8 +26,6 @@
 #include <QPainter>
 
 #include "ControlInfo.hpp"
-#include "Capture.hpp"
-#include "ObjectModel.hpp"
 
 #include <Gecon/ObjectStateGesture.hpp>
 
@@ -37,6 +35,8 @@ namespace Gecon
     {
         class ObjectDialog;
     }
+
+    class ObjectModel; // forward declaration
 
     class ObjectDialog : public QDialog
     {
@@ -54,15 +54,21 @@ namespace Gecon
         ~ObjectDialog();
 
     public slots:
-        void startCapture(DeviceAdapter device);
+        int newObject();
+
+        void addObject();
+
+        void startCapture();
         void stopCapture();
 
         void displayImage(Image original, Image segmented, ObjectSet objects);
+        void firstImageDisplayed();
 
         void grabColor(QMouseEvent* event);
 
-        int newObject(DeviceAdapter device);
-        void addObject();
+        void setDevice(DeviceAdapter device);
+
+        void reset();
 
         int exec();
 
@@ -75,7 +81,7 @@ namespace Gecon
         bool colorGrabbed_;
 
         Object object_;
-        //ObjectStateGesture<Object, bool> gesture_;
+        ObjectStateGesture<Object, bool> gesture_;
 
         ObjectModel* objectModel_;
 

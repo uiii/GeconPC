@@ -24,11 +24,20 @@ namespace Gecon {
     ImageDisplay::ImageDisplay(QWidget *parent) :
         QLabel(parent)
     {
+        reset();
     }
 
     void ImageDisplay::displayImage(const QImage &image)
     {
         setPixmap(QPixmap::fromImage(image));
+
+        emit imageDisplayed();
+    }
+
+    void ImageDisplay::reset()
+    {
+        clear();
+        setText(tr("Video"));
     }
 
     void ImageDisplay::mousePressEvent(QMouseEvent *ev)
