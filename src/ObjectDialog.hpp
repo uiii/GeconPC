@@ -64,7 +64,7 @@ namespace Gecon
         void displayImage(Image original, Image segmented, ObjectSet objects);
         void firstImageDisplayed();
 
-        void grabColor(QMouseEvent* event);
+        void grabColor(QPoint position);
 
         void setDevice(DeviceAdapter device);
 

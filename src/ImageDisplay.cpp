@@ -33,6 +33,8 @@ namespace Gecon {
     {
         setPixmap(QPixmap::fromImage(image));
 
+        displayedImageSize_ = image.size();
+
         emit imageDisplayed();
     }
 
@@ -111,9 +113,7 @@ namespace Gecon {
             painter.restore();
         }
 
-        setPixmap(QPixmap::fromImage(img));
-
-        emit imageDisplayed();
+        displayImage(img);
     }
 
     void ImageDisplay::reset()
@@ -124,7 +124,17 @@ namespace Gecon {
 
     void ImageDisplay::mousePressEvent(QMouseEvent *ev)
     {
-        emit clicked(ev);
+        QSize topLeft = (size() - displayedImageSize_) / 2.0;
+
+        QPoint absolutePosition = ev->pos();
+        QPoint relativePosition = QPoint(absolutePosition.x() - topLeft.width(), absolutePosition.y() - topLeft.height());
+
+        QRect imageRect(QPoint(0, 0), displayedImageSize_);
+
+        if(imageRect.contains(relativePosition))
+        {
+            emit clicked(relativePosition);
+        }
     }
     
 } // namespace Gecon

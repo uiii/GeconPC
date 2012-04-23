@@ -117,12 +117,12 @@ namespace Gecon
     void ObjectDialog::firstImageDisplayed()
     {
         disconnect(ui_->display, SIGNAL(imageDisplayed()), this, SLOT(firstImageDisplayed()));
-        connect(ui_->display, SIGNAL(clicked(QMouseEvent*)), this, SLOT(grabColor(QMouseEvent*)));
+        connect(ui_->display, SIGNAL(clicked(QPoint)), this, SLOT(grabColor(QPoint)));
     }
 
-    void ObjectDialog::grabColor(QMouseEvent *event)
+    void ObjectDialog::grabColor(QPoint position)
     {
-        objectColor_ = rawImage_.at(event->pos().x(), event->pos().y());
+        objectColor_ = rawImage_.at(position.x(), position.y());
 
         ControlInfo::ObjectPolicy::ObjectSet objects;
         object_ = Object(objectColor_);

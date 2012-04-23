@@ -46,7 +46,7 @@ namespace Gecon
         explicit ImageDisplay(QWidget *parent = 0);
         
     signals:
-        void clicked(QMouseEvent* ev);
+        void clicked(QPoint position);
         void imageDisplayed();
 
     public slots:
@@ -56,6 +56,9 @@ namespace Gecon
 
     protected:
         void mousePressEvent(QMouseEvent* ev);
+
+    private:
+        QSize displayedImageSize_;
     };
 } // namespace Gecon
 
