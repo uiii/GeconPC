@@ -24,7 +24,7 @@
 #include <QColor>
 #include <QMetaType>
 
-#include "Gecon/ColorObjectPolicy.hpp"
+#include <Gecon/ColorObjectPolicy.hpp>
 
 namespace Gecon
 {
@@ -47,6 +47,29 @@ namespace Gecon
 
         RawObjectPtr rawObject_;
     };
+
+    template< typename PropertyType >
+    using RawObjectProperty = PropertyType(ObjectWrapper::RawObject::*)() const;
+
+    template< typename PropertyType >
+    struct ObjectPropertyWrapper
+    {
+        QString name;
+        RawObjectProperty<PropertyType> rawProperty;
+    };
+
+    template< typename PropertyType >
+    struct ObjectProperties
+    {
+        static const QList<ObjectPropertyWrapper<PropertyType> > list;
+    };
+
+    template< typename PropertyType >
+    const QList<ObjectPropertyWrapper<PropertyType> > ObjectProperties<PropertyType>::list = {};
+
+    template<> const QList<ObjectPropertyWrapper<bool> > ObjectProperties<bool>::list;
+    template<> const QList<ObjectPropertyWrapper<int> > ObjectProperties<int>::list;
+    template<> const QList<ObjectPropertyWrapper<Point> > ObjectProperties<Point>::list;
 
     bool operator==(const ObjectWrapper& left, const ObjectWrapper& right);
     //bool operator<(const ObjectWrapper& left, const ObjectWrapper& right);

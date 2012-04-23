@@ -6,49 +6,46 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>667</width>
-    <height>141</height>
+    <width>550</width>
+    <height>120</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>550</width>
+    <height>120</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>550</width>
+    <height>120</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QWidget" name="widget" native="true">
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <widget class="QWidget" name="gestureSettings" native="true">
+     <layout class="QHBoxLayout" name="gestureSettingsLayout">
+      <property name="margin">
+       <number>0</number>
+      </property>
       <item>
-       <widget class="QWidget" name="widget_3" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout_4">
-         <item>
-          <widget class="QComboBox" name="leftProperty"/>
-         </item>
-         <item>
-          <widget class="QComboBox" name="leftObject"/>
-         </item>
-        </layout>
-       </widget>
+       <widget class="QComboBox" name="leftObject"/>
       </item>
       <item>
-       <widget class="QWidget" name="widget_5" native="true">
-        <layout class="QVBoxLayout" name="verticalLayout_4">
-         <item>
-          <widget class="QComboBox" name="relation"/>
-         </item>
-        </layout>
-       </widget>
+       <widget class="QComboBox" name="leftProperty"/>
       </item>
       <item>
-       <widget class="QWidget" name="widget_4" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
-         <item>
-          <widget class="QComboBox" name="rightProperty"/>
-         </item>
-         <item>
-          <widget class="QComboBox" name="rightObject"/>
-         </item>
-        </layout>
-       </widget>
+       <widget class="QComboBox" name="rightObject"/>
       </item>
      </layout>
     </widget>

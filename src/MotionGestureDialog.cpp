@@ -29,13 +29,17 @@
 #include "GestureModel.hpp"
 #include "MotionGestureWrapper.hpp"
 
+#include "GestureTestDialog.hpp"
+
 namespace Gecon
 {
-    MotionGestureDialog::MotionGestureDialog(GestureModel* gestureModel, ObjectModel *objectModel, QWidget *parent) :
+    MotionGestureDialog::MotionGestureDialog(GestureModel* gestureModel, ObjectModel *objectModel, GestureTestDialog *testDialog, QWidget *parent) :
         QDialog(parent),
         objectModel_(objectModel),
         object_(0),
         gestureModel_(gestureModel),
+        testDialog_(testDialog),
+        testedGesture_(0),
         editedGesture_(0),
         recording_(false),
         motionRecorder_(0),
@@ -52,6 +56,7 @@ namespace Gecon
         connect(ui_->recordMotionButton, SIGNAL(clicked()), this, SLOT(startCapture()));
         connect(ui_->buttonBox, SIGNAL(accepted()), this, SLOT(addGesture()));
         connect(ui_->deleteButton, SIGNAL(clicked()), this, SLOT(deleteGesture()));
+        connect(ui_->testButton, SIGNAL(clicked()), this, SLOT(testGesture()));
     }
     
     MotionGestureDialog::~MotionGestureDialog()
@@ -105,10 +110,6 @@ namespace Gecon
         }
 
         QString name = ui_->gestureName->text();
-        if(name.isEmpty())
-        {
-            name = "Motion gesture";
-        }
 
         try
         {
@@ -131,10 +132,6 @@ namespace Gecon
         MotionGestureWrapper gestureBackup(*editedGesture_);
 
         QString name = ui_->gestureName->text();
-        if(name.isEmpty())
-        {
-            name = "Motion gesture";
-        }
 
         try
         {
@@ -265,76 +262,7 @@ namespace Gecon
 
     void MotionGestureDialog::displayImage(Image original, Image segmented, ObjectSet obejcts)
     {
-        //rawImage_ = original;
-        QImage img = QImage((const uchar*)&(original.rawData()[0]), original.width(), original.height(), original.width() * 3, QImage::Format_RGB888);
-
-        if(object_ && object_->rawObject()->isVisible())
-        {
-            QPainter painter(&img);
-
-            // paint object's border
-            const Object::Border& border = object_->rawObject()->border();
-
-            QPolygon borderPolygon;
-            for(const Object::Point& point : border)
-            {
-                borderPolygon << QPoint(point.x, point.y);
-            }
-
-            painter.save();
-            painter.setPen(Qt::blue);
-            painter.setBrush(QBrush(Qt::blue, Qt::DiagCrossPattern));
-            painter.setBrush(QBrush(Qt::blue, Qt::Dense6Pattern));
-            painter.drawPolygon(borderPolygon);
-            painter.restore();
-
-            // paint object's convex hull
-            const Object::ConvexHull& convexHull = object_->rawObject()->convexHull();
-
-            QPolygon convexHullPolygon;
-            for(const Object::Point& point : convexHull)
-            {
-                convexHullPolygon << QPoint(point.x, point.y);
-            }
-
-            painter.save();
-            painter.setPen(Qt::green);
-            painter.drawPolygon(convexHullPolygon);
-            painter.restore();
-
-            // paint object's bounding box
-            const Object::BoundingBox& boundingBox = object_->rawObject()->boundingBox();
-
-            painter.save();
-            painter.setPen(Qt::red);
-
-            painter.translate(boundingBox.position.x, boundingBox.position.y);
-            painter.rotate(-(boundingBox.angle));
-            painter.translate(-boundingBox.width / 2.0, -boundingBox.height / 2.0);
-
-            painter.drawRect(0, 0, boundingBox.width, boundingBox.height);
-
-            painter.restore();
-
-            // paint object's motion
-            QPolygon motion;
-            for(const Object::Point& point : currentlyRecordedMotion_)
-            {
-                motion << QPoint(point.x, point.y);
-            }
-
-            painter.save();
-            QLinearGradient gradient;
-            gradient.setColorAt(0, Qt::white);
-            gradient.setColorAt(1, Qt::red);
-            painter.setPen(QPen(QBrush(gradient), 2));
-
-            painter.drawPolyline(motion);
-
-            painter.restore();
-        }
-
-        ui_->display->displayImage(img);
+        ui_->display->displayImage(original, obejcts, currentlyRecordedMotion_);
     }
 
     void MotionGestureDialog::displayRecordedMotion()
@@ -342,7 +270,7 @@ namespace Gecon
         if(! recordedMotion_.empty())
         {
             QPolygon motion;
-            for(const Object::Point& point : recordedMotion_)
+            for(const Point& point : recordedMotion_)
             {
                 motion << QPoint(point.x, point.y);
             }
@@ -402,6 +330,27 @@ namespace Gecon
     void MotionGestureDialog::setDevice(MotionGestureDialog::DeviceAdapter device)
     {
         control_.setDevice(device);
+    }
+
+    void MotionGestureDialog::testGesture()
+    {
+        testedGesture_ = new MotionGestureWrapper(
+            "Tested gesture",
+            ui_->object->itemData(ui_->object->currentIndex()).value<ObjectWrapper*>(),
+            recordedMotion_
+        );
+
+        connect(testDialog_, SIGNAL(finished(int)), this, SLOT(deleteTestedGesture()));
+
+        testDialog_->test(testedGesture_);
+    }
+
+    void MotionGestureDialog::deleteTestedGesture()
+    {
+        delete testedGesture_;
+        testedGesture_ = 0;
+
+        disconnect(testDialog_, SIGNAL(finished(int)), this, SLOT(deleteTestedGesture()));
     }
 
     void MotionGestureDialog::reset()

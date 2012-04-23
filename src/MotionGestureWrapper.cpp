@@ -25,18 +25,19 @@ namespace Gecon
 {
     MotionGestureDialog* MotionGestureWrapper::dialog = 0;
 
-    MotionGestureWrapper::MotionGestureWrapper(const QString &name, ObjectWrapper *object, const Motion& motion):
-        GestureWrapper(name),
+    MotionGestureWrapper::MotionGestureWrapper(const QString& name, ObjectWrapper* object, const Motion& motion):
+        GestureWrapper(name, {object}),
         object_(object),
         motion_(motion)
     {
+        rawGesture_ = new ObjectMotionGesture<ObjectWrapper::RawObject>(object_->rawObject(), motion_);
     }
 
     MotionGestureWrapper::~MotionGestureWrapper()
     {
     }
 
-    ObjectWrapper *MotionGestureWrapper::object() const
+    ObjectWrapper *MotionGestureWrapper::object()
     {
         return object_;
     }
@@ -52,5 +53,10 @@ namespace Gecon
         {
             dialog->editGesture(this);
         }
+    }
+
+    MotionGestureWrapper::RawGesture *MotionGestureWrapper::rawGesture()
+    {
+        return rawGesture_;
     }
 } // namespace Gecon

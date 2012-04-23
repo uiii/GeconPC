@@ -45,14 +45,16 @@ namespace Gecon
         int rowCount(const QModelIndex& parent) const;
         QVariant data(const QModelIndex& index, int role) const;
 
-        QModelIndex index(ObjectWrapper* object) const;
+        QModelIndex index(ObjectWrapper* objects) const;
+        QModelIndex index(ObjectWrapper::RawObject* objects) const;
 
         int size() const;
 
         void addObject(const QString& name, RawObject::Color color);
         void removeObject(const QModelIndex& index);
 
-        const RawObjectSet& rawObjects();
+        const ObjectWrapperList& objects() const;
+        const RawObjectSet& rawObjects() const;
 
     private:
         ObjectWrapperList objects_;

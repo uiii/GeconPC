@@ -19,6 +19,8 @@
 
 #include "ImageDisplay.hpp"
 
+#include <QPainter>
+
 namespace Gecon {
     
     ImageDisplay::ImageDisplay(QWidget *parent) :
@@ -30,6 +32,86 @@ namespace Gecon {
     void ImageDisplay::displayImage(const QImage &image)
     {
         setPixmap(QPixmap::fromImage(image));
+
+        emit imageDisplayed();
+    }
+
+    void ImageDisplay::displayImage(const Image &image, const ObjectSet& objects, const Motion& motion)
+    {
+        QImage img = QImage((const uchar*)&(image.rawData()[0]), image.width(), image.height(), image.width() * 3, QImage::Format_RGB888);
+
+        QPainter painter(&img);
+        for(ObjectPtr object : objects)
+        {
+            if(object->isVisible())
+            {
+                // paint object's border
+                const Object::Border& border = object->border();
+
+                QPolygon borderPolygon;
+                for(const Point& point : border)
+                {
+                    borderPolygon << QPoint(point.x, point.y);
+                }
+
+                painter.save();
+                painter.setPen(Qt::blue);
+                painter.setBrush(QBrush(Qt::blue, Qt::DiagCrossPattern));
+                painter.setBrush(QBrush(Qt::blue, Qt::Dense6Pattern));
+                painter.drawPolygon(borderPolygon);
+                painter.restore();
+
+                // paint object's convex hull
+                const Object::ConvexHull& convexHull = object->convexHull();
+
+                QPolygon convexHullPolygon;
+                for(const Point& point : convexHull)
+                {
+                    convexHullPolygon << QPoint(point.x, point.y);
+                }
+
+                painter.save();
+                painter.setPen(Qt::green);
+                painter.drawPolygon(convexHullPolygon);
+                painter.restore();
+
+                // paint object's bounding box
+                const Object::BoundingBox& boundingBox = object->boundingBox();
+
+                painter.save();
+                painter.setPen(Qt::red);
+
+                painter.translate(boundingBox.position.x, boundingBox.position.y);
+                painter.rotate(-(boundingBox.angle));
+                painter.translate(-boundingBox.width / 2.0, -boundingBox.height / 2.0);
+
+                painter.drawRect(0, 0, boundingBox.width, boundingBox.height);
+
+                painter.restore();
+            }
+        }
+
+        if(! motion.empty())
+        {
+            // paint object's motion
+            QPolygon motionPolyline;
+            for(const Point& point : motion)
+            {
+                motionPolyline << QPoint(point.x, point.y);
+            }
+
+            painter.save();
+            QLinearGradient gradient;
+            gradient.setColorAt(0, Qt::white);
+            gradient.setColorAt(1, Qt::red);
+            painter.setPen(QPen(QBrush(gradient), 2));
+
+            painter.drawPolyline(motionPolyline);
+
+            painter.restore();
+        }
+
+        setPixmap(QPixmap::fromImage(img));
 
         emit imageDisplayed();
     }

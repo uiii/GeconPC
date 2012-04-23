@@ -28,30 +28,44 @@
 #include "GestureModel.hpp"
 #include "ObjectModel.hpp"
 
+#include "GestureTestDialog.hpp"
+
+#include "ObjectStateSettings.hpp"
+
 namespace Gecon {
     
-    StateGestureDialog::StateGestureDialog(GestureModel* gestureModel, ObjectModel* objectModel, QWidget *parent) :
+    StateGestureDialog::StateGestureDialog(GestureModel* gestureModel, ObjectModel* objectModel, GestureTestDialog* testDialog, QWidget *parent) :
         QDialog(parent),
         gestureModel_(gestureModel),
         objectModel_(objectModel),
+        testDialog_(testDialog),
+        testedGesture_(0),
         editedGesture_(0),
+        currentState_(0),
         ui_(new Ui::StateGestureDialog)
     {
         ui_->setupUi(this);
 
-        stateSettings_.push_back(new VisibilityStateSettings);
-        stateSettings_.push_back(new PositionStateSettings);
-        stateSettings_.push_back(new AngleStateSettings);
+        states_.push_back(new ObjectStateSettings<bool>("vibility", &ObjectWrapper::RawObject::isVisible));
+        states_.push_back(new ObjectStateSettings<Point>("position", &ObjectWrapper::RawObject::position));
+        states_.push_back(new ObjectStateSettings<int>("angle", &ObjectWrapper::RawObject::angle));
 
-        initObjectComboBox(objectModel);
+        ui_->object->setModel(objectModel);
+
         initPropertyComboBox();
 
         connect(ui_->deleteButton, SIGNAL(clicked()), this, SLOT(deleteGesture()));
+        connect(ui_->testButton, SIGNAL(clicked()), this, SLOT(testGesture()));
     }
     
     StateGestureDialog::~StateGestureDialog()
     {
         delete ui_;
+
+        for(ObjectState* stateSettings : states_)
+        {
+            delete stateSettings;
+        }
     }
 
     int StateGestureDialog::newGesture()
@@ -64,8 +78,6 @@ namespace Gecon {
         }
 
         reset();
-
-        ui_->deleteButton->setVisible(false);
 
         disconnect(ui_->buttonBox, SIGNAL(accepted()), this, 0);
         connect(ui_->buttonBox, SIGNAL(accepted()), this, SLOT(addGesture()));
@@ -81,17 +93,17 @@ namespace Gecon {
 
         ui_->object->setCurrentIndex(objectModel_->index(editedGesture_->object()).row());
 
-        ObjectPropertyStateSettingsList::iterator it = std::find_if(stateSettings_.begin(), stateSettings_.end(),
-                [&](ObjectPropertyStateSettings* stateSettings){
-                    return stateSettings->widget() == editedGesture_->stateSettings()->widget();
+        PropertyStateList::iterator it = std::find_if(states_.begin(), states_.end(),
+                [&](ObjectState* state){
+                    return state->widget() == editedGesture_->state()->widget();
                 }
         );
 
-        ui_->objectProperty->setCurrentIndex(it - stateSettings_.begin());
+        ui_->objectProperty->setCurrentIndex(it - states_.begin());
         ui_->gestureName->setText(editedGesture_->name());
         ui_->deleteButton->setVisible(true);
 
-        editedGesture_->stateSettings()->load();
+        editedGesture_->state()->load();
 
         disconnect(ui_->buttonBox, SIGNAL(accepted()), this, 0);
         connect(ui_->buttonBox, SIGNAL(accepted()), this, SLOT(updateGesture()));
@@ -102,19 +114,15 @@ namespace Gecon {
     void StateGestureDialog::addGesture()
     {
         QString name = ui_->gestureName->text();
-        if(name.isEmpty())
-        {
-            name = "State gesture";
-        }
 
-        currentStateSettings_->save();
+        currentState_->save();
 
         try
         {
             gestureModel_->addStateGesture(
                 name,
                 ui_->object->itemData(ui_->object->currentIndex()).value<ObjectWrapper*>(),
-                currentStateSettings_
+                currentState_
             );
 
             accept();
@@ -129,29 +137,23 @@ namespace Gecon {
     {
         StateGestureWrapper gestureBackup(*editedGesture_);
 
-        QString name = ui_->gestureName->text();
-        if(name.isEmpty())
-        {
-            name = "State gesture";
-        }
-
-        currentStateSettings_->save();
+        currentState_->save();
 
         try
         {
             QModelIndex index = gestureModel_->index(editedGesture_);
             gestureModel_->removeGesture(index);
             gestureModel_->addStateGesture(
-                name,
+                ui_->gestureName->text(),
                 ui_->object->itemData(ui_->object->currentIndex()).value<ObjectWrapper*>(),
-                currentStateSettings_
+                currentState_
             );
 
             accept();
         }
         catch(...)
         {
-            gestureModel_->addStateGesture(gestureBackup.name(), gestureBackup.object(), gestureBackup.stateSettings());
+            gestureModel_->addStateGesture(gestureBackup.name(), gestureBackup.object(), gestureBackup.state());
 
             // TODO
         }
@@ -171,6 +173,29 @@ namespace Gecon {
         }
     }
 
+    void StateGestureDialog::testGesture()
+    {
+        currentState_->save();
+
+        testedGesture_ = new StateGestureWrapper(
+            "Tested gesture",
+            ui_->object->itemData(ui_->object->currentIndex()).value<ObjectWrapper*>(),
+            currentState_
+        );
+
+        connect(testDialog_, SIGNAL(finished(int)), this, SLOT(deleteTestedGesture()));
+
+        testDialog_->test(testedGesture_);
+    }
+
+    void StateGestureDialog::deleteTestedGesture()
+    {
+        delete testedGesture_;
+        testedGesture_ = 0;
+
+        disconnect(testDialog_, SIGNAL(finished(int)), this, SLOT(deleteTestedGesture()));
+    }
+
     void StateGestureDialog::reset()
     {
         editedGesture_ = 0;
@@ -178,61 +203,44 @@ namespace Gecon {
         ui_->object->setCurrentIndex(0);
         ui_->objectProperty->setCurrentIndex(0);
 
-        for(ObjectPropertyStateSettings* stateSettings : stateSettings_)
+        for(ObjectState* state: states_)
         {
-            stateSettings->reset();
+            state->reset();
         }
 
         ui_->gestureName->setText(QString());
-    }
 
-    void StateGestureDialog::pack()
-    {
-        //ui_->objectPropertyState->resize(0, 0);
-        resize(0, 0);
-    }
-
-    void StateGestureDialog::initObjectComboBox(ObjectModel* objectModel)
-    {
-        ui_->object->setModel(objectModel);
-
-        /*QPixmap red(16,16);
-        red.fill(Qt::red);
-        QLabel* icon = new QLabel(ui_->object);
-        icon->setPixmap(red);*/
+        ui_->deleteButton->setVisible(false);
     }
 
     void StateGestureDialog::initPropertyComboBox()
     {
-        for(ObjectPropertyStateSettings* stateSettings : stateSettings_)
+        for(ObjectState* state : states_)
         {
-            ui_->objectProperty->addItem(stateSettings->propertyName());
-            ui_->gestureSettingsLayout->addWidget(stateSettings->widget());
+            ui_->objectProperty->addItem(state->propertyName());
+            ui_->gestureSettingsLayout->addWidget(state->widget());
 
-            stateSettings->widget()->setVisible(false);
+            state->widget()->setVisible(false);
         }
 
         //ui_->gestureSettingsLayout->addStretch(0);
 
-        currentStateSettings_ = stateSettings_.front();
-        currentStateSettings_->widget()->setVisible(true);
+        currentState_ = states_.front();
+        currentState_->widget()->setVisible(true);
 
-        connect(ui_->objectProperty, SIGNAL(currentIndexChanged(int)), this, SLOT(setPropertyStateSettings(int)));
+        connect(ui_->objectProperty, SIGNAL(currentIndexChanged(int)), this, SLOT(setObjectStateSettings(int)));
     }
 
-    void StateGestureDialog::setPropertyStateSettings(int index)
+    void StateGestureDialog::setObjectStateSettings(int index)
     {
-        currentStateSettings_->widget()->setVisible(false);
+        currentState_->widget()->setVisible(false);
 
-        currentStateSettings_ = stateSettings_.at(index);
-        currentStateSettings_->widget()->setVisible(true);
-
-        pack();
+        currentState_ = states_.at(index);
+        currentState_->widget()->setVisible(true);
     }
 
     int StateGestureDialog::exec()
     {
         return QDialog::Rejected;
     }
-    
 } // namespace Gecon

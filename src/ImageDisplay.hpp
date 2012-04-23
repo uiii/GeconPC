@@ -24,6 +24,9 @@
 #include <QMouseEvent>
 
 #include <Gecon/Image.hpp>
+#include <Gecon/ObjectMotionGesture.hpp>
+
+#include "ControlInfo.hpp"
 
 namespace Gecon
 {
@@ -32,6 +35,14 @@ namespace Gecon
         Q_OBJECT
 
     public:
+        typedef Gecon::Image<RGB> Image;
+
+        typedef ControlInfo::ObjectPolicy::Object Object;
+        typedef ControlInfo::ObjectPolicy::ObjectPtr ObjectPtr;
+        typedef ControlInfo::ObjectPolicy::ObjectSet ObjectSet;
+
+        typedef ObjectMotionGesture<Object>::Motion Motion;
+
         explicit ImageDisplay(QWidget *parent = 0);
         
     signals:
@@ -40,6 +51,7 @@ namespace Gecon
 
     public slots:
         void displayImage(const QImage& image);
+        void displayImage(const Image& image, const ObjectSet& objects = ObjectSet(), const Motion& motion = Motion());
         void reset();
 
     protected:

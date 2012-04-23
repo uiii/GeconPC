@@ -25,32 +25,32 @@ namespace Gecon
 {
     StateGestureDialog* StateGestureWrapper::dialog = 0;
 
-    StateGestureWrapper::StateGestureWrapper(const QString& name, ObjectWrapper* object, const ObjectPropertyStateSettings *stateSettings):
-        GestureWrapper(name),
+    StateGestureWrapper::StateGestureWrapper(const QString& name, ObjectWrapper* object, ObjectState *state):
+        GestureWrapper(name, {object}),
         object_(object),
-        stateSettings_(stateSettings->clone())
+        state_(state->clone())
     {
-        rawStateGesture_ = stateSettings_->toGesture(*object_);
+        rawGesture_ = state_->toGesture(object_);
     }
 
     StateGestureWrapper::StateGestureWrapper(const StateGestureWrapper& another):
-        StateGestureWrapper(another.name(), another.object_, another.stateSettings_)
+        StateGestureWrapper(another.name(), another.object_, another.state_)
     {
     }
 
     StateGestureWrapper::~StateGestureWrapper()
     {
-        delete stateSettings_;
+        delete state_;
     }
 
-    ObjectWrapper* StateGestureWrapper::object() const
+    ObjectWrapper* StateGestureWrapper::object()
     {
         return object_;
     }
 
-    ObjectPropertyStateSettings *StateGestureWrapper::stateSettings() const
+    ObjectState* StateGestureWrapper::state()
     {
-        return stateSettings_;
+        return state_;
     }
 
     void StateGestureWrapper::edit()
@@ -59,5 +59,10 @@ namespace Gecon
         {
             dialog->editGesture(this);
         }
+    }
+
+    StateGestureWrapper::RawGesture *StateGestureWrapper::rawGesture()
+    {
+        return rawGesture_;
     }
 } // namespace Gecon

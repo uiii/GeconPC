@@ -20,26 +20,43 @@
 #ifndef GECON_RELATIONGESTUREWRAPPER_HPP
 #define GECON_RELATIONGESTUREWRAPPER_HPP
 
-#include <QString>
-
 #include "ObjectWrapper.hpp"
+#include "ObjectRelationSettings.hpp"
+
 #include "GestureWrapper.hpp"
+
+#include <Gecon/ObjectRelationGesture.hpp>
 
 namespace Gecon
 {
+    class RelationGestureDialog; // forward declaration
+
     class RelationGestureWrapper : public GestureWrapper
     {
     public:
-        RelationGestureWrapper();
+        typedef ObjectRelationGesture<ControlInfo::ObjectPolicy::Object> RawGesture;
 
-        const QString& name() const;
-        const ObjectWrapper& left() const;
-        const ObjectWrapper& right() const;
+        static RelationGestureDialog* dialog;
+
+        RelationGestureWrapper(const QString& name, ObjectWrapper* leftObject, ObjectWrapper* rightObject, ObjectRelation* relation);
+        RelationGestureWrapper(const RelationGestureWrapper& another);
+
+        virtual ~RelationGestureWrapper();
+
+        ObjectWrapper* leftObject();
+        ObjectWrapper* rightObject();
+        ObjectRelation* relation();
+
+        void edit();
+
+        RawGesture* rawGesture();
 
     public:
-        QString name_;
-        ObjectWrapper left_;
-        ObjectWrapper right_;
+        ObjectWrapper* left_;
+        ObjectWrapper* right_;
+        ObjectRelation* relation_;
+
+        RawGesture* rawGesture_;
     };
 } // namespace Gecon
 

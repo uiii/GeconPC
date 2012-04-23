@@ -81,7 +81,6 @@ namespace Gecon
         bool colorGrabbed_;
 
         Object object_;
-        ObjectStateGesture<Object, bool> gesture_;
 
         ObjectModel* objectModel_;
 

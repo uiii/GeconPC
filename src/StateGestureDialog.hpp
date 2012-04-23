@@ -35,14 +35,15 @@ namespace Gecon
     class StateGestureWrapper; // forward declaration
     class GestureModel;
     class ObjectModel;
-    class ObjectPropertyStateSettings;
+    class ObjectState;
+    class GestureTestDialog;
 
     class StateGestureDialog : public QDialog
     {
         Q_OBJECT
         
     public:
-        explicit StateGestureDialog(GestureModel* gestureModel, ObjectModel* objectModel, QWidget *parent = 0);
+        explicit StateGestureDialog(GestureModel* gestureModel, ObjectModel* objectModel, GestureTestDialog* testDialog, QWidget *parent);
         ~StateGestureDialog();
 
     public slots:
@@ -53,26 +54,30 @@ namespace Gecon
         void updateGesture();
         void deleteGesture();
 
+        void testGesture();
+        void deleteTestedGesture();
+
         void reset();
 
-        void pack();
-        void setPropertyStateSettings(int index);
+        void setObjectStateSettings(int index);
 
         int exec();
 
     private:
-        typedef QList<ObjectPropertyStateSettings*> ObjectPropertyStateSettingsList;
+        typedef QList<ObjectState*> PropertyStateList;
 
-        void initObjectComboBox(ObjectModel* objectModel);
         void initPropertyComboBox();
 
         GestureModel* gestureModel_;
         ObjectModel* objectModel_;
 
+        GestureTestDialog* testDialog_;
+        StateGestureWrapper* testedGesture_;
+
         StateGestureWrapper* editedGesture_;
 
-        ObjectPropertyStateSettingsList stateSettings_;
-        ObjectPropertyStateSettings* currentStateSettings_;
+        PropertyStateList states_;
+        ObjectState* currentState_;
 
         Ui::StateGestureDialog *ui_;
     };

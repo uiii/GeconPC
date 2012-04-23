@@ -17,7 +17,7 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ObjectPropertyStateSettings.hpp"
+#include "PropertyStateSettings.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -26,22 +26,22 @@
 
 namespace Gecon
 {
-    ObjectPropertyStateSettings::ObjectPropertyStateSettings(const QString& propertyName, QWidget* widget):
+    ObjectStateSettings::ObjectStateSettings(const QString& propertyName, QWidget* widget):
         widget_(widget),
         propertyName_(propertyName)
     {
     }
 
-    ObjectPropertyStateSettings::~ObjectPropertyStateSettings()
+    ObjectStateSettings::~ObjectStateSettings()
     {
     }
 
-    const QString& ObjectPropertyStateSettings::propertyName()
+    const QString& ObjectStateSettings::propertyName() const
     {
         return propertyName_;
     }
 
-    QWidget* ObjectPropertyStateSettings::widget()
+    QWidget* PropertyStateSetting::widget() const
     {
         return widget_;
     }
@@ -53,10 +53,10 @@ namespace Gecon
         layout->setContentsMargins(0,0,0,0);
 
         visibilityOptions = new QComboBox(this);
-        visibilityOptions->addItem(QObject::tr("visible"));
-        visibilityOptions->addItem(QObject::tr("hidden"));
+        visibilityOptions->addItem(tr("visible"), true);
+        visibilityOptions->addItem(tr("hidden"), false);
 
-        QLabel* equality = new QLabel(QObject::tr("="), this);
+        QLabel* equality = new QLabel(tr("="), this);
         equality->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
         layout->addWidget(equality);
@@ -64,7 +64,7 @@ namespace Gecon
     }
 
     VisibilityStateSettings::VisibilityStateSettings(QWidget* parent):
-        ObjectPropertyStateSettings("visibility", new VisibilityStateSettingsWidget(parent)),
+        PropertyStateSettings("visibility", new VisibilityStateSettingsWidget(parent)),
         visibilityOptionsIndex_(0),
         widget_(dynamic_cast<VisibilityStateSettingsWidget*>(widget()))
     {
@@ -85,14 +85,21 @@ namespace Gecon
         widget_->visibilityOptions->setCurrentIndex(visibilityOptionsIndex_);
     }
 
-    ObjectPropertyStateSettings *VisibilityStateSettings::clone() const
+    ObjectStateSettings *VisibilityStateSettings::clone() const
     {
         return new VisibilityStateSettings(*this);
     }
 
-    ObjectPropertyStateSettings::GesturePtr VisibilityStateSettings::toGesture(ObjectWrapper object)
+    ObjectStateSettings::RawGesture* VisibilityStateSettings::toGesture(ObjectWrapper* object)
     {
-        return 0;
+        bool value = widget_->visibilityOptions->itemData(visibilityOptionsIndex_).value<bool>();
+
+        return new RawGesture(
+            object->rawObject(),
+            &ObjectWrapper::RawObject::isVisible,
+            RawGesture::Relation<bool>(std::equal_to<bool>()),
+            value
+        );
     }
 
     PositionStateSettingsWidget::PositionStateSettingsWidget(QWidget *parent):
@@ -102,36 +109,36 @@ namespace Gecon
         layout->setContentsMargins(0,0,0,0);
 
         relation = new QComboBox(this);
-        relation->addItem(QObject::tr("over"));
-        relation->addItem(QObject::tr("under"));
-        relation->addItem(QObject::tr("to the left of"));
-        relation->addItem(QObject::tr("to the right of"));
-        relation->addItem(QObject::tr("closer than"));
-        relation->addItem(QObject::tr("farther than"));
+        relation->addItem(tr("over"));
+        relation->addItem(tr("under"));
+        relation->addItem(tr("on the left of"));
+        relation->addItem(tr("on the right of"));
+        relation->addItem(tr("closer than"));
+        relation->addItem(tr("farther than"));
 
         distance = new QSpinBox(this);
         distance->setMaximum(100);
-        distance->setSuffix(QObject::tr(" %"));
+        distance->setSuffix(tr(" %"));
         distance->setVisible(false);
 
-        from = new QLabel(QObject::tr("from"), this);
+        from = new QLabel(tr("from"), this);
         from->setVisible(false);
 
         positionX = new QSpinBox(this);
         positionX->setMaximum(100);
-        positionX->setSuffix(QObject::tr(" %"));
+        positionX->setSuffix(tr(" %"));
 
         positionY = new QSpinBox(this);
         positionY->setMaximum(100);
-        positionY->setSuffix(QObject::tr(" %"));
+        positionY->setSuffix(tr(" %"));
 
-        layout->addWidget(new QLabel(QObject::tr("is"), this));
+        layout->addWidget(new QLabel(tr("is"), this));
         layout->addWidget(relation);
         layout->addWidget(distance);
         layout->addWidget(from);
-        layout->addWidget(new QLabel(QObject::tr("x:"), this));
+        layout->addWidget(new QLabel(tr("x:"), this));
         layout->addWidget(positionX);
-        layout->addWidget(new QLabel(QObject::tr("y:"), this));
+        layout->addWidget(new QLabel(tr("y:"), this));
         layout->addWidget(positionY);
 
         connect(relation, SIGNAL(currentIndexChanged(int)), this, SLOT(relationChanged()));
@@ -152,12 +159,16 @@ namespace Gecon
     }
 
     PositionStateSettings::PositionStateSettings(QWidget *parent):
-        ObjectPropertyStateSettings(QObject::tr("position"), new PositionStateSettingsWidget(parent)),
+        PropertyStateSettings(QObject::tr("position"), new PositionStateSettingsWidget(parent)),
         relationIndex_(0),
         positionXValue_(0),
         positionYValue_(0),
         widget_(dynamic_cast<PositionStateSettingsWidget*>(widget()))
     {
+        relations_.push_back(&isOver);
+        relations_.push_back(&isUnder);
+        relations_.push_back(&isOnTheLeftOf);
+        relations_.push_back(&isOnTheRightOf);
     }
 
     void PositionStateSettings::reset()
@@ -184,14 +195,37 @@ namespace Gecon
         widget_->positionY->setValue(positionYValue_);
     }
 
-    ObjectPropertyStateSettings *PositionStateSettings::clone() const
+    ObjectStateSettings *PositionStateSettings::clone() const
     {
         return new PositionStateSettings(*this);
     }
 
-    ObjectPropertyStateSettings::GesturePtr PositionStateSettings::toGesture(ObjectWrapper object)
+    ObjectStateSettings::RawGesture* PositionStateSettings::toGesture(ObjectWrapper* object)
     {
-        return 0;
+        RelationType relation = relations_.at(relationIndex_);
+        if(relationIndex_ == 4)
+        {
+            relation = std::bind(
+                std::less<int>(),
+                std::bind(&distance, std::placeholders::_1, std::placeholders::_2),
+                distance_
+            );
+        }
+        else if(relationIndex_ == 5)
+        {
+            relation = std::bind(
+                std::greater<int>(),
+                std::bind(&distance, std::placeholders::_1, std::placeholders::_2),
+                distance_
+            );
+        }
+
+        return new RawGesture(
+            object->rawObject(),
+            &ObjectWrapper::RawObject::position,
+            relation,
+            PropertyReturnType{(double)positionXValue_, (double)positionYValue_}
+        );
     }
 
     AngleStateSettingsWidget::AngleStateSettingsWidget(QWidget *parent)
@@ -199,24 +233,24 @@ namespace Gecon
         QHBoxLayout* layout = new QHBoxLayout(this);
         layout->setContentsMargins(0,0,0,0);
 
-        relationOptions = new QComboBox(this);
-        relationOptions->addItem(QObject::tr("="));
-        relationOptions->addItem(QObject::tr("<"));
-        relationOptions->addItem(QObject::tr("<="));
-        relationOptions->addItem(QObject::tr(">"));
-        relationOptions->addItem(QObject::tr(">="));
-        relationOptions->addItem(QObject::tr("!="));
+        relation = new QComboBox(this);
+        relation->addItem(tr("="));
+        relation->addItem(tr("<"));
+        relation->addItem(tr("<="));
+        relation->addItem(tr(">"));
+        relation->addItem(tr(">="));
+        relation->addItem(tr("!="));
 
         angle = new QSpinBox(this);
         angle->setMaximum(179);
 
-        layout->addWidget(relationOptions);
+        layout->addWidget(relation);
         layout->addWidget(angle);
     }
 
     AngleStateSettings::AngleStateSettings(QWidget *parent):
-        ObjectPropertyStateSettings(QObject::tr("angle"), new AngleStateSettingsWidget(parent)),
-        relationOptionsIndex_(0),
+        PropertyStateSettings(QObject::tr("angle"), new AngleStateSettingsWidget(parent)),
+        relationIndex_(0),
         angleValue_(0),
         widget_(dynamic_cast<AngleStateSettingsWidget*>(widget()))
     {
@@ -230,30 +264,34 @@ namespace Gecon
 
     void AngleStateSettings::reset()
     {
-        widget_->relationOptions->setCurrentIndex(0);
+        widget_->relation->setCurrentIndex(0);
         widget_->angle->setValue(0);
     }
 
     void AngleStateSettings::save()
     {
-        relationOptionsIndex_ = widget_->relationOptions->currentIndex();
+        relationIndex_ = widget_->relation->currentIndex();
         angleValue_ = widget_->angle->value();
     }
 
     void AngleStateSettings::load()
     {
-        widget_->relationOptions->setCurrentIndex(relationOptionsIndex_);
+        widget_->relation->setCurrentIndex(relationIndex_);
         widget_->angle->setValue(angleValue_);
     }
 
-    ObjectPropertyStateSettings *AngleStateSettings::clone() const
+    ObjectStateSettings *AngleStateSettings::clone() const
     {
         return new AngleStateSettings(*this);
     }
 
-    ObjectPropertyStateSettings::GesturePtr AngleStateSettings::toGesture(ObjectWrapper object)
+    ObjectStateSettings::RawGesture* AngleStateSettings::toGesture(ObjectWrapper* object)
     {
-        //return makeGestureStateGesture(object, &Object::angle, );
-        return 0;
+        return new RawGesture(
+            object->rawObject(),
+            &ObjectWrapper::RawObject::angle,
+            relations_.at(relationIndex_),
+            angleValue_
+        );
     }
 } // namespace Gecon

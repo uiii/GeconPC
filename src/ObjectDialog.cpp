@@ -71,15 +71,9 @@ namespace Gecon
             return;
         }
 
-        QString name = ui_->objectName->text();
-        if(name.isEmpty())
-        {
-            name = "Object";
-        }
-
         try
         {
-            objectModel_->addObject(name, objectColor_);
+            objectModel_->addObject(ui_->objectName->text(), objectColor_);
 
             accept();
         }
@@ -102,82 +96,22 @@ namespace Gecon
 
     void ObjectDialog::startCapture()
     {
-        /*capture_.reset();
-        capture_.setDevice(device);
-
-        capture_.start();
-        capture_.captureImage();
-        capture_.wait();*/
         ui_->display->reset();
 
+        control_.prepareObjects(ObjectSet());
         control_.start();
     }
 
     void ObjectDialog::stopCapture()
     {
-        /*captureTimer_.stop();
-        capture_.stop();*/
-
-        qDebug("before stop");
         QtConcurrent::run(&control_, &ControlInfo::Control::stop);
-        qDebug("after stop");
     }
 
     void ObjectDialog::displayImage(Image original, Image segmented, ObjectSet objects)
     {
         rawImage_ = original;
-        QImage img = QImage((const uchar*)&(original.rawData()[0]), original.width(), original.height(), original.width() * 3, QImage::Format_RGB888);
 
-        if(colorGrabbed_ && object_.isVisible())
-        {
-            QPainter painter(&img);
-
-            // paint object's border
-            const Object::Border& border = object_.border();
-
-            QPolygon borderPolygon;
-            for(const Object::Point& point : border)
-            {
-                borderPolygon << QPoint(point.x, point.y);
-            }
-
-            painter.save();
-            painter.setPen(Qt::blue);
-            painter.setBrush(QBrush(Qt::blue, Qt::DiagCrossPattern));
-            painter.setBrush(QBrush(Qt::blue, Qt::Dense6Pattern));
-            painter.drawPolygon(borderPolygon);
-            painter.restore();
-
-            // paint object's convex hull
-            const Object::ConvexHull& convexHull = object_.convexHull();
-
-            QPolygon convexHullPolygon;
-            for(const Object::Point& point : convexHull)
-            {
-                convexHullPolygon << QPoint(point.x, point.y);
-            }
-
-            painter.save();
-            painter.setPen(Qt::green);
-            painter.drawPolygon(convexHullPolygon);
-            painter.restore();
-
-            // paint object's bounding box
-            const Object::BoundingBox& boundingBox = object_.boundingBox();
-
-            painter.save();
-            painter.setPen(Qt::red);
-
-            painter.translate(boundingBox.position.x, boundingBox.position.y);
-            painter.rotate(-(boundingBox.angle));
-            painter.translate(-boundingBox.width / 2.0, -boundingBox.height / 2.0);
-
-            painter.drawRect(0, 0, boundingBox.width, boundingBox.height);
-
-            painter.restore();
-        }
-
-        ui_->display->displayImage(img);
+        ui_->display->displayImage(rawImage_, objects);
     }
 
     void ObjectDialog::firstImageDisplayed()
@@ -195,17 +129,7 @@ namespace Gecon
         objects.insert(&object_);
         control_.prepareObjects(objects);
 
-        /*ControlInfo::GesturePolicy::GestureSet gestures;
-        std::function<bool(const bool&)> f =
-                std::bind(std::equal_to<bool>(), std::placeholders::_1, true);
-        gesture_ = ObjectStateGesture<Object, bool>(&object_, &Object::isVisible, f);
-        gestures.insert(&gesture_);
-        control_.prepareGestures(gestures);
-
-        gesture_.stateEnterEvent().connect([&](const decltype(gesture_)::Event*){reject();});*/
-
         QtConcurrent::run(&control_, &ControlInfo::Control::restart);
-        //control_.restart();
 
         colorGrabbed_ = true;
     }

@@ -40,19 +40,20 @@ namespace Gecon
         static MotionGestureDialog* dialog;
 
         MotionGestureWrapper(const QString& name, ObjectWrapper* object, const Motion& motion);
-
         virtual ~MotionGestureWrapper();
 
-        ObjectWrapper* object() const;
+        ObjectWrapper* object();
         const Motion& motion() const;
 
         void edit();
+
+        RawGesture* rawGesture();
 
     private:
         ObjectWrapper* object_;
         Motion motion_;
 
-        ControlInfo::GesturePolicy::GesturePtr rawMotionGesture_;
+        RawGesture* rawGesture_;
     };
 } // namespace Gecon
 

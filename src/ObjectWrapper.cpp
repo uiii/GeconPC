@@ -54,6 +54,21 @@ namespace Gecon
         return left.name() == right.name() && left.rawObject() == right.rawObject();
     }
 
+    template<>
+    const QList<ObjectPropertyWrapper<bool> > ObjectProperties<bool>::list = {
+        { "visibility", &ObjectWrapper::RawObject::isVisible }
+    };
+
+    template<>
+    const QList<ObjectPropertyWrapper<int> > ObjectProperties<int>::list ={
+        { "angle", &ObjectWrapper::RawObject::angle }
+    };
+
+    template<>
+    const QList<ObjectPropertyWrapper<Point> > ObjectProperties<Point>::list = {
+        { "position", &ObjectWrapper::RawObject::position }
+    };
+
     bool operator<(const ObjectWrapper& left, const ObjectWrapper& right)
     {
         return left.name() < right.name();

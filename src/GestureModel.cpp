@@ -33,6 +33,11 @@ namespace Gecon
             delete stateGesture;
         }
 
+        for(RelationGestureWrapper* relationGesture : relationGestures_)
+        {
+            delete relationGesture;
+        }
+
         for(MotionGestureWrapper* motionGesture : motionGestures_)
         {
             delete motionGesture;
@@ -58,7 +63,11 @@ namespace Gecon
         {
             gesture = stateGestures_.at(row);
         }
-        else if((row -= stateGestures_.size()) < motionGestures_.size())
+        else if((row -= stateGestures_.size()) < relationGestures_.size())
+        {
+            gesture = relationGestures_.at(row);
+        }
+        else if((row -= relationGestures_.size()) < motionGestures_.size())
         {
             gesture = motionGestures_.at(row);
         }
@@ -79,25 +88,85 @@ namespace Gecon
 
     QModelIndex GestureModel::index(GestureWrapper* gesture) const
     {
-        QModelIndex index;
-        index = createIndex(stateGestures_.indexOf(static_cast<StateGestureWrapper*>(gesture)), 0);
+        int index = 0;
+        int offset = 0;
 
-        if(! index.isValid())
+        index = stateGestures_.indexOf(static_cast<StateGestureWrapper*>(gesture));
+        if(index == -1)
         {
-            index = createIndex(motionGestures_.indexOf(static_cast<MotionGestureWrapper*>(gesture)), 0);
+            offset += stateGestures_.size();
+            index = relationGestures_.indexOf(static_cast<RelationGestureWrapper*>(gesture));
+
+            if(index == -1)
+            {
+                offset += relationGestures_.size();
+                index = motionGestures_.indexOf(static_cast<MotionGestureWrapper*>(gesture));
+            }
         }
 
-        return index;
+        if(index != -1)
+        {
+            index += offset;
+        }
+
+        return createIndex(index, 0);
     }
+
+    /*QModelIndex GestureModel::index(GestureWrapper::RawGesture* rawGesture) const
+    {
+        int index = -1;
+        int offset = 0;
+
+        auto hasSameRawGestures = [&](const GestureWrapper* item) -> bool
+        {
+                return rawGesture == item->rawGesture();
+        };
+
+        StateGestureWrapperList::iterator it = std::find_if(
+            stateGestures_.begin(), stateGestures_.end(), hasSameRawGestures);
+
+        if(it == stateGestures_.end())
+        {
+            offset += stateGestures_.size();
+
+            RelationGestureWrapperList::iterator it = std::find_if(
+                relationGestures_.begin(), relationGestures_.end(), hasSameRawGestures);
+
+            if(it == relationGestures_.end())
+            {
+                offset += relationGestures_.size();
+
+                MotionGestureWrapperList::iterator it = std::find_if(
+                    motionGestures_.begin(), motionGestures_.end(), hasSameRawGestures);
+
+                index = motionGestures_.indexOf(static_cast<MotionGestureWrapper*>(gesture));
+            }
+        }
+        else
+        {
+            index = it - stateGestures_.begin();
+        }
+
+        if(index != -1)
+        {
+            index += offset;
+        }
+
+        return createIndex(index, 0);
+    }*/
 
     int GestureModel::size() const
     {
-        return stateGestures_.size() + motionGestures_.size();
+        return stateGestures_.size() + relationGestures_.size() + motionGestures_.size();
     }
 
-    void GestureModel::addStateGesture(const QString& name, ObjectWrapper *object, const ObjectPropertyStateSettings* stateSettings)
+    void GestureModel::addStateGesture(const QString& name, ObjectWrapper* object, ObjectState *stateSettings)
     {
-        StateGestureWrapper* stateGesture = new StateGestureWrapper(name, object, stateSettings);
+        QString gestureName = name.isEmpty()
+                ? "State gesture " + QString::number(stateGestures_.size() + 1)
+                : name;
+
+        StateGestureWrapper* stateGesture = new StateGestureWrapper(gestureName, object, stateSettings);
 
         StateGestureWrapperList::iterator it = std::find_if(stateGestures_.begin(), stateGestures_.end(),
             [&](const StateGestureWrapper* item){ return QString::localeAwareCompare(stateGesture->name(), item->name()) < 0; }
@@ -110,9 +179,32 @@ namespace Gecon
         endInsertRows();
     }
 
+    void GestureModel::addRelationGesture(const QString &name, ObjectWrapper* leftObject, ObjectWrapper* rightObject, ObjectRelation *relationSettings)
+    {
+        QString gestureName = name.isEmpty()
+                ? "Relation gesture " + QString::number(relationGestures_.size() + 1)
+                : name;
+
+        RelationGestureWrapper* relationGesture = new RelationGestureWrapper(gestureName, leftObject, rightObject, relationSettings);
+
+        RelationGestureWrapperList::iterator it = std::find_if(relationGestures_.begin(), relationGestures_.end(),
+            [&](const RelationGestureWrapper* item){ return QString::localeAwareCompare(relationGesture->name(), item->name()) < 0; }
+        );
+
+        beginInsertRows(QModelIndex(), it - relationGestures_.begin(), it - relationGestures_.begin());
+
+        relationGestures_.insert(it, relationGesture);
+
+        endInsertRows();
+    }
+
     void GestureModel::addMotionGesture(const QString &name, ObjectWrapper *object, const MotionGestureWrapper::Motion& motion)
     {
-        MotionGestureWrapper* motionGesture = new MotionGestureWrapper(name, object, motion);
+        QString gestureName = name.isEmpty()
+                ? "Motion gesture " + QString::number(motionGestures_.size() + 1)
+                : name;
+
+        MotionGestureWrapper* motionGesture = new MotionGestureWrapper(gestureName, object, motion);
 
         MotionGestureWrapperList::iterator it = std::find_if(motionGestures_.begin(), motionGestures_.end(),
             [&](const MotionGestureWrapper* item){ return QString::localeAwareCompare(motionGesture->name(), item->name()) < 0; }
@@ -123,6 +215,21 @@ namespace Gecon
         motionGestures_.insert(it, motionGesture);
 
         endInsertRows();
+    }
+
+    const GestureModel::StateGestureWrapperList& GestureModel::stateGestures() const
+    {
+        return stateGestures_;
+    }
+
+    const GestureModel::RelationGestureWrapperList& GestureModel::relationGestures() const
+    {
+        return relationGestures_;
+    }
+
+    const GestureModel::MotionGestureWrapperList& GestureModel::motionGestures() const
+    {
+        return motionGestures_;
     }
 
     void GestureModel::removeGesture(const QModelIndex &index)
@@ -136,12 +243,24 @@ namespace Gecon
 
         int row = index.row();
 
+        std::cout << "row: " << row << std::endl;
+        std::cout << "state: " << stateGestures_.size() << std::endl;
+        std::cout << "relation: " << relationGestures_.size() << std::endl;
+        std::cout << "motion: " << motionGestures_.size() << std::endl;
+
         if(row < stateGestures_.size())
         {
+            std::cout << "del row: " << row << std::endl;
             stateGestures_.removeAt(row);
         }
-        else if((row -= stateGestures_.size()) < motionGestures_.size())
+        else if((row -= stateGestures_.size()) < relationGestures_.size())
         {
+            std::cout << "del row: " << row << std::endl;
+            relationGestures_.removeAt(row);
+        }
+        else if((row -= relationGestures_.size()) < motionGestures_.size())
+        {
+            std::cout << "del row: " << row << std::endl;
             motionGestures_.removeAt(row);
         }
 

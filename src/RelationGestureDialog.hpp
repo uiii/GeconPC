@@ -21,34 +21,63 @@
 #define GECON_RELATIONGESTUREDIALOG_HPP
 
 #include <QDialog>
+#include <QList>
 
-#include "ObjectModel.hpp"
-
-namespace Gecon {
-    
-    namespace Ui {
+namespace Gecon
+{
+    namespace Ui
+    {
         class RelationGestureDialog;
     }
-    
+
+    class ObjectRelation; // forward declaration
+    class RelationGestureWrapper;
+    class ObjectModel;
+    class GestureModel;
+    class GestureTestDialog;
+
     class RelationGestureDialog : public QDialog
     {
         Q_OBJECT
         
     public:
-        explicit RelationGestureDialog(ObjectModel* objectModel, QWidget *parent = 0);
+        explicit RelationGestureDialog(GestureModel* gestureModel, ObjectModel* objectModel, GestureTestDialog* testDialog, QWidget *parent = 0);
         ~RelationGestureDialog();
 
     public slots:
         int newGesture();
+        int editGesture(RelationGestureWrapper* relationGesture);
+
+        void addGesture();
+        void updateGesture();
+        void deleteGesture();
+
+        void testGesture();
+        void deleteTestedGesture();
+
+        void reset();
+
+        void setRelationSettings(int index);
 
         int exec();
         
     private:
+        typedef QList<ObjectRelation*> ObjectRelationList;
+
+        void initLeftPropertyComboBox_();
+
         ObjectModel* objectModel_;
+        GestureModel* gestureModel_;
+
+        GestureTestDialog* testDialog_;
+        RelationGestureWrapper* testedGesture_;
+
+        RelationGestureWrapper* editedGesture_;
+
+        ObjectRelationList relations_;
+        ObjectRelation* currentRelation_;
 
         Ui::RelationGestureDialog *ui_;
     };
-    
-    
 } // namespace Gecon
 #endif // GECON_RELATIONGESTUREDIALOG_HPP

@@ -23,7 +23,10 @@
 #include <QAbstractListModel>
 
 #include "StateGestureWrapper.hpp"
+#include "RelationGestureWrapper.hpp"
 #include "MotionGestureWrapper.hpp"
+
+#include <Gecon/ObjectGesture.hpp>
 
 namespace Gecon
 {
@@ -33,7 +36,12 @@ namespace Gecon
 
     public:
         typedef QList<StateGestureWrapper*> StateGestureWrapperList;
+        typedef QList<RelationGestureWrapper*> RelationGestureWrapperList;
         typedef QList<MotionGestureWrapper*> MotionGestureWrapperList;
+
+        typedef QList<StateGestureWrapper::RawGesture*> RawStateGestureList;
+        typedef QList<RelationGestureWrapper::RawGesture*> RawRelationGestureList;
+        typedef QList<MotionGestureWrapper::RawGesture*> RawMotionGestureList;
 
         explicit GestureModel(QObject *parent = 0);
         virtual ~GestureModel();
@@ -42,11 +50,17 @@ namespace Gecon
         QVariant data(const QModelIndex& index, int role) const;
 
         QModelIndex index(GestureWrapper* gesture) const;
+        //QModelIndex index(GestureWrapper::RawGesture* rawGesture) const;
 
         int size() const;
 
-        void addStateGesture(const QString& name, ObjectWrapper* object, const ObjectPropertyStateSettings* stateSettings);
+        void addStateGesture(const QString& name, ObjectWrapper* object, ObjectState* stateSettings);
+        void addRelationGesture(const QString& name, ObjectWrapper* leftObject, ObjectWrapper* rightObject, ObjectRelation* relationSettings);
         void addMotionGesture(const QString& name, ObjectWrapper* object, const MotionGestureWrapper::Motion& motion);
+
+        const StateGestureWrapperList& stateGestures() const;
+        const RelationGestureWrapperList& relationGestures() const;
+        const MotionGestureWrapperList& motionGestures() const;
 
         void removeGesture(const QModelIndex& index);
 
@@ -56,7 +70,12 @@ namespace Gecon
 
     private:
         StateGestureWrapperList stateGestures_;
+        RelationGestureWrapperList relationGestures_;
         MotionGestureWrapperList motionGestures_;
+
+        RawStateGestureList rawStateGestures_;
+        RawRelationGestureList rawRelationGestures_;
+        RawMotionGestureList rawMotionGestures_;
     };
 } // namespace Gecon
 

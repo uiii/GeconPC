@@ -27,9 +27,9 @@ namespace Gecon
 
     ObjectModel::~ObjectModel()
     {
-        for(ObjectWrapper* object : objects_)
+        for(ObjectWrapper* objects : objects_)
         {
-            delete object;
+            delete objects;
         }
     }
 
@@ -65,7 +65,7 @@ namespace Gecon
         }
     }
 
-    QModelIndex ObjectModel::index(ObjectWrapper *object) const
+    QModelIndex ObjectModel::index(ObjectWrapper* object) const
     {
         return createIndex(objects_.indexOf(object), 0);
     }
@@ -83,7 +83,11 @@ namespace Gecon
             // throw
         }*/
 
-        ObjectWrapper* object = new ObjectWrapper(name, color);
+        QString objectName = name.isEmpty()
+                ? "Object " + QString::number(objects_.size() + 1)
+                : name;
+
+        ObjectWrapper* object = new ObjectWrapper(objectName, color);
 
         rawObjects_.insert(object->rawObject());
 
@@ -113,5 +117,15 @@ namespace Gecon
         }
 
         objects_.erase(it);*/
+    }
+
+    const ObjectModel::ObjectWrapperList &ObjectModel::objects() const
+    {
+        return objects_;
+    }
+
+    const ObjectModel::RawObjectSet &ObjectModel::rawObjects() const
+    {
+        return rawObjects_;
     }
 } // namespace Gecon

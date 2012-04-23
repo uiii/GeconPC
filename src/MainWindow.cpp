@@ -27,19 +27,22 @@
 #include "StateGestureDialog.hpp"
 #include "RelationGestureDialog.hpp"
 #include "MotionGestureDialog.hpp"
+#include "GestureTestDialog.hpp"
 
 namespace Gecon
 {
     MainWindow::MainWindow(QWidget *parent):
         QMainWindow(parent),
-        settingsDialog_(new SettingsDialog(&control_)),
-        objectDialog_(new ObjectDialog(&objectModel_)),
-        stateGestureDialog_(new StateGestureDialog(&gestureModel_, &objectModel_)),
-        relationGestureDialog_(new RelationGestureDialog(&objectModel_)),
-        motionGestureDialog_(new MotionGestureDialog(&gestureModel_, &objectModel_)),
+        settingsDialog_(new SettingsDialog(&control_, this)),
+        objectDialog_(new ObjectDialog(&objectModel_, this)),
+        gestureTestDialog_(new GestureTestDialog(&gestureModel_, &objectModel_, this)),
+        stateGestureDialog_(new StateGestureDialog(&gestureModel_, &objectModel_, gestureTestDialog_, this)),
+        relationGestureDialog_(new RelationGestureDialog(&gestureModel_, &objectModel_, gestureTestDialog_, this)),
+        motionGestureDialog_(new MotionGestureDialog(&gestureModel_, &objectModel_, gestureTestDialog_, this)),
         ui_(new Ui::MainWindow)
     {
         StateGestureWrapper::dialog = stateGestureDialog_;
+        RelationGestureWrapper::dialog = relationGestureDialog_;
         MotionGestureWrapper::dialog = motionGestureDialog_;
 
         ui_->setupUi(this);
@@ -72,6 +75,7 @@ namespace Gecon
     {
         objectDialog_->setDevice(control_.device());
         motionGestureDialog_->setDevice(control_.device());
+        gestureTestDialog_->setDevice(control_.device());
     }
 
     void MainWindow::initNewGestureMenu()

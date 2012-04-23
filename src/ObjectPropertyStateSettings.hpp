@@ -30,17 +30,18 @@
 #include "ControlInfo.hpp"
 #include "ObjectWrapper.hpp"
 
+#include <Gecon/ColorObject.hpp>
+#include <Gecon/ObjectStateGesture.hpp>
+
 namespace Gecon
 {
-    class ObjectPropertyStateSettings
+    class ObjectStateSettings
     {
     public:
-        typedef ControlInfo::GesturePolicy::GesturePtr GesturePtr;
-        typedef ControlInfo::ObjectPolicy::Object Object;
-        typedef ControlInfo::ObjectPolicy::ObjectPtr ObjectPtr;
+        typedef ObjectStateGesture<ControlInfo::ObjectPolicy::Object> RawGesture;
 
-        ObjectPropertyStateSettings(const QString& propertyName, QWidget* widget);
-        virtual ~ObjectPropertyStateSettings();
+        ObjectStateSettings(const QString& propertyName, QWidget* widget);
+        virtual ~ObjectStateSettings();
 
         virtual const QString& propertyName();
         virtual QWidget* widget();
@@ -49,9 +50,9 @@ namespace Gecon
         virtual void save() = 0;
         virtual void load() = 0;
 
-        virtual ObjectPropertyStateSettings* clone() const = 0;
+        virtual ObjectStateSettings* clone() const = 0;
 
-        virtual GesturePtr toGesture(ObjectWrapper object) = 0;
+        virtual RawGesture* toGesture(ObjectWrapper* object) = 0;
 
     private:
         QWidget* widget_;
@@ -66,7 +67,7 @@ namespace Gecon
         QComboBox* visibilityOptions;
     };
 
-    class VisibilityStateSettings : public ObjectPropertyStateSettings
+    class VisibilityStateSettings : public ObjectStateSettings
     {
     public:
         VisibilityStateSettings(QWidget* parent = 0);
@@ -75,9 +76,9 @@ namespace Gecon
         void save();
         void load();
 
-        ObjectPropertyStateSettings* clone() const;
+        ObjectStateSettings* clone() const;
 
-        GesturePtr toGesture(ObjectWrapper object);
+        RawGesture* toGesture(ObjectWrapper* object);
 
     private:
         int visibilityOptionsIndex_;
@@ -102,7 +103,7 @@ namespace Gecon
         void relationChanged();
     };
 
-    class PositionStateSettings : public ObjectPropertyStateSettings
+    class PositionStateSettings : public ObjectStateSettings
     {
     public:
         PositionStateSettings(QWidget* parent = 0);
@@ -111,11 +112,16 @@ namespace Gecon
         void save();
         void load();
 
-        ObjectPropertyStateSettings* clone() const;
+        ObjectStateSettings* clone() const;
 
-        GesturePtr toGesture(ObjectWrapper object);
+        RawGesture* toGesture(ObjectWrapper* object);
 
     private:
+        typedef Point PropertyReturnType;
+        typedef RawGesture::Relation<PropertyReturnType> RelationType;
+
+        QList<RelationType> relations_;
+
         int relationIndex_;
         int distance_;
         int positionXValue_;
@@ -129,11 +135,11 @@ namespace Gecon
     public:
         AngleStateSettingsWidget(QWidget* parent);
 
-        QComboBox* relationOptions;
+        QComboBox* relation;
         QSpinBox* angle;
     };
 
-    class AngleStateSettings : public ObjectPropertyStateSettings
+    class AngleStateSettings : public ObjectStateSettings
     {
     public:
         AngleStateSettings(QWidget* parent = 0);
@@ -142,17 +148,17 @@ namespace Gecon
         void save();
         void load();
 
-        ObjectPropertyStateSettings* clone() const;
+        ObjectStateSettings* clone() const;
 
-        GesturePtr toGesture(ObjectWrapper object);
+        RawGesture* toGesture(ObjectWrapper* object);
 
     private:
-        typedef decltype(Object().angle()) PropertyReturnType;
-        typedef std::function<bool(const PropertyReturnType&, const PropertyReturnType&)> RelationType;
+        typedef int PropertyReturnType;
+        typedef RawGesture::Relation<PropertyReturnType> RelationType;
 
         QList<RelationType> relations_;
 
-        int relationOptionsIndex_;
+        int relationIndex_;
         int angleValue_;
 
         AngleStateSettingsWidget* widget_;

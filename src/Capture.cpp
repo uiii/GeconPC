@@ -78,7 +78,7 @@ namespace Gecon
             const Object::Border& border = object_->border();
 
             QPolygon borderPolygon;
-            for(const Object::Point& point : border)
+            for(const Point& point : border)
             {
                 borderPolygon << QPoint(point.x, point.y);
             }

@@ -21,9 +21,11 @@
 #define GECON_STATEGESTUREWRAPPER_HPP
 
 #include "ObjectWrapper.hpp"
-#include "ObjectPropertyStateSettings.hpp"
+#include "ObjectStateSettings.hpp"
 
 #include "GestureWrapper.hpp"
+
+#include <Gecon/ObjectStateGesture.hpp>
 
 namespace Gecon
 {
@@ -32,22 +34,26 @@ namespace Gecon
     class StateGestureWrapper : public GestureWrapper
     {
     public:
+        typedef ObjectStateGesture<ControlInfo::ObjectPolicy::Object> RawGesture;
+
         static StateGestureDialog* dialog;
 
-        StateGestureWrapper(const QString& name, ObjectWrapper* object, const ObjectPropertyStateSettings* stateSettings);
+        StateGestureWrapper(const QString& name, ObjectWrapper* object, ObjectState* state);
         StateGestureWrapper(const StateGestureWrapper& another);
         virtual ~StateGestureWrapper();
 
-        ObjectWrapper* object() const;
-        ObjectPropertyStateSettings* stateSettings() const;
+        ObjectWrapper* object();
+        ObjectState* state();
 
         void edit();
 
+        RawGesture* rawGesture();
+
     private:
         ObjectWrapper* object_;
-        ObjectPropertyStateSettings* stateSettings_;
+        ObjectState* state_;
 
-        ControlInfo::GesturePolicy::GesturePtr rawStateGesture_;
+        RawGesture* rawGesture_;
     };
 } // namespace Gecon
 

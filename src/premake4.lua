@@ -20,6 +20,8 @@ project "GeconPC"
         "StateGestureDialog.*",
         "RelationGestureDialog.*",
         "MotionGestureDialog.*",
+        "StateGestureWrapper.*",
+        "RelationGestureWrapper.*",
         "MotionGestureWrapper.*",
         "MotionRecorder.*",
         "SettingsDialog.*",
@@ -29,6 +31,9 @@ project "GeconPC"
         "ObjectWrapper.*",
         "GestureModel.*",
         "GestureWrapper.*",
-        "StateGestureWrapper.*",
-        "ObjectPropertyStateSettings.*"
+        "ObjectStateSettings.*",
+        "PropertyRelationSettings.*",
+        "ObjectRelationSettings.*",
+        "PropertyValueSettings.*",
+        "GestureTestDialog.*"
     }

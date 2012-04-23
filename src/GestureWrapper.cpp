@@ -21,8 +21,9 @@
 
 namespace Gecon
 {
-    GestureWrapper::GestureWrapper(const QString& name):
-        name_(name)
+    GestureWrapper::GestureWrapper(const QString& name, const GestureWrapper::Objects& objects):
+        name_(name),
+        objects_(objects)
     {
     }
 
@@ -33,5 +34,10 @@ namespace Gecon
     const QString &GestureWrapper::name() const
     {
         return name_;
+    }
+
+    const GestureWrapper::Objects& GestureWrapper::objects() const
+    {
+        return objects_;
     }
 } // namespace Gecon

@@ -19,9 +19,60 @@
 
 #include "RelationGestureWrapper.hpp"
 
+#include "RelationGestureDialog.hpp"
+
 namespace Gecon
 {
-    RelationGestureWrapper::RelationGestureWrapper()
+    RelationGestureDialog* RelationGestureWrapper::dialog = 0;
+
+    RelationGestureWrapper::RelationGestureWrapper(
+            const QString& name,
+            ObjectWrapper* leftObject,
+            ObjectWrapper* rightObject,
+            ObjectRelation *relation):
+        GestureWrapper(name, {leftObject, rightObject}),
+        left_(leftObject),
+        right_(rightObject),
+        relation_(relation->clone())
     {
+        rawGesture_ = relation_->toGesture(leftObject, rightObject);
+    }
+
+    RelationGestureWrapper::RelationGestureWrapper(const RelationGestureWrapper& another):
+        RelationGestureWrapper(another.name(), another.left_, another.right_, another.relation_)
+    {
+    }
+
+    RelationGestureWrapper::~RelationGestureWrapper()
+    {
+        delete relation_;
+    }
+
+    ObjectWrapper* RelationGestureWrapper::leftObject()
+    {
+        return left_;
+    }
+
+    ObjectWrapper* RelationGestureWrapper::rightObject()
+    {
+        return right_;
+    }
+
+    ObjectRelation* RelationGestureWrapper::relation()
+    {
+        return relation_;
+    }
+
+    void RelationGestureWrapper::edit()
+    {
+        if(dialog)
+        {
+            dialog->editGesture(this);
+        }
+    }
+
+    RelationGestureWrapper::RawGesture *RelationGestureWrapper::rawGesture()
+    {
+        return rawGesture_;
     }
 } // namespace Gecon

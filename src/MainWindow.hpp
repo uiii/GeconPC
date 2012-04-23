@@ -39,6 +39,7 @@ namespace Gecon
     class StateGestureDialog;
     class RelationGestureDialog;
     class MotionGestureDialog;
+    class GestureTestDialog;
 
     class MainWindow : public QMainWindow
     {
@@ -63,6 +64,8 @@ namespace Gecon
 
         SettingsDialog* settingsDialog_;
         ObjectDialog* objectDialog_;
+
+        GestureTestDialog* gestureTestDialog_;
 
         StateGestureDialog* stateGestureDialog_;
         RelationGestureDialog* relationGestureDialog_;
