@@ -26,6 +26,8 @@ namespace Gecon
     PropertyValueSettings<int>::Widget::Widget():
         value(new QSpinBox)
     {
+        value->setMaximum(10000);
+
         QHBoxLayout* layout = new QHBoxLayout(this);
         layout->setContentsMargins(0, 0, 0, 0);
         layout->addWidget(value);
@@ -112,6 +114,9 @@ namespace Gecon
         xValue(new QSpinBox),
         yValue(new QSpinBox)
     {
+        xValue->setMaximum(10000);
+        yValue->setMaximum(10000);
+
         QHBoxLayout* layout = new QHBoxLayout(this);
         layout->setContentsMargins(0, 0, 0, 0);
         layout->addWidget(xValue);

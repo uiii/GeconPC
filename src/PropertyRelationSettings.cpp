@@ -61,6 +61,7 @@ namespace Gecon
     DistanceWidget::DistanceWidget()
     {
         distance = new QSpinBox(this);
+        distance->setMaximum(10000);
 
         QHBoxLayout* layout = new QHBoxLayout(this);
         layout->setContentsMargins(0, 0, 0, 0);
