@@ -26,6 +26,8 @@
 #include "GestureModel.hpp"
 #include "ObjectModel.hpp"
 
+#include <FakeInput/mouse.hpp>
+
 namespace Gecon
 {
     GestureTestDialog::GestureTestDialog(GestureModel* gestureModel, ObjectModel* objectModel, QWidget *parent) :
@@ -38,8 +40,6 @@ namespace Gecon
         ui_->setupUi(this);
 
         ui_->objectsStates->setModel(objectsStatesModel_);
-
-        connect(ui_->buttonBox, SIGNAL(rejected()), this, SLOT(close_()));
     }
     
     GestureTestDialog::~GestureTestDialog()
@@ -104,6 +104,15 @@ namespace Gecon
 
         triggers_.push_back(stateEnterTrigger);
         triggers_.push_back(stateLeaveTrigger);
+
+        /*Event::Trigger* inStateTrigger = new Event::Trigger([=](const ObjectWrapper::RawObject& object){
+                Point pos = object.position();
+                FakeInput::Mouse::moveTo(pos.x, pos.y);
+        }, stateGesture->object()->rawObject());
+
+        inStateTrigger->addSwitch(rawGesture->inStateEvent());
+
+        triggers_.push_back(inStateTrigger);*/
     }
 
     void GestureTestDialog::includeGesture_(RelationGestureWrapper* relationGesture)
@@ -226,8 +235,6 @@ namespace Gecon
     {
         stopCapture_();
         reset_();
-
-        reject();
     }
 
     void GestureTestDialog::reset_()
@@ -246,8 +253,25 @@ namespace Gecon
         ui_->includeCheckBox->setChecked(false);
     }
 
+    void GestureTestDialog::reject()
+    {
+        close_();
+        QDialog::reject();
+    }
+
+    void GestureTestDialog::accept()
+    {
+        close_();
+        QDialog::accept();
+    }
+
     void GestureTestDialog::setDevice(GestureTestDialog::DeviceAdapter device)
     {
         control_.setDevice(device);
+    }
+
+    void GestureTestDialog::closeEvent(QCloseEvent *)
+    {
+        close_();
     }
 } // namespace Gecon

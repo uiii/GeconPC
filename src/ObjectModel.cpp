@@ -27,9 +27,9 @@ namespace Gecon
 
     ObjectModel::~ObjectModel()
     {
-        for(ObjectWrapper* objects : objects_)
+        for(ObjectWrapper* object : objects_)
         {
-            delete objects;
+            delete object;
         }
     }
 

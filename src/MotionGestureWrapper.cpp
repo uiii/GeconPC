@@ -31,10 +31,22 @@ namespace Gecon
         motion_(motion)
     {
         rawGesture_ = new ObjectMotionGesture<ObjectWrapper::RawObject>(object_->rawObject(), motion_);
+
+        events_.push_back(new EventWrapper("motion done", rawGesture_->motionDoneEvent(), this));
     }
 
     MotionGestureWrapper::~MotionGestureWrapper()
     {
+    }
+
+    const MotionGestureWrapper::Events& MotionGestureWrapper::events() const
+    {
+        return events_;
+
+        for(EventWrapper* event : events_)
+        {
+            delete event;
+        }
     }
 
     ObjectWrapper *MotionGestureWrapper::object()

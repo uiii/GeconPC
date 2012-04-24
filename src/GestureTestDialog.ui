@@ -342,5 +342,22 @@ p, li { white-space: pre-wrap; }
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>Gecon::GestureTestDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>517</x>
+     <y>654</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>338</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

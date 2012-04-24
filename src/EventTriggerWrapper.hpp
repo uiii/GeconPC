@@ -17,45 +17,50 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GECON_GESTUREWRAPPER_HPP
-#define GECON_GESTUREWRAPPER_HPP
+#ifndef GECON_EVENTTRIGGERWRAPPER_HPP
+#define GECON_EVENTTRIGGERWRAPPER_HPP
 
+#include <QList>
 #include <QString>
 #include <QMetaType>
 
-#include <Gecon/ObjectGesture.hpp>
-
-#include "ControlInfo.hpp"
-#include "ObjectWrapper.hpp"
-#include "EventWrapper.hpp"
+#include <Gecon/Event.hpp>
 
 namespace Gecon
 {
-    class GestureWrapper
+    class EventWrapper;
+    class ActionSettings;
+
+    class EventTriggerWrapper
     {
     public:
-        typedef ObjectGesture<ControlInfo::ObjectPolicy::Object> RawGesture;
-        typedef ObjectWrapper Object;
-        typedef std::list<ObjectWrapper*> Objects;
         typedef QList<EventWrapper*> Events;
 
-        GestureWrapper(const QString& name, const Objects& objects);
-        virtual ~GestureWrapper();
+        EventTriggerWrapper(const QString& name, const Events& onEvents, const Events& offEvents, ActionSettings* action);
+        EventTriggerWrapper(const EventTriggerWrapper& another);
+        virtual ~EventTriggerWrapper();
 
-        virtual const QString& name() const;
-        virtual const Objects& objects() const;
-        virtual const Events& events() const = 0;
+        const QString& name() const;
 
-        virtual void edit() = 0;
+        const Events& onEvents() const;
+        const Events& offEvents() const;
 
-        virtual RawGesture* rawGesture() = 0;
+        ActionSettings* action() const;
+
+        Event::Trigger* rawTrigger() const;
 
     private:
         QString name_;
-        Objects objects_;
+
+        Events onEvents_;
+        Events offEvents_;
+
+        ActionSettings* action_;
+
+        Event::Trigger* rawTrigger_;
     };
 } // namespace Gecon
 
-Q_DECLARE_METATYPE(Gecon::GestureWrapper*)
+Q_DECLARE_METATYPE(Gecon::EventTriggerWrapper*)
 
-#endif // GECON_GESTUREWRAPPER_HPP
+#endif // GECON_EVENTTRIGGERWRAPPER_HPP

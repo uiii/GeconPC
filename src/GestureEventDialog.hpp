@@ -17,45 +17,46 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GECON_GESTUREWRAPPER_HPP
-#define GECON_GESTUREWRAPPER_HPP
+#ifndef GECON_GESTUREEVENTDIALOG_HPP
+#define GECON_GESTUREEVENTDIALOG_HPP
 
-#include <QString>
-#include <QMetaType>
+#include <QDialog>
 
-#include <Gecon/ObjectGesture.hpp>
-
-#include "ControlInfo.hpp"
-#include "ObjectWrapper.hpp"
 #include "EventWrapper.hpp"
 
 namespace Gecon
 {
-    class GestureWrapper
+    namespace Ui
     {
+        class GestureEventDialog;
+    }
+
+    class GestureModel;
+
+    class GestureEventDialog : public QDialog
+    {
+        Q_OBJECT
+        
     public:
-        typedef ObjectGesture<ControlInfo::ObjectPolicy::Object> RawGesture;
-        typedef ObjectWrapper Object;
-        typedef std::list<ObjectWrapper*> Objects;
-        typedef QList<EventWrapper*> Events;
+        explicit GestureEventDialog(GestureModel* gestureModel, QWidget *parent = 0);
+        ~GestureEventDialog();
 
-        GestureWrapper(const QString& name, const Objects& objects);
-        virtual ~GestureWrapper();
+        EventWrapper* onEvent() const;
+        EventWrapper* offEvent() const;
 
-        virtual const QString& name() const;
-        virtual const Objects& objects() const;
-        virtual const Events& events() const = 0;
+    public slots:
+        int exec();
 
-        virtual void edit() = 0;
+    private slots:
+        void changeOnEvent_(int index);
+        void changeOffEvent_(int index);
 
-        virtual RawGesture* rawGesture() = 0;
+        void reset_();
 
     private:
-        QString name_;
-        Objects objects_;
+        GestureModel* gestureModel_;
+
+        Ui::GestureEventDialog *ui_;
     };
 } // namespace Gecon
-
-Q_DECLARE_METATYPE(Gecon::GestureWrapper*)
-
-#endif // GECON_GESTUREWRAPPER_HPP
+#endif // GECON_GESTUREEVENTDIALOG_HPP

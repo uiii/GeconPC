@@ -17,45 +17,33 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GECON_GESTUREWRAPPER_HPP
-#define GECON_GESTUREWRAPPER_HPP
+#ifndef GECON_EVENTWRAPPER_HPP
+#define GECON_EVENTWRAPPER_HPP
 
 #include <QString>
 #include <QMetaType>
 
-#include <Gecon/ObjectGesture.hpp>
-
-#include "ControlInfo.hpp"
-#include "ObjectWrapper.hpp"
-#include "EventWrapper.hpp"
-
 namespace Gecon
 {
-    class GestureWrapper
+    class Event;
+    class GestureWrapper;
+
+    class EventWrapper
     {
     public:
-        typedef ObjectGesture<ControlInfo::ObjectPolicy::Object> RawGesture;
-        typedef ObjectWrapper Object;
-        typedef std::list<ObjectWrapper*> Objects;
-        typedef QList<EventWrapper*> Events;
+        EventWrapper(const QString& name, Event* event, GestureWrapper* gesture);
 
-        GestureWrapper(const QString& name, const Objects& objects);
-        virtual ~GestureWrapper();
+        const QString& name() const;
+        Event* rawEvent() const;
 
-        virtual const QString& name() const;
-        virtual const Objects& objects() const;
-        virtual const Events& events() const = 0;
-
-        virtual void edit() = 0;
-
-        virtual RawGesture* rawGesture() = 0;
+        GestureWrapper* gesture() const;
 
     private:
         QString name_;
-        Objects objects_;
+        Event* event_;
+
+        GestureWrapper* gesture_;
     };
 } // namespace Gecon
 
-Q_DECLARE_METATYPE(Gecon::GestureWrapper*)
-
-#endif // GECON_GESTUREWRAPPER_HPP
+#endif // GECON_EVENTWRAPPER_HPP

@@ -17,50 +17,45 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GECON_OBJECTMODEL_HPP
-#define GECON_OBJECTMODEL_HPP
+#ifndef GECON_EVENTTRIGGERMODEL_HPP
+#define GECON_EVENTTRIGGERMODEL_HPP
 
 #include <QAbstractListModel>
-#include <QColor>
 
-#include "ControlInfo.hpp"
-#include "ObjectWrapper.hpp"
+#include <Gecon/Event.hpp>
+
+#include "EventTriggerWrapper.hpp"
 
 namespace Gecon
 {
-    class ObjectModel : public QAbstractListModel
+    class EventTriggerModel : public QAbstractListModel
     {
         Q_OBJECT
 
     public:
-        typedef ControlInfo::ObjectPolicy::ObjectPtr ObjectPtr;
-        typedef ControlInfo::ObjectPolicy::Object RawObject;
-        typedef ControlInfo::ObjectPolicy::ObjectSet RawObjectSet;
+        typedef QList<EventTriggerWrapper*> EventTriggerWrapperList;
+        typedef QList<Event::Trigger*> RawEventTriggerList;
 
-        typedef QList<ObjectWrapper*> ObjectWrapperList;
-
-        ObjectModel();
-        virtual ~ObjectModel();
-
+        explicit EventTriggerModel();
+        virtual ~EventTriggerModel();
+        
         int rowCount(const QModelIndex& parent) const;
         QVariant data(const QModelIndex& index, int role) const;
 
-        QModelIndex index(ObjectWrapper* object) const;
-        QModelIndex index(ObjectWrapper::RawObject* object) const;
+        QModelIndex index(EventTriggerWrapper* trigger) const;
 
         int size() const;
 
-        void addObject(const QString& name, RawObject::Color color);
-        void removeObject(const QModelIndex& index);
+        void addTrigger(const QString& name, const EventTriggerWrapper::Events& onEvents, const EventTriggerWrapper::Events& offEvents, ActionSettings* action);
+        void removeTrigger(const QModelIndex& index);
 
-        const ObjectWrapperList& objects() const;
-        const RawObjectSet& rawObjects() const;
+        const EventTriggerWrapperList& triggers() const;
+        const RawEventTriggerList& rawTriggers() const;
 
     private:
-        ObjectWrapperList objects_;
-
-        RawObjectSet rawObjects_;
+        EventTriggerWrapperList triggers_;
+        RawEventTriggerList rawTriggers_;
     };
 } // namespace Gecon
 
-#endif // GECON_OBJECTMODEL_HPP
+#endif // GECON_EVENTTRIGGERMODEL_HPP

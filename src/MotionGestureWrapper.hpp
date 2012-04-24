@@ -42,6 +42,8 @@ namespace Gecon
         MotionGestureWrapper(const QString& name, ObjectWrapper* object, const Motion& motion);
         virtual ~MotionGestureWrapper();
 
+        const Events& events() const;
+
         ObjectWrapper* object();
         const Motion& motion() const;
 
@@ -50,6 +52,8 @@ namespace Gecon
         RawGesture* rawGesture();
 
     private:
+        Events events_;
+
         ObjectWrapper* object_;
         Motion motion_;
 

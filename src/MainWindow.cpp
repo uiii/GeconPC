@@ -28,6 +28,8 @@
 #include "RelationGestureDialog.hpp"
 #include "MotionGestureDialog.hpp"
 #include "GestureTestDialog.hpp"
+#include "EventTriggerDialog.hpp"
+#include "DebugDialog.hpp"
 
 namespace Gecon
 {
@@ -39,8 +41,12 @@ namespace Gecon
         stateGestureDialog_(new StateGestureDialog(&gestureModel_, &objectModel_, gestureTestDialog_, this)),
         relationGestureDialog_(new RelationGestureDialog(&gestureModel_, &objectModel_, gestureTestDialog_, this)),
         motionGestureDialog_(new MotionGestureDialog(&gestureModel_, &objectModel_, gestureTestDialog_, this)),
+        eventTriggerDialog_(new EventTriggerDialog(&eventTriggerModel_, &gestureModel_, &objectModel_, this)),
         ui_(new Ui::MainWindow)
     {
+        DebugDialog* debug = new DebugDialog(this); // TODO
+        debug->show();
+
         StateGestureWrapper::dialog = stateGestureDialog_;
         RelationGestureWrapper::dialog = relationGestureDialog_;
         MotionGestureWrapper::dialog = motionGestureDialog_;
@@ -49,6 +55,7 @@ namespace Gecon
 
         ui_->objectView->setModel(&objectModel_);
         ui_->gestureView->setModel(&gestureModel_);
+        ui_->eventTriggerView->setModel(&eventTriggerModel_);
 
         updateDialogs();
 
@@ -58,6 +65,8 @@ namespace Gecon
         connect(ui_->actionSettings, SIGNAL(triggered()), settingsDialog_, SLOT(exec()));
         connect(settingsDialog_, SIGNAL(finished(int)), this, SLOT(updateDialogs()));
         connect(ui_->gestureView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editGesture(QModelIndex)));
+        connect(ui_->eventTriggerView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editEventTrigger(QModelIndex)));
+        connect(ui_->newEventTriggerButton, SIGNAL(clicked()), eventTriggerDialog_, SLOT(newTrigger()));
     }
 
     MainWindow::~MainWindow()
@@ -69,6 +78,12 @@ namespace Gecon
     {
         GestureWrapper* gesture = gestureModel_.data(index, Qt::UserRole).value<GestureWrapper*>();
         gesture->edit();
+    }
+
+    void MainWindow::editEventTrigger(const QModelIndex &index)
+    {
+        EventTriggerWrapper* trigger = eventTriggerModel_.data(index, Qt::UserRole).value<EventTriggerWrapper*>();
+        eventTriggerDialog_->editTrigger(trigger);
     }
 
     void MainWindow::updateDialogs()

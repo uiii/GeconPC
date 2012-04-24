@@ -36,6 +36,11 @@ namespace Gecon
         relation_(relation->clone())
     {
         rawGesture_ = relation_->toGesture(leftObject, rightObject);
+
+        events_.push_back(new EventWrapper("relation enter", rawGesture_->relationEnterEvent(), this));
+        events_.push_back(new EventWrapper("relation leave", rawGesture_->relationLeaveEvent(), this));
+        //events_.push_back(new EventWrapper("in relation", rawGesture_->inRelationEvent(), this));
+        //events_.push_back(new EventWrapper("not in relation", rawGesture_->notInRelationEvent(), this));
     }
 
     RelationGestureWrapper::RelationGestureWrapper(const RelationGestureWrapper& another):
@@ -46,6 +51,16 @@ namespace Gecon
     RelationGestureWrapper::~RelationGestureWrapper()
     {
         delete relation_;
+
+        for(EventWrapper* event : events_)
+        {
+            delete event;
+        }
+    }
+
+    const RelationGestureWrapper::Events& RelationGestureWrapper::events() const
+    {
+        return events_;
     }
 
     ObjectWrapper* RelationGestureWrapper::leftObject()

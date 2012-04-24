@@ -251,16 +251,19 @@ namespace Gecon
         if(row < stateGestures_.size())
         {
             std::cout << "del row: " << row << std::endl;
+            delete stateGestures_.at(row);
             stateGestures_.removeAt(row);
         }
         else if((row -= stateGestures_.size()) < relationGestures_.size())
         {
             std::cout << "del row: " << row << std::endl;
+            delete relationGestures_.at(row);
             relationGestures_.removeAt(row);
         }
         else if((row -= relationGestures_.size()) < motionGestures_.size())
         {
             std::cout << "del row: " << row << std::endl;
+            delete motionGestures_.at(row);
             motionGestures_.removeAt(row);
         }
 

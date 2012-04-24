@@ -42,6 +42,8 @@ namespace Gecon
         StateGestureWrapper(const StateGestureWrapper& another);
         virtual ~StateGestureWrapper();
 
+        const Events& events() const;
+
         ObjectWrapper* object();
         ObjectState* state();
 
@@ -50,6 +52,8 @@ namespace Gecon
         RawGesture* rawGesture();
 
     private:
+        Events events_;
+
         ObjectWrapper* object_;
         ObjectState* state_;
 

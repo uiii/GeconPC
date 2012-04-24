@@ -83,8 +83,14 @@ namespace Gecon
         void close_();
         void reset_();
 
+        void reject();
+        void accept();
+
     signals:
         void eventOccured(GestureWrapper* gesture, const QString& eventDescription);
+
+    protected:
+        void closeEvent(QCloseEvent *);
 
     private:
         ControlInfo::Control control_;

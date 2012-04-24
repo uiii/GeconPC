@@ -31,6 +31,11 @@ namespace Gecon
         state_(state->clone())
     {
         rawGesture_ = state_->toGesture(object_);
+
+        events_.push_back(new EventWrapper("state enter", rawGesture_->stateEnterEvent(), this));
+        events_.push_back(new EventWrapper("state leave", rawGesture_->stateLeaveEvent(), this));
+        events_.push_back(new EventWrapper("in state", rawGesture_->inStateEvent(), this));
+        events_.push_back(new EventWrapper("not in state", rawGesture_->notInStateEvent(), this));
     }
 
     StateGestureWrapper::StateGestureWrapper(const StateGestureWrapper& another):
@@ -41,6 +46,16 @@ namespace Gecon
     StateGestureWrapper::~StateGestureWrapper()
     {
         delete state_;
+
+        for(EventWrapper* event : events_)
+        {
+            delete event;
+        }
+    }
+
+    const StateGestureWrapper::Events& StateGestureWrapper::events() const
+    {
+        return events_;
     }
 
     ObjectWrapper* StateGestureWrapper::object()

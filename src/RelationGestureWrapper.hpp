@@ -43,6 +43,8 @@ namespace Gecon
 
         virtual ~RelationGestureWrapper();
 
+        const Events& events() const;
+
         ObjectWrapper* leftObject();
         ObjectWrapper* rightObject();
         ObjectRelation* relation();
@@ -52,6 +54,8 @@ namespace Gecon
         RawGesture* rawGesture();
 
     public:
+        Events events_;
+
         ObjectWrapper* left_;
         ObjectWrapper* right_;
         ObjectRelation* relation_;

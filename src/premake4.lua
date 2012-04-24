@@ -9,6 +9,7 @@ project "GeconPC"
 
     require_pkg_config()
     require_pkg("GeconFramework")
+    require_pkg("FakeInput")
 
     includedirs { "./" }
 
@@ -35,5 +36,12 @@ project "GeconPC"
         "PropertyRelationSettings.*",
         "ObjectRelationSettings.*",
         "PropertyValueSettings.*",
-        "GestureTestDialog.*"
+        "GestureTestDialog.*",
+        "EventTriggerDialog.*",
+        "GestureEventDialog.*",
+        "EventWrapper.*",
+        "ActionSettings.*",
+        "EventTriggerModel.*",
+        "EventTriggerWrapper.*",
+        "DebugDialog.*"
     }
