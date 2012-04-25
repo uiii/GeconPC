@@ -20,7 +20,7 @@
 #include "EventTriggerDialog.hpp"
 #include "ui_EventTriggerDialog.hpp"
 
-#include <QStringListModel>
+#include <QStandardItemModel>
 #include <QMessageBox>
 
 #include "EventTriggerModel.hpp"
@@ -39,6 +39,7 @@ namespace Gecon
         gestureModel_(gestureModel),
         objectModel_(objectModel),
         eventDialog_(new GestureEventDialog(gestureModel, this)),
+        switchModel_(new QStandardItemModel(this)),
         editedTrigger_(0),
         currentAction_(0),
         ui_(new Ui::EventTriggerDialog)
@@ -58,6 +59,10 @@ namespace Gecon
 
         currentAction_ = actions_.front();
         currentAction_->widget()->setVisible(true);
+
+        ui_->switchList->setModel(switchModel_);
+        ui_->switchList->horizontalHeader()->setResizeMode(QHeaderView::Fixed);
+        ui_->switchList->setStyleSheet("QTableView::item { padding-right: 30px; }");
 
         connect(ui_->action, SIGNAL(currentIndexChanged(int)), this, SLOT(setActionSettings_(int)));
         connect(ui_->addSwitchButton, SIGNAL(clicked()), this, SLOT(addSwitch_()));
@@ -98,19 +103,8 @@ namespace Gecon
             EventWrapper* onEvent = editedTrigger_->onEvents().at(i);
             EventWrapper* offEvent = editedTrigger_->offEvents().at(i);
 
-            onEvents_.push_back(onEvent);
-            offEvents_.push_back(offEvent);
-
-            QString eventDescription = QString("ON: %1 [%2]").arg(onEvent->gesture()->name()).arg(onEvent->name());
-            if(offEvent)
-            {
-                eventDescription += QString("\tOFF: %1 [%2]").arg(offEvent->gesture()->name()).arg(offEvent->name());
-            }
-
-            switchDescriptions_.push_back(eventDescription);
+            appendSwitch_(onEvent, offEvent);
         }
-
-        ui_->switchList->setModel(new QStringListModel(switchDescriptions_));
 
         QList<ActionSettings*>::iterator it = std::find_if(actions_.begin(), actions_.end(),
                 [&](ActionSettings* action){
@@ -205,19 +199,8 @@ namespace Gecon
             EventWrapper* onEvent = eventDialog_->onEvent();
             EventWrapper* offEvent = eventDialog_->offEvent();
 
-            onEvents_.push_back(onEvent);
-            offEvents_.push_back(offEvent);
-
-            QString eventDescription = QString("ON: %1 [%2]").arg(onEvent->gesture()->name()).arg(onEvent->name());
-            if(offEvent)
-            {
-                eventDescription += QString("\tOFF: %1 [%2]").arg(offEvent->gesture()->name()).arg(offEvent->name());
-            }
-
-            switchDescriptions_.push_back(eventDescription);
+            appendSwitch_(onEvent, offEvent);
         }
-
-        ui_->switchList->setModel(new QStringListModel(switchDescriptions_, this));
     }
 
     void EventTriggerDialog::removeSwitch_()
@@ -227,10 +210,30 @@ namespace Gecon
         {
             onEvents_.removeAt(indexes.front().row());
             offEvents_.removeAt(indexes.front().row());
-            switchDescriptions_.removeAt(indexes.front().row());
-
-            ui_->switchList->setModel(new QStringListModel(switchDescriptions_, this));
+            switchModel_->removeRow(indexes.front().row());
         }
+    }
+
+    void EventTriggerDialog::appendSwitch_(EventWrapper *onEvent, EventWrapper *offEvent)
+    {
+        onEvents_.push_back(onEvent);
+        offEvents_.push_back(offEvent);
+
+        QString onEventDescription = QString("ON: %1 [%2]").arg(onEvent->gesture()->name()).arg(onEvent->name());
+        QString offEventDescription;
+        if(offEvent)
+        {
+            offEventDescription = QString("OFF: %1 [%2]").arg(offEvent->gesture()->name()).arg(offEvent->name());
+        }
+
+        switchModel_->appendRow(
+            QList<QStandardItem*>()
+            << new QStandardItem(onEventDescription)
+            << new QStandardItem(offEventDescription)
+        );
+
+        ui_->switchList->resizeColumnToContents(0);
+        ui_->switchList->resizeRowsToContents();
     }
 
     void EventTriggerDialog::setActionSettings_(int index)
@@ -245,8 +248,7 @@ namespace Gecon
     {
         onEvents_.clear();
         offEvents_.clear();
-        switchDescriptions_.clear();
-        ui_->switchList->setModel(new QStringListModel);
+        switchModel_->clear();
         ui_->action->setCurrentIndex(0);
         ui_->actionName->setText(QString());
     }

@@ -21,7 +21,7 @@
 #define GECON_EVENTTRIGGERDIALOG_HPP
 
 #include <QDialog>
-#include <QStringList>
+#include <QStandardItemModel>
 
 #include "EventWrapper.hpp"
 
@@ -61,6 +61,8 @@ namespace Gecon
         void addSwitch_();
         void removeSwitch_();
 
+        void appendSwitch_(EventWrapper* onEvent, EventWrapper* offEvent);
+
         void setActionSettings_(int index);
 
         void reset_();
@@ -74,7 +76,7 @@ namespace Gecon
 
         QList<EventWrapper*> onEvents_;
         QList<EventWrapper*> offEvents_;
-        QStringList switchDescriptions_;
+        QStandardItemModel* switchModel_;
 
         EventTriggerWrapper* editedTrigger_;
 
