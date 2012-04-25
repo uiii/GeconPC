@@ -22,6 +22,11 @@
 #include <QHBoxLayout>
 
 #include <FakeInput/mouse.hpp>
+#include <FakeInput/actions/actionsequence.hpp>
+
+#include <iostream>
+
+Q_DECLARE_METATYPE(FakeInput::MouseButton)
 
 namespace Gecon
 {
@@ -43,6 +48,25 @@ namespace Gecon
     QWidget* ActionSettings::widget() const
     {
         return widget_;
+    }
+
+    void ActionSettings::addSwitches_(Event::Trigger *trigger, const ActionSettings::Events &onEvents, const ActionSettings::Events &offEvents) const
+    {
+        for(int i = 0; i < onEvents.size(); ++i)
+        {
+            qDebug("add switch");
+            Event* rawOnEvent = onEvents.at(i)->rawEvent();
+            Event* rawOffEvent = 0;
+            if(offEvents.at(i))
+            {
+                rawOffEvent = offEvents.at(i)->rawEvent();
+            }
+
+            std::cout << rawOnEvent << std::endl;
+            std::cout << rawOffEvent << std::endl;
+
+            trigger->addSwitch(rawOnEvent, rawOffEvent);
+        }
     }
 
     MouseMotionActionSettings::Widget::Widget():
@@ -79,26 +103,68 @@ namespace Gecon
     Event::Trigger *MouseMotionActionSettings::toTrigger(const Events &onEvents, const Events &offEvents) const
     {
         Event::Trigger* trigger = new Event::Trigger([](const ObjectWrapper::RawObject& object){
+            qDebug("mouse move");
             FakeInput::Mouse::moveTo(object.position().x, object.position().y);
         }, object_->rawObject());
 
-        for(int i = 0; i < onEvents.size(); ++i)
-        {
-            Event* rawOnEvent = onEvents.at(i)->rawEvent();
-            Event* rawOffEvent = 0;
-            if(offEvents.at(i))
-            {
-                rawOffEvent = offEvents.at(i)->rawEvent();
-            }
+        addSwitches_(trigger, onEvents, offEvents);
 
-            trigger->addSwitch(rawOnEvent, rawOffEvent);
-        }
-
-    return trigger;
+        return trigger;
     }
 
     ActionSettings* MouseMotionActionSettings::clone() const
     {
         return new MouseMotionActionSettings(*this);
+    }
+
+    MouseButtonActionSettings::Widget::Widget():
+        button(new QComboBox)
+    {
+        QHBoxLayout* layout = new QHBoxLayout(this);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->addWidget(button);
+
+        button->addItem("Left button", QVariant::fromValue(FakeInput::Mouse_Left));
+        button->addItem("Middle button", QVariant::fromValue(FakeInput::Mouse_Middle));
+        button->addItem("Right button", QVariant::fromValue(FakeInput::Mouse_Right));
+    }
+
+    MouseButtonActionSettings::MouseButtonActionSettings():
+        ActionSettings("mouse button", new Widget),
+        widget_(dynamic_cast<Widget*>(widget()))
+    {
+    }
+
+    void MouseButtonActionSettings::load()
+    {
+        widget_->button->setCurrentIndex(buttonIndex_);
+    }
+
+    void MouseButtonActionSettings::save()
+    {
+        buttonIndex_ = widget_->button->currentIndex();
+    }
+
+    void MouseButtonActionSettings::reset()
+    {
+        widget_->button->setCurrentIndex(0);
+    }
+
+    Event::Trigger *MouseButtonActionSettings::toTrigger(const ActionSettings::Events &onEvents, const ActionSettings::Events &offEvents) const
+    {
+        FakeInput::MouseButton button = widget_->button->itemData(buttonIndex_).value<FakeInput::MouseButton>();
+        Event::Trigger* trigger = new Event::Trigger([=](){
+                qDebug("click");
+                FakeInput::ActionSequence().press(button).release(button).send();
+        });
+
+        addSwitches_(trigger, onEvents, offEvents);
+
+        return trigger;
+    }
+
+    ActionSettings *MouseButtonActionSettings::clone() const
+    {
+        return new MouseButtonActionSettings(*this);
     }
 } // namespace Gecon

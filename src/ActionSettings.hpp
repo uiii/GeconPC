@@ -48,6 +48,9 @@ namespace Gecon
 
         virtual ActionSettings* clone() const = 0;
 
+    protected:
+        virtual void addSwitches_(Event::Trigger* trigger, const Events& onEvents, const Events& offEvents) const;
+
     private:
         QString name_;
         QWidget* widget_;
@@ -76,6 +79,32 @@ namespace Gecon
     private:
         ObjectWrapper* object_;
         ObjectModel* objectModel_;
+
+        Widget* widget_;
+    };
+
+    class MouseButtonActionSettings : public ActionSettings
+    {
+    public:
+        struct Widget : public QWidget
+        {
+            Widget();
+
+            QComboBox* button;
+        };
+
+        MouseButtonActionSettings();
+
+        void load();
+        void save();
+        void reset();
+
+        Event::Trigger* toTrigger(const Events& onEvents, const Events& offEvents) const;
+
+        ActionSettings* clone() const;
+
+    private:
+        int buttonIndex_;
 
         Widget* widget_;
     };

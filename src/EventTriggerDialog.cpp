@@ -46,6 +46,7 @@ namespace Gecon
         ui_->setupUi(this);
 
         actions_.push_back(new MouseMotionActionSettings(objectModel));
+        actions_.push_back(new MouseButtonActionSettings());
 
         for(ActionSettings* action : actions_)
         {
