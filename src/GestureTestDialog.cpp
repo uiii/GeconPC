@@ -34,12 +34,14 @@ namespace Gecon
         QDialog(parent),
         gestureModel_(gestureModel),
         objectModel_(objectModel),
+        testedGesture_(0),
         objectsStatesModel_(new QStandardItemModel(this)),
         ui_(new Ui::GestureTestDialog)
     {
         ui_->setupUi(this);
 
         ui_->objectsStates->setModel(objectsStatesModel_);
+        connect(ui_->includeCheckBox, SIGNAL(toggled(bool)), this, SLOT(includeAllGestures_(bool)));
     }
     
     GestureTestDialog::~GestureTestDialog()
@@ -91,7 +93,7 @@ namespace Gecon
         ui_->eventLog->verticalScrollBar()->setValue(ui_->eventLog->verticalScrollBar()->maximum());
     }
 
-    void GestureTestDialog::includeGesture_(StateGestureWrapper* stateGesture)
+    void GestureTestDialog::includeGesture_(StateGestureWrapper* stateGesture, bool tested)
     {
         StateGestureWrapper::RawGesture* rawGesture = stateGesture->rawGesture();
         gestures_.insert(rawGesture);
@@ -102,9 +104,6 @@ namespace Gecon
         stateEnterTrigger->addSwitch(rawGesture->stateEnterEvent());
         stateLeaveTrigger->addSwitch(rawGesture->stateLeaveEvent());
 
-        triggers_.push_back(stateEnterTrigger);
-        triggers_.push_back(stateLeaveTrigger);
-
         /*Event::Trigger* inStateTrigger = new Event::Trigger([=](const ObjectWrapper::RawObject& object){
                 Point pos = object.position();
                 FakeInput::Mouse::moveTo(pos.x, pos.y);
@@ -113,9 +112,22 @@ namespace Gecon
         inStateTrigger->addSwitch(rawGesture->inStateEvent());
 
         triggers_.push_back(inStateTrigger);*/
+
+        if(tested)
+        {
+            testedGesture_ = stateGesture;
+
+            testedGestureTriggers_.push_back(stateEnterTrigger);
+            testedGestureTriggers_.push_back(stateLeaveTrigger);
+        }
+        else
+        {
+            triggers_.push_back(stateEnterTrigger);
+            triggers_.push_back(stateLeaveTrigger);
+        }
     }
 
-    void GestureTestDialog::includeGesture_(RelationGestureWrapper* relationGesture)
+    void GestureTestDialog::includeGesture_(RelationGestureWrapper* relationGesture, bool tested)
     {
         RelationGestureWrapper::RawGesture* rawGesture = relationGesture->rawGesture();
         gestures_.insert(rawGesture);
@@ -126,11 +138,21 @@ namespace Gecon
         relationEnterTrigger->addSwitch(rawGesture->relationEnterEvent());
         relationLeaveTrigger->addSwitch(rawGesture->relationLeaveEvent());
 
-        triggers_.push_back(relationEnterTrigger);
-        triggers_.push_back(relationLeaveTrigger);
+        if(tested)
+        {
+            testedGesture_ = relationGesture;
+
+            testedGestureTriggers_.push_back(relationEnterTrigger);
+            testedGestureTriggers_.push_back(relationLeaveTrigger);
+        }
+        else
+        {
+            triggers_.push_back(relationEnterTrigger);
+            triggers_.push_back(relationLeaveTrigger);
+        }
     }
 
-    void GestureTestDialog::includeGesture_(MotionGestureWrapper* motionGesture)
+    void GestureTestDialog::includeGesture_(MotionGestureWrapper* motionGesture, bool tested)
     {
         MotionGestureWrapper::RawGesture* rawGesture = motionGesture->rawGesture();
         gestures_.insert(rawGesture);
@@ -138,29 +160,53 @@ namespace Gecon
         Event::Trigger* motionDoneTrigger = new Event::Trigger([=](){ emit eventOccured(motionGesture, "Motion done"); });
         motionDoneTrigger->addSwitch(rawGesture->motionDoneEvent());
 
-        triggers_.push_back(motionDoneTrigger);
+        if(tested)
+        {
+            testedGesture_ = motionGesture;
+
+            testedGestureTriggers_.push_back(motionDoneTrigger);
+        }
+        else
+        {
+            triggers_.push_back(motionDoneTrigger);
+        }
     }
 
-    void GestureTestDialog::includeAllGesture_()
+    void GestureTestDialog::includeAllGestures_(bool checked)
     {
-        for(StateGestureWrapper* stateGesture : gestureModel_->stateGestures())
+        if(checked)
         {
-            includeGesture_(stateGesture);
+            for(StateGestureWrapper* stateGesture : gestureModel_->stateGestures())
+            {
+                includeGesture_(stateGesture, false);
+            }
+
+            for(RelationGestureWrapper* relationGesture : gestureModel_->relationGestures())
+            {
+                includeGesture_(relationGesture, false);
+            }
+
+            for(MotionGestureWrapper* motionGesture : gestureModel_->motionGestures())
+            {
+                includeGesture_(motionGesture, false);
+            }
+        }
+        else
+        {
+            gestures_.clear();
+            for(Event::Trigger* trigger : triggers_)
+            {
+                delete trigger;
+            }
+            triggers_.clear();
+
+            if(testedGesture_)
+            {
+                gestures_.insert(testedGesture_->rawGesture());
+            }
         }
 
-        for(RelationGestureWrapper* relationGesture : gestureModel_->relationGestures())
-        {
-            includeGesture_(relationGesture);
-        }
-
-        for(MotionGestureWrapper* motionGesture : gestureModel_->motionGestures())
-        {
-            includeGesture_(motionGesture);
-        }
-
-        ui_->includeCheckBox->setChecked(true);
-
-        control_.prepareGestures(gestures_);
+        restartCapture_();
     }
 
     void GestureTestDialog::startCapture_()
@@ -171,6 +217,13 @@ namespace Gecon
         control_.prepareObjects(objectModel_->rawObjects());
         control_.prepareGestures(gestures_);
         control_.start();
+    }
+
+    void GestureTestDialog::restartCapture_()
+    {
+        control_.prepareObjects(objectModel_->rawObjects());
+        control_.prepareGestures(gestures_);
+        QtConcurrent::run(&control_, &ControlInfo::Control::restart);
     }
 
     void GestureTestDialog::stopCapture_()
@@ -239,18 +292,27 @@ namespace Gecon
 
     void GestureTestDialog::reset_()
     {
-        gestures_.clear();
-        objectsStatesModel_->clear();
+        ui_->includeCheckBox->setEnabled(true);
+        ui_->includeCheckBox->setChecked(false);
 
+        testedGesture_ = 0;
+        for(Event::Trigger* trigger : testedGestureTriggers_)
+        {
+            delete trigger;
+        }
+        testedGestureTriggers_.clear();
+
+        gestures_.clear();
         for(Event::Trigger* trigger : triggers_)
         {
             delete trigger;
         }
         triggers_.clear();
 
+        objectsStatesModel_->clear();
+
         ui_->display->reset();
         ui_->eventLog->clear();
-        ui_->includeCheckBox->setChecked(false);
     }
 
     void GestureTestDialog::reject()
@@ -268,6 +330,16 @@ namespace Gecon
     void GestureTestDialog::setDevice(GestureTestDialog::DeviceAdapter device)
     {
         control_.setDevice(device);
+    }
+
+    void GestureTestDialog::testAll()
+    {
+        ui_->includeCheckBox->setChecked(true);
+        ui_->includeCheckBox->setEnabled(false);
+
+        startCapture_();
+
+        QDialog::exec();
     }
 
     void GestureTestDialog::closeEvent(QCloseEvent *)

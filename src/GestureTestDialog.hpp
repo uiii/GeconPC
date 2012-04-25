@@ -63,18 +63,21 @@ namespace Gecon
     public slots:
         void setDevice(DeviceAdapter device);
 
+        void testAll();
+
         int exec();
 
     private slots:
         void logEvent_(GestureWrapper* gesture, const QString& eventDescription);
 
-        void includeGesture_(StateGestureWrapper* stateGesture);
-        void includeGesture_(RelationGestureWrapper* relationGesture);
-        void includeGesture_(MotionGestureWrapper* motionGesture);
+        void includeGesture_(StateGestureWrapper* stateGesture, bool tested);
+        void includeGesture_(RelationGestureWrapper* relationGesture, bool tested);
+        void includeGesture_(MotionGestureWrapper* motionGesture, bool tested);
 
-        void includeAllGesture_();
+        void includeAllGestures_(bool checked);
 
         void startCapture_();
+        void restartCapture_();
         void stopCapture_();
 
         void displayImage_(Image original, Image segmented, ObjectSet objects);
@@ -100,6 +103,9 @@ namespace Gecon
         GestureModel* gestureModel_;
         ObjectModel* objectModel_;
 
+        GestureWrapper* testedGesture_;
+        std::list<Event::Trigger*> testedGestureTriggers_;
+
         QStandardItemModel* objectsStatesModel_;
 
         std::list<Event::Trigger*> triggers_;
@@ -110,7 +116,7 @@ namespace Gecon
     template< typename GestureWrapperType >
     void GestureTestDialog::test(GestureWrapperType* gesture)
     {
-        includeGesture_(gesture);
+        includeGesture_(gesture, true);
 
         startCapture_();
 

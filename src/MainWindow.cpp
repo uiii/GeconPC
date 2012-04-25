@@ -62,11 +62,15 @@ namespace Gecon
         initNewGestureMenu();
 
         connect(ui_->newObjectButton, SIGNAL(clicked()), objectDialog_, SLOT(newObject()));
+        connect(ui_->newEventTriggerButton, SIGNAL(clicked()), eventTriggerDialog_, SLOT(newTrigger()));
+
         connect(ui_->actionSettings, SIGNAL(triggered()), settingsDialog_, SLOT(exec()));
+        connect(ui_->actionTest, SIGNAL(triggered()), gestureTestDialog_, SLOT(testAll()));
+
         connect(settingsDialog_, SIGNAL(finished(int)), this, SLOT(updateDialogs()));
+
         connect(ui_->gestureView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editGesture(QModelIndex)));
         connect(ui_->eventTriggerView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editEventTrigger(QModelIndex)));
-        connect(ui_->newEventTriggerButton, SIGNAL(clicked()), eventTriggerDialog_, SLOT(newTrigger()));
     }
 
     MainWindow::~MainWindow()
