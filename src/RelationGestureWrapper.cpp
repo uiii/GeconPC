@@ -39,8 +39,8 @@ namespace Gecon
 
         events_.push_back(new EventWrapper("relation enter", rawGesture_->relationEnterEvent(), this));
         events_.push_back(new EventWrapper("relation leave", rawGesture_->relationLeaveEvent(), this));
-        //events_.push_back(new EventWrapper("in relation", rawGesture_->inRelationEvent(), this));
-        //events_.push_back(new EventWrapper("not in relation", rawGesture_->notInRelationEvent(), this));
+        events_.push_back(new EventWrapper("in relation", rawGesture_->inRelationEvent(), this));
+        events_.push_back(new EventWrapper("not in relation", rawGesture_->notInRelationEvent(), this));
     }
 
     RelationGestureWrapper::RelationGestureWrapper(const RelationGestureWrapper& another):
