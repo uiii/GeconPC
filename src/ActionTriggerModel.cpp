@@ -17,35 +17,35 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "EventTriggerModel.hpp"
+#include "ActionTriggerModel.hpp"
 
 namespace Gecon
 {
-    EventTriggerModel::EventTriggerModel()
+    ActionTriggerModel::ActionTriggerModel()
     {
     }
 
-    EventTriggerModel::~EventTriggerModel()
+    ActionTriggerModel::~ActionTriggerModel()
     {
-        for(EventTriggerWrapper* trigger : triggers_)
+        for(ActionTriggerWrapper* trigger : triggers_)
         {
             delete trigger;
         }
     }
 
-    int EventTriggerModel::rowCount(const QModelIndex &parent) const
+    int ActionTriggerModel::rowCount(const QModelIndex &parent) const
     {
         return size();
     }
 
-    QVariant EventTriggerModel::data(const QModelIndex &index, int role) const
+    QVariant ActionTriggerModel::data(const QModelIndex &index, int role) const
     {
         if(! index.isValid() || index.row() >= size())
         {
             return QVariant();
         }
 
-        EventTriggerWrapper* trigger = triggers_.at(index.row());
+        ActionTriggerWrapper* trigger = triggers_.at(index.row());
 
         if(role == Qt::DisplayRole)
         {
@@ -61,28 +61,28 @@ namespace Gecon
         }
     }
 
-    QModelIndex EventTriggerModel::index(EventTriggerWrapper* trigger) const
+    QModelIndex ActionTriggerModel::index(ActionTriggerWrapper* trigger) const
     {
         return createIndex(triggers_.indexOf(trigger), 0);
     }
 
-    int EventTriggerModel::size() const
+    int ActionTriggerModel::size() const
     {
         return triggers_.size();
     }
 
-    void EventTriggerModel::addTrigger(const QString &name, const EventTriggerWrapper::Events &onEvents, const EventTriggerWrapper::Events &offEvents, ActionSettings *action)
+    void ActionTriggerModel::addTrigger(const QString &name, const ActionTriggerWrapper::Events &onEvents, const ActionTriggerWrapper::Events &offEvents, ActionSettings *action)
     {
         QString triggerName = name.isEmpty()
-                ? "EventTrigger " + QString::number(triggers_.size() + 1)
+                ? "ActionTrigger " + QString::number(triggers_.size() + 1)
                 : name;
 
-        EventTriggerWrapper* trigger = new EventTriggerWrapper(triggerName, onEvents, offEvents, action);
+        ActionTriggerWrapper* trigger = new ActionTriggerWrapper(triggerName, onEvents, offEvents, action);
 
         rawTriggers_.push_back(trigger->rawTrigger());
 
-        EventTriggerWrapperList::iterator it = std::find_if(triggers_.begin(), triggers_.end(),
-            [&](EventTriggerWrapper* item){ return QString::localeAwareCompare(trigger->name(), item->name()) < 0; }
+        ActionTriggerWrappers::iterator it = std::find_if(triggers_.begin(), triggers_.end(),
+            [&](ActionTriggerWrapper* item){ return QString::localeAwareCompare(trigger->name(), item->name()) < 0; }
         );
 
         beginInsertRows(QModelIndex(), it - triggers_.begin(), it - triggers_.begin());
@@ -92,7 +92,7 @@ namespace Gecon
         endInsertRows();
     }
 
-    void EventTriggerModel::removeTrigger(const QModelIndex &index)
+    void ActionTriggerModel::removeTrigger(const QModelIndex &index)
     {
         if(! index.isValid() || index.row() >= size())
         {
@@ -109,12 +109,12 @@ namespace Gecon
         endRemoveRows();
     }
 
-    const EventTriggerModel::EventTriggerWrapperList& EventTriggerModel::triggers() const
+    const ActionTriggerModel::ActionTriggerWrappers& ActionTriggerModel::triggers() const
     {
         return triggers_;
     }
 
-    const EventTriggerModel::RawEventTriggerList& EventTriggerModel::rawTriggers() const
+    const ActionTriggerModel::RawActionTriggers& ActionTriggerModel::rawTriggers() const
     {
         return rawTriggers_;
     }

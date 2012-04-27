@@ -24,21 +24,22 @@
 #include <QString>
 #include <QMetaType>
 
-#include <Gecon/Event.hpp>
+#include "ControlInfo.hpp"
 
 namespace Gecon
 {
     class EventWrapper;
     class ActionSettings;
 
-    class EventTriggerWrapper
+    class ActionTriggerWrapper
     {
     public:
         typedef QList<EventWrapper*> Events;
+        typedef ControlInfo::ActionPolicy::ActionTrigger RawActionTrigger;
 
-        EventTriggerWrapper(const QString& name, const Events& onEvents, const Events& offEvents, ActionSettings* action);
-        EventTriggerWrapper(const EventTriggerWrapper& another);
-        virtual ~EventTriggerWrapper();
+        ActionTriggerWrapper(const QString& name, const Events& onEvents, const Events& offEvents, ActionSettings* action);
+        ActionTriggerWrapper(const ActionTriggerWrapper& another);
+        virtual ~ActionTriggerWrapper();
 
         const QString& name() const;
 
@@ -47,7 +48,7 @@ namespace Gecon
 
         ActionSettings* action() const;
 
-        Event::Trigger* rawTrigger() const;
+        RawActionTrigger* rawTrigger() const;
 
     private:
         QString name_;
@@ -57,10 +58,10 @@ namespace Gecon
 
         ActionSettings* action_;
 
-        Event::Trigger* rawTrigger_;
+        RawActionTrigger* rawTrigger_;
     };
 } // namespace Gecon
 
-Q_DECLARE_METATYPE(Gecon::EventTriggerWrapper*)
+Q_DECLARE_METATYPE(Gecon::ActionTriggerWrapper*)
 
 #endif // GECON_EVENTTRIGGERWRAPPER_HPP

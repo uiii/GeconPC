@@ -20,13 +20,12 @@
 #ifndef GECON_ACTIONSETTINGS_HPP
 #define GECON_ACTIONSETTINGS_HPP
 
-#include <Gecon/Event.hpp>
-
 #include <QString>
 #include <QComboBox>
 
 #include "ObjectModel.hpp"
 #include "EventWrapper.hpp"
+#include "ActionTriggerWrapper.hpp"
 
 namespace Gecon
 {
@@ -34,6 +33,7 @@ namespace Gecon
     {
     public:
         typedef QList<EventWrapper*> Events;
+
         ActionSettings(const QString& name, QWidget* widget);
         virtual ~ActionSettings();
 
@@ -44,12 +44,12 @@ namespace Gecon
         virtual void save() = 0;
         virtual void reset() = 0;
 
-        virtual Event::Trigger* toTrigger(const Events& onEvents, const Events& offEvent) const = 0;
+        virtual ActionTriggerWrapper::RawActionTrigger* toTrigger(const Events& onEvents, const Events& offEvent) const = 0;
 
         virtual ActionSettings* clone() const = 0;
 
     protected:
-        virtual void addSwitches_(Event::Trigger* trigger, const Events& onEvents, const Events& offEvents) const;
+        virtual void addSwitches_(ActionTriggerWrapper::RawActionTrigger* trigger, const Events& onEvents, const Events& offEvents) const;
 
     private:
         QString name_;
@@ -72,7 +72,7 @@ namespace Gecon
         void save();
         void reset();
 
-        Event::Trigger* toTrigger(const Events& onEvents, const Events& offEvents) const;
+        ActionTriggerWrapper::RawActionTrigger* toTrigger(const Events& onEvents, const Events& offEvents) const;
 
         ActionSettings* clone() const;
 
@@ -99,7 +99,7 @@ namespace Gecon
         void save();
         void reset();
 
-        Event::Trigger* toTrigger(const Events& onEvents, const Events& offEvents) const;
+        ActionTriggerWrapper::RawActionTrigger* toTrigger(const Events& onEvents, const Events& offEvents) const;
 
         ActionSettings* clone() const;
 

@@ -29,27 +29,27 @@ namespace Gecon
 {
     namespace Ui
     {
-        class EventTriggerDialog;
+        class ActionTriggerDialog;
     }
 
-    class EventTriggerModel;
-    class EventTriggerWrapper;
+    class ActionTriggerModel;
+    class ActionTriggerWrapper;
     class GestureModel;
     class ObjectModel;
     class GestureEventDialog;
     class ActionSettings;
 
-    class EventTriggerDialog : public QDialog
+    class ActionTriggerDialog : public QDialog
     {
         Q_OBJECT
 
     public:
-        explicit EventTriggerDialog(EventTriggerModel* eventTriggerModel_, GestureModel* gestureModel, ObjectModel *objectModel, QWidget *parent);
-        ~EventTriggerDialog();
+        explicit ActionTriggerDialog(ActionTriggerModel* eventTriggerModel_, GestureModel* gestureModel, ObjectModel *objectModel, QWidget *parent);
+        ~ActionTriggerDialog();
 
     public slots:
         int newTrigger();
-        int editTrigger(Gecon::EventTriggerWrapper *trigger);
+        int editTrigger(Gecon::ActionTriggerWrapper *trigger);
 
         int exec();
 
@@ -68,7 +68,7 @@ namespace Gecon
         void reset_();
 
     private:
-        EventTriggerModel* eventTriggerModel_;
+        ActionTriggerModel* eventTriggerModel_;
         GestureModel* gestureModel_;
         ObjectModel* objectModel_;
 
@@ -78,12 +78,12 @@ namespace Gecon
         QList<EventWrapper*> offEvents_;
         QStandardItemModel* switchModel_;
 
-        EventTriggerWrapper* editedTrigger_;
+        ActionTriggerWrapper* editedTrigger_;
 
         QList<ActionSettings*> actions_;
         ActionSettings* currentAction_;
 
-        Ui::EventTriggerDialog* ui_;
+        Ui::ActionTriggerDialog* ui_;
     };
 }
 

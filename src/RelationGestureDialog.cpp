@@ -29,11 +29,11 @@
 #include "ObjectModel.hpp"
 #include "GestureModel.hpp"
 
-#include "GestureTestDialog.hpp"
+#include "TestDialog.hpp"
 
 namespace Gecon {
     
-    RelationGestureDialog::RelationGestureDialog(GestureModel* gestureModel, ObjectModel *objectModel, GestureTestDialog *testDialog, QWidget *parent) :
+    RelationGestureDialog::RelationGestureDialog(GestureModel* gestureModel, ObjectModel *objectModel, TestDialog *testDialog, QWidget *parent) :
         QDialog(parent),
         objectModel_(objectModel),
         gestureModel_(gestureModel),
@@ -205,7 +205,7 @@ namespace Gecon {
 
         connect(testDialog_, SIGNAL(finished(int)), this, SLOT(deleteTestedGesture()));
 
-        testDialog_->test(testedGesture_);
+        testDialog_->testGesture(testedGesture_);
     }
 
     void RelationGestureDialog::deleteTestedGesture()

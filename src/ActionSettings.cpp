@@ -50,13 +50,13 @@ namespace Gecon
         return widget_;
     }
 
-    void ActionSettings::addSwitches_(Event::Trigger *trigger, const ActionSettings::Events &onEvents, const ActionSettings::Events &offEvents) const
+    void ActionSettings::addSwitches_(ActionTriggerWrapper::RawActionTrigger *trigger, const ActionSettings::Events &onEvents, const ActionSettings::Events &offEvents) const
     {
         for(int i = 0; i < onEvents.size(); ++i)
         {
             qDebug("add switch");
-            Event* rawOnEvent = onEvents.at(i)->rawEvent();
-            Event* rawOffEvent = 0;
+            EventWrapper::RawEvent* rawOnEvent = onEvents.at(i)->rawEvent();
+            EventWrapper::RawEvent* rawOffEvent = 0;
             if(offEvents.at(i))
             {
                 rawOffEvent = offEvents.at(i)->rawEvent();
@@ -100,12 +100,13 @@ namespace Gecon
         widget_->object->setCurrentIndex(0);
     }
 
-    Event::Trigger *MouseMotionActionSettings::toTrigger(const Events &onEvents, const Events &offEvents) const
+    ActionTriggerWrapper::RawActionTrigger* MouseMotionActionSettings::toTrigger(const Events &onEvents, const Events &offEvents) const
     {
-        Event::Trigger* trigger = new Event::Trigger([](const ObjectWrapper::RawObject& object){
+        ActionTriggerWrapper::RawActionTrigger* trigger = new ActionTriggerWrapper::RawActionTrigger([=](){
             qDebug("mouse move");
-            FakeInput::Mouse::moveTo(object.position().x, object.position().y);
-        }, object_->rawObject());
+            ObjectWrapper::RawObject* object = object_->rawObject();
+            FakeInput::Mouse::moveTo(object->position().x, object->position().y);
+        });
 
         addSwitches_(trigger, onEvents, offEvents);
 
@@ -150,10 +151,10 @@ namespace Gecon
         widget_->button->setCurrentIndex(0);
     }
 
-    Event::Trigger *MouseButtonActionSettings::toTrigger(const ActionSettings::Events &onEvents, const ActionSettings::Events &offEvents) const
+    ActionTriggerWrapper::RawActionTrigger *MouseButtonActionSettings::toTrigger(const ActionSettings::Events &onEvents, const ActionSettings::Events &offEvents) const
     {
         FakeInput::MouseButton button = widget_->button->itemData(buttonIndex_).value<FakeInput::MouseButton>();
-        Event::Trigger* trigger = new Event::Trigger([=](){
+        ActionTriggerWrapper::RawActionTrigger* trigger = new ActionTriggerWrapper::RawActionTrigger([=](){
                 qDebug("click");
                 FakeInput::ActionSequence().press(button).release(button).send();
         });

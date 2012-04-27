@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Gecon::GestureTestDialog</class>
- <widget class="QDialog" name="Gecon::GestureTestDialog">
+ <class>Gecon::TestDialog</class>
+ <widget class="QDialog" name="Gecon::TestDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -282,7 +282,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QTextEdit" name="eventLog">
+    <widget class="QTextEdit" name="log">
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -313,9 +313,16 @@ p, li { white-space: pre-wrap; }
        <number>0</number>
       </property>
       <item>
-       <widget class="QCheckBox" name="includeCheckBox">
+       <widget class="QCheckBox" name="showGestureEvents">
         <property name="text">
-         <string>Include all other gestures</string>
+         <string>Show all gesture events</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="showActions">
+        <property name="text">
+         <string>Show all actions</string>
         </property>
        </widget>
       </item>
@@ -346,7 +353,7 @@ p, li { white-space: pre-wrap; }
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>Gecon::GestureTestDialog</receiver>
+   <receiver>Gecon::TestDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

@@ -23,6 +23,8 @@
 #include <QString>
 #include <QMetaType>
 
+#include "ControlInfo.hpp"
+
 namespace Gecon
 {
     class Event;
@@ -31,16 +33,18 @@ namespace Gecon
     class EventWrapper
     {
     public:
-        EventWrapper(const QString& name, Event* event, GestureWrapper* gesture);
+        typedef ControlInfo::GesturePolicy::Event RawEvent;
+
+        EventWrapper(const QString& name, RawEvent* event, GestureWrapper* gesture);
 
         const QString& name() const;
-        Event* rawEvent() const;
+        RawEvent* rawEvent() const;
 
         GestureWrapper* gesture() const;
 
     private:
         QString name_;
-        Event* event_;
+        RawEvent* event_;
 
         GestureWrapper* gesture_;
     };

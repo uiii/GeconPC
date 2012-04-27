@@ -22,39 +22,37 @@
 
 #include <QAbstractListModel>
 
-#include <Gecon/Event.hpp>
-
-#include "EventTriggerWrapper.hpp"
+#include "ActionTriggerWrapper.hpp"
 
 namespace Gecon
 {
-    class EventTriggerModel : public QAbstractListModel
+    class ActionTriggerModel : public QAbstractListModel
     {
         Q_OBJECT
 
     public:
-        typedef QList<EventTriggerWrapper*> EventTriggerWrapperList;
-        typedef QList<Event::Trigger*> RawEventTriggerList;
+        typedef QList<ActionTriggerWrapper*> ActionTriggerWrappers;
+        typedef QList<ActionTriggerWrapper::RawActionTrigger*> RawActionTriggers;
 
-        explicit EventTriggerModel();
-        virtual ~EventTriggerModel();
+        explicit ActionTriggerModel();
+        virtual ~ActionTriggerModel();
         
         int rowCount(const QModelIndex& parent) const;
         QVariant data(const QModelIndex& index, int role) const;
 
-        QModelIndex index(EventTriggerWrapper* trigger) const;
+        QModelIndex index(ActionTriggerWrapper* trigger) const;
 
         int size() const;
 
-        void addTrigger(const QString& name, const EventTriggerWrapper::Events& onEvents, const EventTriggerWrapper::Events& offEvents, ActionSettings* action);
+        void addTrigger(const QString& name, const ActionTriggerWrapper::Events& onEvents, const ActionTriggerWrapper::Events& offEvents, ActionSettings* action);
         void removeTrigger(const QModelIndex& index);
 
-        const EventTriggerWrapperList& triggers() const;
-        const RawEventTriggerList& rawTriggers() const;
+        const ActionTriggerWrappers& triggers() const;
+        const RawActionTriggers& rawTriggers() const;
 
     private:
-        EventTriggerWrapperList triggers_;
-        RawEventTriggerList rawTriggers_;
+        ActionTriggerWrappers triggers_;
+        RawActionTriggers rawTriggers_;
     };
 } // namespace Gecon
 

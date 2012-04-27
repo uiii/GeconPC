@@ -34,14 +34,14 @@ namespace Gecon
     class RelationGestureWrapper;
     class ObjectModel;
     class GestureModel;
-    class GestureTestDialog;
+    class TestDialog;
 
     class RelationGestureDialog : public QDialog
     {
         Q_OBJECT
         
     public:
-        explicit RelationGestureDialog(GestureModel* gestureModel, ObjectModel* objectModel, GestureTestDialog* testDialog, QWidget *parent = 0);
+        explicit RelationGestureDialog(GestureModel* gestureModel, ObjectModel* objectModel, TestDialog* testDialog, QWidget *parent = 0);
         ~RelationGestureDialog();
 
     public slots:
@@ -69,7 +69,7 @@ namespace Gecon
         ObjectModel* objectModel_;
         GestureModel* gestureModel_;
 
-        GestureTestDialog* testDialog_;
+        TestDialog* testDialog_;
         RelationGestureWrapper* testedGesture_;
 
         RelationGestureWrapper* editedGesture_;

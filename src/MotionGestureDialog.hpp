@@ -37,7 +37,7 @@ namespace Gecon
     class ObjectWrapper;
     class GestureModel;
     class MotionGestureWrapper;
-    class GestureTestDialog;
+    class TestDialog;
 
     class MotionGestureDialog : public QDialog
     {
@@ -49,7 +49,7 @@ namespace Gecon
         typedef ControlInfo::ObjectPolicy::Object Object;
         typedef ControlInfo::ObjectPolicy::ObjectSet ObjectSet;
 
-        explicit MotionGestureDialog(GestureModel* gestureModel, ObjectModel* objectModel, GestureTestDialog* testDialog, QWidget *parent = 0);
+        explicit MotionGestureDialog(GestureModel* gestureModel, ObjectModel* objectModel, TestDialog* testDialog, QWidget *parent = 0);
         ~MotionGestureDialog();
 
     public slots:
@@ -95,7 +95,7 @@ namespace Gecon
 
         GestureModel* gestureModel_;
 
-        GestureTestDialog* testDialog_;
+        TestDialog* testDialog_;
         MotionGestureWrapper* testedGesture_;
 
         MotionGestureWrapper* editedGesture_;

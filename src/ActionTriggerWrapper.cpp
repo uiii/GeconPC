@@ -17,14 +17,14 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "EventTriggerWrapper.hpp"
+#include "ActionTriggerWrapper.hpp"
 
 #include "EventWrapper.hpp"
 #include "ActionSettings.hpp"
 
 namespace Gecon
 {
-    EventTriggerWrapper::EventTriggerWrapper(const QString& name, const Events &onEvents, const Events &offEvents, ActionSettings *action):
+    ActionTriggerWrapper::ActionTriggerWrapper(const QString& name, const Events &onEvents, const Events &offEvents, ActionSettings *action):
         name_(name),
         onEvents_(onEvents),
         offEvents_(offEvents),
@@ -33,37 +33,37 @@ namespace Gecon
         rawTrigger_ = action_->toTrigger(onEvents_, offEvents_);
     }
 
-    EventTriggerWrapper::EventTriggerWrapper(const EventTriggerWrapper &another):
-        EventTriggerWrapper(another.name(), another.onEvents_, another.offEvents_, another.action_)
+    ActionTriggerWrapper::ActionTriggerWrapper(const ActionTriggerWrapper &another):
+        ActionTriggerWrapper(another.name(), another.onEvents_, another.offEvents_, another.action_)
     {
     }
 
-    EventTriggerWrapper::~EventTriggerWrapper()
+    ActionTriggerWrapper::~ActionTriggerWrapper()
     {
         delete rawTrigger_;
     }
 
-    const QString &EventTriggerWrapper::name() const
+    const QString &ActionTriggerWrapper::name() const
     {
         return name_;
     }
 
-    const EventTriggerWrapper::Events &EventTriggerWrapper::onEvents() const
+    const ActionTriggerWrapper::Events &ActionTriggerWrapper::onEvents() const
     {
         return onEvents_;
     }
 
-    const EventTriggerWrapper::Events &EventTriggerWrapper::offEvents() const
+    const ActionTriggerWrapper::Events &ActionTriggerWrapper::offEvents() const
     {
         return offEvents_;
     }
 
-    ActionSettings *EventTriggerWrapper::action() const
+    ActionSettings *ActionTriggerWrapper::action() const
     {
         return action_;
     }
 
-    Event::Trigger *EventTriggerWrapper::rawTrigger() const
+    ActionTriggerWrapper::RawActionTrigger *ActionTriggerWrapper::rawTrigger() const
     {
         return rawTrigger_;
     }

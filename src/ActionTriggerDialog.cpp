@@ -17,13 +17,13 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "EventTriggerDialog.hpp"
-#include "ui_EventTriggerDialog.hpp"
+#include "ActionTriggerDialog.hpp"
+#include "ui_ActionTriggerDialog.hpp"
 
 #include <QStandardItemModel>
 #include <QMessageBox>
 
-#include "EventTriggerModel.hpp"
+#include "ActionTriggerModel.hpp"
 #include "GestureModel.hpp"
 #include "ObjectModel.hpp"
 
@@ -33,7 +33,7 @@
 
 namespace Gecon
 {
-    EventTriggerDialog::EventTriggerDialog(EventTriggerModel* eventTriggerModel, GestureModel* gestureModel, ObjectModel* objectModel, QWidget *parent) :
+    ActionTriggerDialog::ActionTriggerDialog(ActionTriggerModel* eventTriggerModel, GestureModel* gestureModel, ObjectModel* objectModel, QWidget *parent) :
         QDialog(parent),
         eventTriggerModel_(eventTriggerModel),
         gestureModel_(gestureModel),
@@ -42,7 +42,7 @@ namespace Gecon
         switchModel_(new QStandardItemModel(this)),
         editedTrigger_(0),
         currentAction_(0),
-        ui_(new Ui::EventTriggerDialog)
+        ui_(new Ui::ActionTriggerDialog)
     {
         ui_->setupUi(this);
 
@@ -70,12 +70,12 @@ namespace Gecon
         connect(ui_->deleteButton, SIGNAL(clicked()), this, SLOT(deleteTrigger_()));
     }
 
-    EventTriggerDialog::~EventTriggerDialog()
+    ActionTriggerDialog::~ActionTriggerDialog()
     {
         delete ui_;
     }
 
-    int EventTriggerDialog::newTrigger()
+    int ActionTriggerDialog::newTrigger()
     {
         if(! gestureModel_->size())
         {
@@ -92,7 +92,7 @@ namespace Gecon
         return QDialog::exec();
     }
 
-    int EventTriggerDialog::editTrigger(EventTriggerWrapper* trigger)
+    int ActionTriggerDialog::editTrigger(ActionTriggerWrapper* trigger)
     {
         reset_();
 
@@ -124,12 +124,12 @@ namespace Gecon
         return QDialog::exec();
     }
 
-    int EventTriggerDialog::exec()
+    int ActionTriggerDialog::exec()
     {
         return QDialog::Rejected;
     }
 
-    void EventTriggerDialog::addTrigger_()
+    void ActionTriggerDialog::addTrigger_()
     {
         currentAction_->save();
 
@@ -151,9 +151,9 @@ namespace Gecon
     }
 
 
-    void EventTriggerDialog::updateTrigger_()
+    void ActionTriggerDialog::updateTrigger_()
     {
-        EventTriggerWrapper triggerBackup(*editedTrigger_);
+        ActionTriggerWrapper triggerBackup(*editedTrigger_);
 
         currentAction_->save();
 
@@ -178,7 +178,7 @@ namespace Gecon
         }
     }
 
-    void EventTriggerDialog::deleteTrigger_()
+    void ActionTriggerDialog::deleteTrigger_()
     {
         QMessageBox::StandardButton button = QMessageBox::question(this, tr("Delete question"),
             tr("Do you really want to delete event trigger '%1'").arg(editedTrigger_->name()), QMessageBox::Ok | QMessageBox::Cancel);
@@ -192,7 +192,7 @@ namespace Gecon
         }
     }
 
-    void EventTriggerDialog::addSwitch_()
+    void ActionTriggerDialog::addSwitch_()
     {
         if(eventDialog_->exec() == QDialog::Accepted)
         {
@@ -203,7 +203,7 @@ namespace Gecon
         }
     }
 
-    void EventTriggerDialog::removeSwitch_()
+    void ActionTriggerDialog::removeSwitch_()
     {
         QModelIndexList indexes = ui_->switchList->selectionModel()->selectedIndexes();
         if(indexes.size() > 0)
@@ -214,7 +214,7 @@ namespace Gecon
         }
     }
 
-    void EventTriggerDialog::appendSwitch_(EventWrapper *onEvent, EventWrapper *offEvent)
+    void ActionTriggerDialog::appendSwitch_(EventWrapper *onEvent, EventWrapper *offEvent)
     {
         onEvents_.push_back(onEvent);
         offEvents_.push_back(offEvent);
@@ -236,7 +236,7 @@ namespace Gecon
         ui_->switchList->resizeRowsToContents();
     }
 
-    void EventTriggerDialog::setActionSettings_(int index)
+    void ActionTriggerDialog::setActionSettings_(int index)
     {
         currentAction_->widget()->setVisible(false);
 
@@ -244,7 +244,7 @@ namespace Gecon
         currentAction_->widget()->setVisible(true);
     }
 
-    void EventTriggerDialog::reset_()
+    void ActionTriggerDialog::reset_()
     {
         onEvents_.clear();
         offEvents_.clear();

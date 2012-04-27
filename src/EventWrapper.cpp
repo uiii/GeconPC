@@ -19,13 +19,11 @@
 
 #include "EventWrapper.hpp"
 
-#include <Gecon/Event.hpp>
-
 #include "GestureWrapper.hpp"
 
 namespace Gecon
 {
-    EventWrapper::EventWrapper(const QString &name, Event *event, GestureWrapper *gesture):
+    EventWrapper::EventWrapper(const QString &name, EventWrapper::RawEvent *event, GestureWrapper *gesture):
         name_(name),
         event_(event),
         gesture_(gesture)
@@ -37,7 +35,7 @@ namespace Gecon
         return name_;
     }
 
-    Event* EventWrapper::rawEvent() const
+    EventWrapper::RawEvent* EventWrapper::rawEvent() const
     {
         return event_;
     }

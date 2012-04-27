@@ -27,11 +27,13 @@ namespace Gecon
     {
     }
 
-    void MotionRecorder::check()
+    MotionRecorder::Events MotionRecorder::check()
     {
-        ObjectMotionGesture<Object>::check();
+        Events events = ObjectMotionGesture<Object>::check();
 
         signaler_->emitMotionUpdated(recordedMotion_);
+
+        return events;
     }
 
     const std::shared_ptr<MotionRecorderSignaler>& MotionRecorder::signaler() const
@@ -39,7 +41,7 @@ namespace Gecon
         return signaler_;
     }
 
-    void MotionRecorder::checkMotion_(const Motion& motion)
+    bool MotionRecorder::checkMotion_(const Motion& motion)
     {
         std::cout << "emit motion" << std::endl;
 
@@ -47,6 +49,8 @@ namespace Gecon
         motionToMoves_(motion, moves);
 
         signaler_->emitMotionRecorded(motion, moves);
+
+        return true;
     }
 
     void MotionRecorderSignaler::emitMotionUpdated(const MotionRecorder::Motion& motion)

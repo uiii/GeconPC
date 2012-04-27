@@ -29,11 +29,11 @@
 #include "GestureModel.hpp"
 #include "MotionGestureWrapper.hpp"
 
-#include "GestureTestDialog.hpp"
+#include "TestDialog.hpp"
 
 namespace Gecon
 {
-    MotionGestureDialog::MotionGestureDialog(GestureModel* gestureModel, ObjectModel *objectModel, GestureTestDialog *testDialog, QWidget *parent) :
+    MotionGestureDialog::MotionGestureDialog(GestureModel* gestureModel, ObjectModel *objectModel, TestDialog *testDialog, QWidget *parent) :
         QDialog(parent),
         objectModel_(objectModel),
         object_(0),
@@ -192,7 +192,7 @@ namespace Gecon
         QCoreApplication::processEvents();
 
         QtConcurrent::run(&control_, &ControlInfo::Control::stop);
-        control_.prepareGestures(ControlInfo::GesturePolicy::GestureSet());
+        control_.prepareGestures(ControlInfo::GesturePolicy::Gestures());
 
         readyLabel_->hide();
         readyButton_->hide();
@@ -214,7 +214,7 @@ namespace Gecon
         connect(motionRecorder_->signaler().get(), SIGNAL(motionRecorded(const MotionRecorder::Motion&, const MotionRecorder::MoveSequence&)),
                 this, SLOT(motionRecorded(const MotionRecorder::Motion&, const MotionRecorder::MoveSequence&)), Qt::BlockingQueuedConnection);
 
-        ControlInfo::GesturePolicy::GestureSet gestures;
+        ControlInfo::GesturePolicy::Gestures gestures;
         gestures.insert(motionRecorder_);
         control_.prepareGestures(gestures);
 
@@ -320,6 +320,11 @@ namespace Gecon
 
     void MotionGestureDialog::selectObject(int index)
     {
+        if(index == -1)
+        {
+            return;
+        }
+
         object_ = ui_->object->itemData(ui_->object->currentIndex()).value<ObjectWrapper*>();
 
         ObjectSet objects;
@@ -342,7 +347,7 @@ namespace Gecon
 
         connect(testDialog_, SIGNAL(finished(int)), this, SLOT(deleteTestedGesture()));
 
-        testDialog_->test(testedGesture_);
+        testDialog_->testGesture(testedGesture_);
     }
 
     void MotionGestureDialog::deleteTestedGesture()

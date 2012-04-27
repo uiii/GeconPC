@@ -24,6 +24,7 @@
 #include <Gecon/Image.hpp>
 #include <Gecon/V4L2VideoDevicePolicy.hpp>
 #include <Gecon/GesturePolicy.hpp>
+#include <Gecon/ActionPolicy.hpp>
 
 #include "ObjectPolicy.hpp"
 
@@ -34,8 +35,9 @@ namespace Gecon
         typedef Gecon::V4L2VideoDevicePolicy<Gecon::Image<Gecon::RGB> > DevicePolicy;
         typedef Gecon::ObjectPolicy ObjectPolicy;
         typedef Gecon::GesturePolicy<ObjectPolicy::Object> GesturePolicy;
+        typedef Gecon::ActionPolicy<GesturePolicy::Event> ActionPolicy;
 
-        typedef Gecon::Control<DevicePolicy, ObjectPolicy, GesturePolicy> Control;
+        typedef Gecon::Control<DevicePolicy, ObjectPolicy, GesturePolicy, ActionPolicy> Control;
     };
 }
 

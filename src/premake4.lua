@@ -36,12 +36,12 @@ project "GeconPC"
         "PropertyRelationSettings.*",
         "ObjectRelationSettings.*",
         "PropertyValueSettings.*",
-        "GestureTestDialog.*",
-        "EventTriggerDialog.*",
+        "TestDialog.*",
+        "ActionTriggerDialog.*",
         "GestureEventDialog.*",
         "EventWrapper.*",
         "ActionSettings.*",
-        "EventTriggerModel.*",
-        "EventTriggerWrapper.*",
+        "ActionTriggerModel.*",
+        "ActionTriggerWrapper.*",
         "DebugDialog.*"
     }

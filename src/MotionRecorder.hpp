@@ -39,12 +39,12 @@ namespace Gecon
 
         MotionRecorder(Object* object = 0); // TODO!!!
 
-        void check();
+        Events check();
 
         const std::shared_ptr<MotionRecorderSignaler>& signaler() const;
 
     protected:
-        void checkMotion_(const Motion& motion);
+        bool checkMotion_(const Motion& motion);
 
     private:
         std::shared_ptr<MotionRecorderSignaler> signaler_;

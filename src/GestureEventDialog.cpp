@@ -73,6 +73,11 @@ namespace Gecon
 
     void GestureEventDialog::changeOnEvent_(int index)
     {
+        if(index == -1)
+        {
+            return;
+        }
+
         GestureWrapper* gesture = ui_->onEventGesture->itemData(index).value<GestureWrapper*>();
 
         ui_->onEvent->clear();
@@ -84,6 +89,11 @@ namespace Gecon
 
     void GestureEventDialog::changeOffEvent_(int index)
     {
+        if(index == -1)
+        {
+            return;
+        }
+
         GestureWrapper* gesture = ui_->offEventGesture->itemData(index).value<GestureWrapper*>();
 
         ui_->offEvent->clear();

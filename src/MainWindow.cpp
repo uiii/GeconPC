@@ -27,8 +27,8 @@
 #include "StateGestureDialog.hpp"
 #include "RelationGestureDialog.hpp"
 #include "MotionGestureDialog.hpp"
-#include "GestureTestDialog.hpp"
-#include "EventTriggerDialog.hpp"
+#include "TestDialog.hpp"
+#include "ActionTriggerDialog.hpp"
 #include "DebugDialog.hpp"
 
 namespace Gecon
@@ -37,11 +37,11 @@ namespace Gecon
         QMainWindow(parent),
         settingsDialog_(new SettingsDialog(&control_, this)),
         objectDialog_(new ObjectDialog(&objectModel_, this)),
-        gestureTestDialog_(new GestureTestDialog(&gestureModel_, &objectModel_, this)),
+        gestureTestDialog_(new TestDialog(&objectModel_, &gestureModel_, &actionTriggerModel_, this)),
         stateGestureDialog_(new StateGestureDialog(&gestureModel_, &objectModel_, gestureTestDialog_, this)),
         relationGestureDialog_(new RelationGestureDialog(&gestureModel_, &objectModel_, gestureTestDialog_, this)),
         motionGestureDialog_(new MotionGestureDialog(&gestureModel_, &objectModel_, gestureTestDialog_, this)),
-        eventTriggerDialog_(new EventTriggerDialog(&eventTriggerModel_, &gestureModel_, &objectModel_, this)),
+        eventTriggerDialog_(new ActionTriggerDialog(&actionTriggerModel_, &gestureModel_, &objectModel_, this)),
         ui_(new Ui::MainWindow)
     {
         DebugDialog* debug = new DebugDialog(this); // TODO
@@ -55,14 +55,14 @@ namespace Gecon
 
         ui_->objectView->setModel(&objectModel_);
         ui_->gestureView->setModel(&gestureModel_);
-        ui_->eventTriggerView->setModel(&eventTriggerModel_);
+        ui_->eventTriggerView->setModel(&actionTriggerModel_);
 
         updateDialogs();
 
         initNewGestureMenu();
 
         connect(ui_->newObjectButton, SIGNAL(clicked()), objectDialog_, SLOT(newObject()));
-        connect(ui_->newEventTriggerButton, SIGNAL(clicked()), eventTriggerDialog_, SLOT(newTrigger()));
+        connect(ui_->newActionTriggerButton, SIGNAL(clicked()), eventTriggerDialog_, SLOT(newTrigger()));
 
         connect(ui_->actionSettings, SIGNAL(triggered()), settingsDialog_, SLOT(exec()));
         connect(ui_->actionTest, SIGNAL(triggered()), gestureTestDialog_, SLOT(testAll()));
@@ -70,7 +70,7 @@ namespace Gecon
         connect(settingsDialog_, SIGNAL(finished(int)), this, SLOT(updateDialogs()));
 
         connect(ui_->gestureView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editGesture(QModelIndex)));
-        connect(ui_->eventTriggerView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editEventTrigger(QModelIndex)));
+        connect(ui_->eventTriggerView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editActionTrigger(QModelIndex)));
     }
 
     MainWindow::~MainWindow()
@@ -84,9 +84,9 @@ namespace Gecon
         gesture->edit();
     }
 
-    void MainWindow::editEventTrigger(const QModelIndex &index)
+    void MainWindow::editActionTrigger(const QModelIndex &index)
     {
-        EventTriggerWrapper* trigger = eventTriggerModel_.data(index, Qt::UserRole).value<EventTriggerWrapper*>();
+        ActionTriggerWrapper* trigger = actionTriggerModel_.data(index, Qt::UserRole).value<ActionTriggerWrapper*>();
         eventTriggerDialog_->editTrigger(trigger);
     }
 

@@ -17,8 +17,8 @@
  * along with Gecon PC. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GECON_GESTURETESTDIALOG_HPP
-#define GECON_GESTURETESTDIALOG_HPP
+#ifndef GECON_TESTDIALOG_HPP
+#define GECON_TESTDIALOG_HPP
 
 #include <QDialog>
 
@@ -26,25 +26,25 @@
 
 #include "ControlInfo.hpp"
 
-#include <Gecon/Event.hpp>
-
 namespace Gecon
 {
     namespace Ui
     {
-        class GestureTestDialog;
+        class TestDialog;
     }
 
     class GestureModel;
     class ObjectModel;
+    class ActionTriggerModel;
+
     class ObjectWrapper;
     class GestureWrapper;
     class StateGestureWrapper;
     class RelationGestureWrapper;
     class MotionGestureWrapper;
-    class Trigger;
+    class ActionTriggerWrapper;
 
-    class GestureTestDialog : public QDialog
+    class TestDialog : public QDialog
     {
         Q_OBJECT
         
@@ -53,12 +53,17 @@ namespace Gecon
         typedef Gecon::Image<RGB> Image;
         typedef ControlInfo::ObjectPolicy::ObjectPtr ObjectPtr;
         typedef ControlInfo::ObjectPolicy::ObjectSet ObjectSet;
+        typedef ControlInfo::GesturePolicy::Gestures Gestures;
+        typedef ControlInfo::ActionPolicy::ActionTrigger ActionTrigger;
+        typedef ControlInfo::ActionPolicy::ActionTriggers ActionTriggers;
 
-        explicit GestureTestDialog(GestureModel* gestureModel, ObjectModel* objectModel, QWidget *parent = 0);
-        ~GestureTestDialog();
+        explicit TestDialog(ObjectModel* objectModel, GestureModel* gestureModel, ActionTriggerModel* actionTriggerModel, QWidget *parent = 0);
+        ~TestDialog();
 
         template< typename GestureWrapperType >
-        void test(GestureWrapperType* gesture);
+        void testGesture(GestureWrapperType* gesture);
+
+        void testActionTrigger(ActionTriggerWrapper* trigger);
 
     public slots:
         void setDevice(DeviceAdapter device);
@@ -68,16 +73,18 @@ namespace Gecon
         int exec();
 
     private slots:
-        void logEvent_(GestureWrapper* gesture, const QString& eventDescription);
+        void logGestureEvent_(GestureWrapper* gesture, const QString& eventDescription, bool isTestedGesture);
+        void logAction_(const QString& triggerName, bool isTestedTrigger);
 
-        void includeGesture_(StateGestureWrapper* stateGesture, bool tested);
-        void includeGesture_(RelationGestureWrapper* relationGesture, bool tested);
-        void includeGesture_(MotionGestureWrapper* motionGesture, bool tested);
+        void includeGesture_(StateGestureWrapper* stateGesture, bool isTestedGesture);
+        void includeGesture_(RelationGestureWrapper* relationGesture, bool isTestedGesture);
+        void includeGesture_(MotionGestureWrapper* motionGesture, bool isTestedGesture);
+        void includeAllGestures_();
 
-        void includeAllGestures_(bool checked);
+        void includeActionTrigger_(ActionTriggerWrapper* trigger, bool isTestedTrigger);
+        void includeAllActionTriggers_();
 
         void startCapture_();
-        void restartCapture_();
         void stopCapture_();
 
         void displayImage_(Image original, Image segmented, ObjectSet objects);
@@ -90,7 +97,8 @@ namespace Gecon
         void accept();
 
     signals:
-        void eventOccured(GestureWrapper* gesture, const QString& eventDescription);
+        void gestureEventOccured(GestureWrapper* gesture, const QString& eventDescription, bool isTestedGesture);
+        void actionTriggered(const QString& triggerName, bool isTestedTrigger);
 
     protected:
         void closeEvent(QCloseEvent *);
@@ -98,29 +106,28 @@ namespace Gecon
     private:
         ControlInfo::Control control_;
 
-        ControlInfo::GesturePolicy::GestureSet gestures_;
+        ControlInfo::GesturePolicy::Gestures gestures_;
 
-        GestureModel* gestureModel_;
         ObjectModel* objectModel_;
-
-        GestureWrapper* testedGesture_;
-        std::list<Event::Trigger*> testedGestureTriggers_;
+        GestureModel* gestureModel_;
+        ActionTriggerModel* actionTriggerModel_;
 
         QStandardItemModel* objectsStatesModel_;
 
-        std::list<Event::Trigger*> triggers_;
+        ActionTriggers triggers_;
 
-        Ui::GestureTestDialog *ui_;
+        Ui::TestDialog *ui_;
     };
 
     template< typename GestureWrapperType >
-    void GestureTestDialog::test(GestureWrapperType* gesture)
+    void TestDialog::testGesture(GestureWrapperType* gesture)
     {
         includeGesture_(gesture, true);
+        includeAllGestures_();
 
         startCapture_();
 
         QDialog::exec();
     }
 } // namespace Gecon
-#endif // GECON_GESTURETESTDIALOG_HPP
+#endif // GECON_TESTDIALOG_HPP

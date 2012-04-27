@@ -36,14 +36,14 @@ namespace Gecon
     class GestureModel;
     class ObjectModel;
     class ObjectState;
-    class GestureTestDialog;
+    class TestDialog;
 
     class StateGestureDialog : public QDialog
     {
         Q_OBJECT
         
     public:
-        explicit StateGestureDialog(GestureModel* gestureModel, ObjectModel* objectModel, GestureTestDialog* testDialog, QWidget *parent);
+        explicit StateGestureDialog(GestureModel* gestureModel, ObjectModel* objectModel, TestDialog* testDialog, QWidget *parent);
         ~StateGestureDialog();
 
     public slots:
@@ -71,7 +71,7 @@ namespace Gecon
         GestureModel* gestureModel_;
         ObjectModel* objectModel_;
 
-        GestureTestDialog* testDialog_;
+        TestDialog* testDialog_;
         StateGestureWrapper* testedGesture_;
 
         StateGestureWrapper* editedGesture_;

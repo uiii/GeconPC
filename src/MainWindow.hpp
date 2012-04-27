@@ -26,7 +26,7 @@
 
 #include "ObjectModel.hpp"
 #include "GestureModel.hpp"
-#include "EventTriggerModel.hpp"
+#include "ActionTriggerModel.hpp"
 
 namespace Gecon
 {
@@ -40,8 +40,8 @@ namespace Gecon
     class StateGestureDialog;
     class RelationGestureDialog;
     class MotionGestureDialog;
-    class GestureTestDialog;
-    class EventTriggerDialog;
+    class TestDialog;
+    class ActionTriggerDialog;
 
     class MainWindow : public QMainWindow
     {
@@ -53,7 +53,7 @@ namespace Gecon
 
     public slots:
         void editGesture(const QModelIndex& index);
-        void editEventTrigger(const QModelIndex& index);
+        void editActionTrigger(const QModelIndex& index);
 
         void updateDialogs();
 
@@ -64,18 +64,18 @@ namespace Gecon
 
         ObjectModel objectModel_;
         GestureModel gestureModel_;
-        EventTriggerModel eventTriggerModel_;
+        ActionTriggerModel actionTriggerModel_;
 
         SettingsDialog* settingsDialog_;
         ObjectDialog* objectDialog_;
 
-        GestureTestDialog* gestureTestDialog_;
+        TestDialog* gestureTestDialog_;
 
         StateGestureDialog* stateGestureDialog_;
         RelationGestureDialog* relationGestureDialog_;
         MotionGestureDialog* motionGestureDialog_;
 
-        EventTriggerDialog* eventTriggerDialog_;
+        ActionTriggerDialog* eventTriggerDialog_;
 
         Ui::MainWindow *ui_;
     };

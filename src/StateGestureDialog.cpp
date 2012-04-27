@@ -28,13 +28,13 @@
 #include "GestureModel.hpp"
 #include "ObjectModel.hpp"
 
-#include "GestureTestDialog.hpp"
+#include "TestDialog.hpp"
 
 #include "ObjectStateSettings.hpp"
 
 namespace Gecon {
     
-    StateGestureDialog::StateGestureDialog(GestureModel* gestureModel, ObjectModel* objectModel, GestureTestDialog* testDialog, QWidget *parent) :
+    StateGestureDialog::StateGestureDialog(GestureModel* gestureModel, ObjectModel* objectModel, TestDialog* testDialog, QWidget *parent) :
         QDialog(parent),
         gestureModel_(gestureModel),
         objectModel_(objectModel),
@@ -185,7 +185,7 @@ namespace Gecon {
 
         connect(testDialog_, SIGNAL(finished(int)), this, SLOT(deleteTestedGesture()));
 
-        testDialog_->test(testedGesture_);
+        testDialog_->testGesture(testedGesture_);
     }
 
     void StateGestureDialog::deleteTestedGesture()
