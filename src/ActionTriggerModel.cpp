@@ -79,7 +79,7 @@ namespace Gecon
 
         ActionTriggerWrapper* trigger = new ActionTriggerWrapper(triggerName, onEvents, offEvents, action);
 
-        rawTriggers_.push_back(trigger->rawTrigger());
+        rawTriggers_.insert(trigger->rawTrigger());
 
         ActionTriggerWrappers::iterator it = std::find_if(triggers_.begin(), triggers_.end(),
             [&](ActionTriggerWrapper* item){ return QString::localeAwareCompare(trigger->name(), item->name()) < 0; }
@@ -99,12 +99,14 @@ namespace Gecon
             return;
         }
 
+        ActionTriggerWrapper* trigger = triggers_.at(index.row());
+
+        rawTriggers_.erase(trigger->rawTrigger());
+        delete trigger;
+
         beginRemoveRows(QModelIndex(), index.row(), index.row());
 
-        delete triggers_.at(index.row());
-
         triggers_.removeAt(index.row());
-        rawTriggers_.removeAt(index.row());
 
         endRemoveRows();
     }
@@ -114,7 +116,7 @@ namespace Gecon
         return triggers_;
     }
 
-    const ActionTriggerModel::RawActionTriggers& ActionTriggerModel::rawTriggers() const
+    const ControlInfo::ActionTriggers& ActionTriggerModel::rawTriggers() const
     {
         return rawTriggers_;
     }

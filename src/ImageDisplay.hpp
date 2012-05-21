@@ -36,12 +36,7 @@ namespace Gecon
 
     public:
         typedef Gecon::Image<RGB> Image;
-
-        typedef ControlInfo::ObjectPolicy::Object Object;
-        typedef ControlInfo::ObjectPolicy::ObjectPtr ObjectPtr;
-        typedef ControlInfo::ObjectPolicy::ObjectSet ObjectSet;
-
-        typedef ObjectMotionGesture<Object>::Motion Motion;
+        typedef ObjectMotionGesture<ControlInfo::Object>::Motion Motion;
 
         explicit ImageDisplay(QWidget *parent = 0);
         
@@ -51,7 +46,7 @@ namespace Gecon
 
     public slots:
         void displayImage(const QImage& image);
-        void displayImage(const Image& image, const ObjectSet& objects = ObjectSet(), const Motion& motion = Motion());
+        void displayImage(const Image& image, const ControlInfo::Objects& objects = ControlInfo::Objects(), const Motion& motion = Motion());
         void reset();
 
     protected:

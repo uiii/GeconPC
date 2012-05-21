@@ -40,4 +40,9 @@ namespace Gecon
     {
         return objects_;
     }
+
+    void GestureWrapper::setName(const QString& name)
+    {
+        name_ = name;
+    }
 } // namespace Gecon

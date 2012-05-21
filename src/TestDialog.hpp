@@ -25,6 +25,7 @@
 #include <QStandardItemModel>
 
 #include "ControlInfo.hpp"
+#include "DialogBase.hpp"
 
 namespace Gecon
 {
@@ -44,18 +45,13 @@ namespace Gecon
     class MotionGestureWrapper;
     class ActionTriggerWrapper;
 
-    class TestDialog : public QDialog
+    class TestDialog : public DialogBase
     {
         Q_OBJECT
         
     public:
-        typedef ControlInfo::DevicePolicy::DeviceAdapter DeviceAdapter;
+        typedef ControlInfo::Objects Objects;
         typedef Gecon::Image<RGB> Image;
-        typedef ControlInfo::ObjectPolicy::ObjectPtr ObjectPtr;
-        typedef ControlInfo::ObjectPolicy::ObjectSet ObjectSet;
-        typedef ControlInfo::GesturePolicy::Gestures Gestures;
-        typedef ControlInfo::ActionPolicy::ActionTrigger ActionTrigger;
-        typedef ControlInfo::ActionPolicy::ActionTriggers ActionTriggers;
 
         explicit TestDialog(ObjectModel* objectModel, GestureModel* gestureModel, ActionTriggerModel* actionTriggerModel, QWidget *parent = 0);
         ~TestDialog();
@@ -66,11 +62,14 @@ namespace Gecon
         void testActionTrigger(ActionTriggerWrapper* trigger);
 
     public slots:
-        void setDevice(DeviceAdapter device);
+        void setDevice(ControlInfo::DeviceAdapter device);
 
         void testAll();
 
         int exec();
+
+    protected slots:
+        void beforeClose_();
 
     private slots:
         void logGestureEvent_(GestureWrapper* gesture, const QString& eventDescription, bool isTestedGesture);
@@ -87,21 +86,16 @@ namespace Gecon
         void startCapture_();
         void stopCapture_();
 
-        void displayImage_(Image original, Image segmented, ObjectSet objects);
+        void displayImage_(const Image& original, const Image& segmented, const Objects& objects);
         void displayObjectsStates_();
 
-        void close_();
-        void reset_();
+        void performActions(bool perform);
 
-        void reject();
-        void accept();
+        void reset_();
 
     signals:
         void gestureEventOccured(GestureWrapper* gesture, const QString& eventDescription, bool isTestedGesture);
         void actionTriggered(const QString& triggerName, bool isTestedTrigger);
-
-    protected:
-        void closeEvent(QCloseEvent *);
 
     private:
         ControlInfo::Control control_;
@@ -114,7 +108,8 @@ namespace Gecon
 
         QStandardItemModel* objectsStatesModel_;
 
-        ActionTriggers triggers_;
+        ControlInfo::ActionTriggers logTriggers_;
+        ControlInfo::ActionTriggers actionTriggers_;
 
         Ui::TestDialog *ui_;
     };

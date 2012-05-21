@@ -34,30 +34,35 @@ namespace Gecon
     class MotionGestureWrapper : public GestureWrapper
     {
     public:
-        typedef ObjectMotionGesture<ControlInfo::ObjectPolicy::Object> RawGesture;
-        typedef RawGesture::Motion Motion;
-
         static MotionGestureDialog* dialog;
 
-        MotionGestureWrapper(const QString& name, ObjectWrapper* object, const Motion& motion);
+        MotionGestureWrapper(
+                const QString& name,
+                ObjectWrapper* object,
+                const ControlInfo::MotionGesture::Motion& motion,
+                ControlInfo::MotionGesture::MotionStorage* motionStorage
+        );
         virtual ~MotionGestureWrapper();
 
         const Events& events() const;
 
         ObjectWrapper* object();
-        const Motion& motion() const;
+        const ControlInfo::MotionGesture::Motion& motion() const;
+
+        void setObject(ObjectWrapper* object);
+        void setMotion(const ControlInfo::MotionGesture::Motion& motion);
 
         void edit();
 
-        RawGesture* rawGesture();
+        ControlInfo::MotionGesture* rawGesture();
 
     private:
         Events events_;
 
         ObjectWrapper* object_;
-        Motion motion_;
+        ControlInfo::MotionGesture::Motion motion_;
 
-        RawGesture* rawGesture_;
+        ControlInfo::MotionGesture* rawGesture_;
     };
 } // namespace Gecon
 

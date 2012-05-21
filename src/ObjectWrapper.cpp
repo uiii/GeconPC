@@ -26,12 +26,16 @@ namespace Gecon
     {
     }
 
-    ObjectWrapper::ObjectWrapper(const QString &name, RawObject::Color color):
+    ObjectWrapper::ObjectWrapper(const QString &name, const ControlInfo::Object::Color &color):
         name_(name),
-        rawObject_(new RawObject(color))
+        rawObject_(new RawObject)
     {
-        Color<RGB> rgb = color;
-        color_ = QColor(rgb.r, rgb.g, rgb.b);
+        setColor(color);
+    }
+
+    ObjectWrapper::~ObjectWrapper()
+    {
+        delete rawObject_;
     }
 
     const QString& ObjectWrapper::name() const
@@ -44,7 +48,19 @@ namespace Gecon
         return color_;
     }
 
-    ObjectWrapper::RawObjectPtr ObjectWrapper::rawObject() const
+    void ObjectWrapper::setName(const QString &name)
+    {
+        name_ = name;
+    }
+
+    void ObjectWrapper::setColor(const ControlInfo::Object::Color &color)
+    {
+        rawObject_->setColor(color);
+        Color<RGB> rgb = color;
+        color_ = QColor(rgb.r, rgb.g, rgb.b);
+    }
+
+    ObjectWrapper::RawObject* ObjectWrapper::rawObject() const
     {
         return rawObject_;
     }
@@ -61,7 +77,17 @@ namespace Gecon
 
     template<>
     const QList<ObjectPropertyWrapper<int> > ObjectProperties<int>::list ={
-        { "angle", &ObjectWrapper::RawObject::angle }
+        { "angle", &ObjectWrapper::RawObject::angle },
+    };
+
+    template<>
+    const QList<ObjectPropertyWrapper<double> > ObjectProperties<double>::list ={
+        { "aspect ratio", &ObjectWrapper::RawObject::aspectRatio }
+    };
+
+    template<>
+    const QList<ObjectPropertyWrapper<Fraction> > ObjectProperties<Fraction>::list ={
+        { "area", &ObjectWrapper::RawObject::areaSize }
     };
 
     template<>

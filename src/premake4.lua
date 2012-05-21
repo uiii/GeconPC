@@ -26,7 +26,6 @@ project "GeconPC"
         "MotionGestureWrapper.*",
         "MotionRecorder.*",
         "SettingsDialog.*",
-        "Capture.*",
         "ObjectPolicy.*",
         "ObjectModel.*",
         "ObjectWrapper.*",
@@ -43,5 +42,6 @@ project "GeconPC"
         "ActionSettings.*",
         "ActionTriggerModel.*",
         "ActionTriggerWrapper.*",
-        "DebugDialog.*"
+        "DebugDialog.*",
+        "DialogBase.*"
     }

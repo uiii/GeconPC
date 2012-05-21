@@ -90,7 +90,7 @@ namespace Gecon
         return new VisibilityStateSettings(*this);
     }
 
-    ObjectStateSettings::RawGesture* VisibilityStateSettings::toGesture(ObjectWrapper* object)
+    ControlInfo::StateGesture* VisibilityStateSettings::toGesture(ObjectWrapper* object)
     {
         bool value = widget_->visibilityOptions->itemData(visibilityOptionsIndex_).value<bool>();
 
@@ -200,7 +200,7 @@ namespace Gecon
         return new PositionStateSettings(*this);
     }
 
-    ObjectStateSettings::RawGesture* PositionStateSettings::toGesture(ObjectWrapper* object)
+    ControlInfo::StateGesture* PositionStateSettings::toGesture(ObjectWrapper* object)
     {
         RelationType relation = relations_.at(relationIndex_);
         if(relationIndex_ == 4)
@@ -235,11 +235,9 @@ namespace Gecon
 
         relation = new QComboBox(this);
         relation->addItem(tr("="));
-        relation->addItem(tr("<"));
-        relation->addItem(tr("<="));
-        relation->addItem(tr(">"));
-        relation->addItem(tr(">="));
         relation->addItem(tr("!="));
+        relation->addItem(tr("<"));
+        relation->addItem(tr(">"));
 
         angle = new QSpinBox(this);
         angle->setMaximum(179);
@@ -255,11 +253,9 @@ namespace Gecon
         widget_(dynamic_cast<AngleStateSettingsWidget*>(widget()))
     {
         relations_.push_back(std::equal_to<PropertyReturnType>());
-        relations_.push_back(std::less<PropertyReturnType>());
-        relations_.push_back(std::less_equal<PropertyReturnType>());
-        relations_.push_back(std::greater<PropertyReturnType>());
-        relations_.push_back(std::greater_equal<PropertyReturnType>());
         relations_.push_back(std::not_equal_to<PropertyReturnType>());
+        relations_.push_back(std::less<PropertyReturnType>());
+        relations_.push_back(std::greater<PropertyReturnType>());
     }
 
     void AngleStateSettings::reset()
@@ -292,6 +288,134 @@ namespace Gecon
             &ObjectWrapper::RawObject::angle,
             relations_.at(relationIndex_),
             angleValue_
+        );
+    }
+
+    AreaSizeStateSettingsWidget::AreaSizeStateSettingsWidget(QWidget *parent)
+    {
+        QHBoxLayout* layout = new QHBoxLayout(this);
+        layout->setContentsMargins(0,0,0,0);
+
+        relation = new QComboBox(this);
+        relation->addItem(tr("="));
+        relation->addItem(tr("!="));
+        relation->addItem(tr("<"));
+        relation->addItem(tr(">"));
+
+        area = new QSpinBox(this);
+        area->setMaximum(179);
+
+        layout->addWidget(relation);
+        layout->addWidget(area);
+    }
+
+    AreaSizeStateSettings::AreaSizeStateSettings(QWidget *parent):
+        PropertyStateSettings(QObject::tr("area"), new AreaSizeStateSettingsWidget(parent)),
+        relationIndex_(0),
+        areaValue_(0),
+        widget_(dynamic_cast<AreaSizeStateSettingsWidget*>(widget()))
+    {
+        relations_.push_back(std::equal_to<PropertyReturnType>());
+        relations_.push_back(std::not_equal_to<PropertyReturnType>());
+        relations_.push_back(std::less<PropertyReturnType>());
+        relations_.push_back(std::greater<PropertyReturnType>());
+    }
+
+    void AreaSizeStateSettings::reset()
+    {
+        widget_->relation->setCurrentIndex(0);
+        widget_->area->setValue(0);
+    }
+
+    void AreaSizeStateSettings::save()
+    {
+        relationIndex_ = widget_->relation->currentIndex();
+        areaValue_ = widget_->area->value();
+    }
+
+    void AreaSizeStateSettings::load()
+    {
+        widget_->relation->setCurrentIndex(relationIndex_);
+        widget_->area->setValue(areaValue_);
+    }
+
+    ObjectStateSettings *AreaSizeStateSettings::clone() const
+    {
+        return new AreaSizeStateSettings(*this);
+    }
+
+    ObjectStateSettings::RawGesture* AreaSizeStateSettings::toGesture(ObjectWrapper* object)
+    {
+        return new RawGesture(
+            object->rawObject(),
+            &ObjectWrapper::RawObject::area,
+            relations_.at(relationIndex_),
+            areaValue_
+        );
+    }
+
+    AspectRatioStateSettingsWidget::AspectRatioStateSettingsWidget(QWidget *parent)
+    {
+        QHBoxLayout* layout = new QHBoxLayout(this);
+        layout->setContentsMargins(0,0,0,0);
+
+        relation = new QComboBox(this);
+        relation->addItem(tr("="));
+        relation->addItem(tr("!="));
+        relation->addItem(tr("<"));
+        relation->addItem(tr(">"));
+
+        aspectRatio = new QDoubleSpinBox(this);
+        aspectRatio->setMaximum(1000.0);
+        aspectRatio->setDecimals(2);
+        aspectRatio->setSingleStep(0.1);
+
+        layout->addWidget(relation);
+        layout->addWidget(aspectRatio);
+    }
+
+    AspectRatioStateSettings::AspectRatioStateSettings(QWidget *parent):
+        PropertyStateSettings(QObject::tr("aspect ratio"), new AspectRatioStateSettingsWidget(parent)),
+        relationIndex_(0),
+        aspectRatioValue_(0.0),
+        widget_(dynamic_cast<AspectRatioStateSettingsWidget*>(widget()))
+    {
+        relations_.push_back(std::equal_to<PropertyReturnType>());
+        relations_.push_back(std::not_equal_to<PropertyReturnType>());
+        relations_.push_back(std::less<PropertyReturnType>());
+        relations_.push_back(std::greater<PropertyReturnType>());
+    }
+
+    void AspectRatioStateSettings::reset()
+    {
+        widget_->relation->setCurrentIndex(0);
+        widget_->aspectRatio->setValue(0.0);
+    }
+
+    void AspectRatioStateSettings::save()
+    {
+        relationIndex_ = widget_->relation->currentIndex();
+        aspectRatioValue_ = widget_->aspectRatio->value();
+    }
+
+    void AspectRatioStateSettings::load()
+    {
+        widget_->relation->setCurrentIndex(relationIndex_);
+        widget_->aspectRatio->setValue(aspectRatioValue_);
+    }
+
+    ObjectStateSettings *AspectRatioStateSettings::clone() const
+    {
+        return new AspectRatioStateSettings(*this);
+    }
+
+    ObjectStateSettings::RawGesture* AspectRatioStateSettings::toGesture(ObjectWrapper* object)
+    {
+        return new RawGesture(
+            object->rawObject(),
+            &ObjectWrapper::RawObject::aspectRatio,
+            relations_.at(relationIndex_),
+            aspectRatioValue_
         );
     }
 } // namespace Gecon

@@ -21,17 +21,22 @@
 
 namespace Gecon
 {
-    MotionRecorder::MotionRecorder(Object* object):
-        ObjectMotionGesture<Object>(object, Motion()),
+    MotionRecorder::MotionRecorder(ControlInfo::Object* object):
+        ControlInfo::MotionGesture(object, Motion(), new ControlInfo::MotionGesture::MotionStorage),
         signaler_(std::make_shared<MotionRecorderSignaler>())
     {
     }
 
+    MotionRecorder::~MotionRecorder()
+    {
+        delete motionStorage_;
+    }
+
     MotionRecorder::Events MotionRecorder::check()
     {
-        Events events = ObjectMotionGesture<Object>::check();
+        Events events = ControlInfo::MotionGesture::check();
 
-        signaler_->emitMotionUpdated(recordedMotion_);
+        signaler_->emitMotionUpdated((*motionStorage_)[object_].motion);
 
         return events;
     }
@@ -41,16 +46,12 @@ namespace Gecon
         return signaler_;
     }
 
-    bool MotionRecorder::checkMotion_(const Motion& motion)
+    void MotionRecorder::processRecord_(MotionRecord& record, const Size& motionSize)
     {
         std::cout << "emit motion" << std::endl;
 
-        MoveSequence moves;
-        motionToMoves_(motion, moves);
-
-        signaler_->emitMotionRecorded(motion, moves);
-
-        return true;
+        ControlInfo::MotionGesture::processRecord_(record, motionSize);
+        signaler_->emitMotionRecorded(record.motion, record.moves);
     }
 
     void MotionRecorderSignaler::emitMotionUpdated(const MotionRecorder::Motion& motion)

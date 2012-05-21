@@ -25,28 +25,31 @@ namespace Gecon
 {
     MotionGestureDialog* MotionGestureWrapper::dialog = 0;
 
-    MotionGestureWrapper::MotionGestureWrapper(const QString& name, ObjectWrapper* object, const Motion& motion):
+    MotionGestureWrapper::MotionGestureWrapper(
+            const QString& name,
+            ObjectWrapper* object,
+            const ControlInfo::MotionGesture::Motion& motion,
+            ControlInfo::MotionGesture::MotionStorage* motionStorage):
         GestureWrapper(name, {object}),
         object_(object),
         motion_(motion)
     {
-        rawGesture_ = new ObjectMotionGesture<ObjectWrapper::RawObject>(object_->rawObject(), motion_);
+        rawGesture_ = new ObjectMotionGesture<ObjectWrapper::RawObject>(object_->rawObject(), motion_, motionStorage);
 
         events_.push_back(new EventWrapper("motion done", rawGesture_->motionDoneEvent(), this));
     }
 
     MotionGestureWrapper::~MotionGestureWrapper()
     {
+        for(EventWrapper* event : events_)
+        {
+            delete event;
+        }
     }
 
     const MotionGestureWrapper::Events& MotionGestureWrapper::events() const
     {
         return events_;
-
-        for(EventWrapper* event : events_)
-        {
-            delete event;
-        }
     }
 
     ObjectWrapper *MotionGestureWrapper::object()
@@ -54,9 +57,19 @@ namespace Gecon
         return object_;
     }
 
-    const MotionGestureWrapper::Motion &MotionGestureWrapper::motion() const
+    const ControlInfo::MotionGesture::Motion &MotionGestureWrapper::motion() const
     {
         return motion_;
+    }
+
+    void MotionGestureWrapper::setObject(ObjectWrapper* object)
+    {
+        object_ = object;
+    }
+
+    void MotionGestureWrapper::setMotion(const ControlInfo::MotionGesture::Motion& motion)
+    {
+        motion_ = motion;
     }
 
     void MotionGestureWrapper::edit()
@@ -67,7 +80,7 @@ namespace Gecon
         }
     }
 
-    MotionGestureWrapper::RawGesture *MotionGestureWrapper::rawGesture()
+    ControlInfo::MotionGesture* MotionGestureWrapper::rawGesture()
     {
         return rawGesture_;
     }

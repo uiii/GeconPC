@@ -38,17 +38,17 @@ namespace Gecon {
         emit imageDisplayed();
     }
 
-    void ImageDisplay::displayImage(const Image &image, const ObjectSet& objects, const Motion& motion)
+    void ImageDisplay::displayImage(const Image &image, const ControlInfo::Objects &objects, const Motion& motion)
     {
         QImage img = QImage((const uchar*)&(image.rawData()[0]), image.width(), image.height(), image.width() * 3, QImage::Format_RGB888);
 
         QPainter painter(&img);
-        for(ObjectPtr object : objects)
+        for(ControlInfo::Object* object : objects)
         {
             if(object->isVisible())
             {
                 // paint object's border
-                const Object::Border& border = object->border();
+                const ControlInfo::Object::Border& border = object->border();
 
                 QPolygon borderPolygon;
                 for(const Point& point : border)
@@ -64,7 +64,7 @@ namespace Gecon {
                 painter.restore();
 
                 // paint object's convex hull
-                const Object::ConvexHull& convexHull = object->convexHull();
+                const ControlInfo::Object::ConvexHull& convexHull = object->convexHull();
 
                 QPolygon convexHullPolygon;
                 for(const Point& point : convexHull)
@@ -78,7 +78,7 @@ namespace Gecon {
                 painter.restore();
 
                 // paint object's bounding box
-                const Object::BoundingBox& boundingBox = object->boundingBox();
+                const ControlInfo::Object::BoundingBox& boundingBox = object->boundingBox();
 
                 painter.save();
                 painter.setPen(Qt::red);

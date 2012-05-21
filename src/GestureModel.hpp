@@ -35,13 +35,13 @@ namespace Gecon
         Q_OBJECT
 
     public:
-        typedef QList<StateGestureWrapper*> StateGestureWrapperList;
-        typedef QList<RelationGestureWrapper*> RelationGestureWrapperList;
-        typedef QList<MotionGestureWrapper*> MotionGestureWrapperList;
+        typedef QList<StateGestureWrapper*> StateGestureWrappers;
+        typedef QList<RelationGestureWrapper*> RelationGestureWrappers;
+        typedef QList<MotionGestureWrapper*> MotionGestureWrappers;
 
-        typedef QList<StateGestureWrapper::RawGesture*> RawStateGestureList;
-        typedef QList<RelationGestureWrapper::RawGesture*> RawRelationGestureList;
-        typedef QList<MotionGestureWrapper::RawGesture*> RawMotionGestureList;
+        typedef QList<ControlInfo::StateGesture*> RawStateGestures;
+        typedef QList<ControlInfo::RelationGesture*> RawRelationGestures;
+        typedef QList<ControlInfo::MotionGesture*> RawMotionGestures;
 
         explicit GestureModel(QObject *parent = 0);
         virtual ~GestureModel();
@@ -56,26 +56,36 @@ namespace Gecon
 
         void addStateGesture(const QString& name, ObjectWrapper* object, ObjectState* stateSettings);
         void addRelationGesture(const QString& name, ObjectWrapper* leftObject, ObjectWrapper* rightObject, ObjectRelation* relationSettings);
-        void addMotionGesture(const QString& name, ObjectWrapper* object, const MotionGestureWrapper::Motion& motion);
+        void addMotionGesture(const QString& name, ObjectWrapper* object, const ControlInfo::MotionGesture::Motion& motion);
 
-        const StateGestureWrapperList& stateGestures() const;
-        const RelationGestureWrapperList& relationGestures() const;
-        const MotionGestureWrapperList& motionGestures() const;
+        void editStateGesture(const QModelIndex& index, const QString& name, ObjectWrapper* object, ObjectState* stateSettings);
+        void editRelationGesture(const QModelIndex& index, const QString& name, ObjectWrapper* leftObject, ObjectWrapper* rightObject, ObjectRelation* relationSettings);
+        void editMotionGesture(const QModelIndex& index, const QString& name, ObjectWrapper* object, const ControlInfo::MotionGesture::Motion& motion);
 
         void removeGesture(const QModelIndex& index);
+
+        const StateGestureWrappers& stateGestures() const;
+        const RelationGestureWrappers& relationGestures() const;
+        const MotionGestureWrappers& motionGestures() const;
+
+        ControlInfo::Gestures rawGestures();
+
+        ControlInfo::MotionGesture::MotionStorage* motionStorage();
 
     signals:
         
     public slots:
 
     private:
-        StateGestureWrapperList stateGestures_;
-        RelationGestureWrapperList relationGestures_;
-        MotionGestureWrapperList motionGestures_;
+        StateGestureWrappers stateGestures_;
+        RelationGestureWrappers relationGestures_;
+        MotionGestureWrappers motionGestures_;
 
-        RawStateGestureList rawStateGestures_;
-        RawRelationGestureList rawRelationGestures_;
-        RawMotionGestureList rawMotionGestures_;
+        RawStateGestures rawStateGestures_;
+        RawRelationGestures rawRelationGestures_;
+        RawMotionGestures rawMotionGestures_;
+
+        ControlInfo::MotionGesture::MotionStorage* motionStorage_;
     };
 } // namespace Gecon
 

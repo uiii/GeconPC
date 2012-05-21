@@ -55,6 +55,16 @@ namespace Gecon {
             relations_.push_back(new ObjectRelationSettings<int>(property.name, property.rawProperty));
         }
 
+        for(auto property : ObjectProperties<double>::list)
+        {
+            relations_.push_back(new ObjectRelationSettings<double>(property.name, property.rawProperty));
+        }
+
+        for(auto property : ObjectProperties<Fraction>::list)
+        {
+            relations_.push_back(new ObjectRelationSettings<Fraction>(property.name, property.rawProperty));
+        }
+
         for(auto property : ObjectProperties<Point>::list)
         {
             relations_.push_back(new ObjectRelationSettings<Point>(property.name, property.rawProperty));

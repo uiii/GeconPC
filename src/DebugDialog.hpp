@@ -45,6 +45,7 @@ namespace Gecon {
         QSpinBox* minimalGestureSide_;
         QSpinBox* minimalMotionSize_;
         QSpinBox* maximalSameGestureDistance_;
+        QSpinBox* minimalObjectSizeFraction_;
 
         Ui::DebugDialog *ui_;
     };

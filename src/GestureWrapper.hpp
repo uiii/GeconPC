@@ -34,9 +34,7 @@ namespace Gecon
     class GestureWrapper
     {
     public:
-        typedef ObjectGesture<ControlInfo::ObjectPolicy::Object> RawGesture;
-        typedef ObjectWrapper Object;
-        typedef std::list<ObjectWrapper*> Objects;
+        typedef QList<ObjectWrapper*> Objects;
         typedef QList<EventWrapper*> Events;
 
         GestureWrapper(const QString& name, const Objects& objects);
@@ -46,9 +44,11 @@ namespace Gecon
         virtual const Objects& objects() const;
         virtual const Events& events() const = 0;
 
+        virtual void setName(const QString& name);
+
         virtual void edit() = 0;
 
-        virtual RawGesture* rawGesture() = 0;
+        virtual ControlInfo::Gesture* rawGesture() = 0;
 
     private:
         QString name_;

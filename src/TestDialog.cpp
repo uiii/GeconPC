@@ -32,7 +32,7 @@
 namespace Gecon
 {
     TestDialog::TestDialog(ObjectModel* objectModel, GestureModel* gestureModel, ActionTriggerModel* actionTriggerModel, QWidget *parent) :
-        QDialog(parent),
+        DialogBase(parent),
         objectModel_(objectModel),
         gestureModel_(gestureModel),
         actionTriggerModel_(actionTriggerModel),
@@ -42,6 +42,11 @@ namespace Gecon
         ui_->setupUi(this);
 
         ui_->objectsStates->setModel(objectsStatesModel_);
+
+        ui_->performActions->setChecked(false);
+        performActions(false);
+
+        connect(ui_->performActions, SIGNAL(toggled(bool)), this, SLOT(performActions(bool)));
     }
     
     TestDialog::~TestDialog()
@@ -79,7 +84,7 @@ namespace Gecon
 
         bool firstObject = true;
         GestureWrapper::Objects objects = gesture->objects();
-        for(GestureWrapper::Object* object : objects)
+        for(ObjectWrapper* object : objects)
         {
             QImage img(12, 12, QImage::Format_RGB888);
             img.fill(object->color());
@@ -128,43 +133,43 @@ namespace Gecon
 
     void TestDialog::includeGesture_(StateGestureWrapper* stateGesture, bool isTestedGesture)
     {
-        StateGestureWrapper::RawGesture* rawGesture = stateGesture->rawGesture();
+        ControlInfo::StateGesture* rawGesture = stateGesture->rawGesture();
         gestures_.insert(rawGesture);
 
-        ActionTrigger* stateEnterTrigger = new ActionTrigger([=](){ emit gestureEventOccured(stateGesture, "State enter", isTestedGesture); });
-        ActionTrigger* stateLeaveTrigger = new ActionTrigger([=](){ emit gestureEventOccured(stateGesture, "State leave", isTestedGesture); });
+        ControlInfo::ActionTrigger* stateEnterTrigger = new ControlInfo::ActionTrigger([=](){ emit gestureEventOccured(stateGesture, "State enter", isTestedGesture); });
+        ControlInfo::ActionTrigger* stateLeaveTrigger = new ControlInfo::ActionTrigger([=](){ emit gestureEventOccured(stateGesture, "State leave", isTestedGesture); });
 
         stateEnterTrigger->addSwitch(rawGesture->stateEnterEvent());
         stateLeaveTrigger->addSwitch(rawGesture->stateLeaveEvent());
 
-        triggers_.insert(stateEnterTrigger);
-        triggers_.insert(stateLeaveTrigger);
+        logTriggers_.insert(stateEnterTrigger);
+        logTriggers_.insert(stateLeaveTrigger);
     }
 
     void TestDialog::includeGesture_(RelationGestureWrapper* relationGesture, bool isTestedGesture)
     {
-        RelationGestureWrapper::RawGesture* rawGesture = relationGesture->rawGesture();
+        ControlInfo::RelationGesture* rawGesture = relationGesture->rawGesture();
         gestures_.insert(rawGesture);
 
-        ActionTrigger* relationEnterTrigger = new ActionTrigger([=](){ emit gestureEventOccured(relationGesture, "Relation enter", isTestedGesture); });
-        ActionTrigger* relationLeaveTrigger = new ActionTrigger([=](){ emit gestureEventOccured(relationGesture, "Relation leave", isTestedGesture); });
+        ControlInfo::ActionTrigger* relationEnterTrigger = new ControlInfo::ActionTrigger([=](){ emit gestureEventOccured(relationGesture, "Relation enter", isTestedGesture); });
+        ControlInfo::ActionTrigger* relationLeaveTrigger = new ControlInfo::ActionTrigger([=](){ emit gestureEventOccured(relationGesture, "Relation leave", isTestedGesture); });
 
         relationEnterTrigger->addSwitch(rawGesture->relationEnterEvent());
         relationLeaveTrigger->addSwitch(rawGesture->relationLeaveEvent());
 
-        triggers_.insert(relationEnterTrigger);
-        triggers_.insert(relationLeaveTrigger);
+        logTriggers_.insert(relationEnterTrigger);
+        logTriggers_.insert(relationLeaveTrigger);
     }
 
     void TestDialog::includeGesture_(MotionGestureWrapper* motionGesture, bool isTestedGesture)
     {
-        MotionGestureWrapper::RawGesture* rawGesture = motionGesture->rawGesture();
+        ControlInfo::MotionGesture* rawGesture = motionGesture->rawGesture();
         gestures_.insert(rawGesture);
 
-        ActionTrigger* motionDoneTrigger = new ActionTrigger([=](){ emit gestureEventOccured(motionGesture, "Motion done", isTestedGesture); });
+        ControlInfo::ActionTrigger* motionDoneTrigger = new ControlInfo::ActionTrigger([=](){ emit gestureEventOccured(motionGesture, "Motion done", isTestedGesture); });
         motionDoneTrigger->addSwitch(rawGesture->motionDoneEvent());
 
-        triggers_.insert(motionDoneTrigger);
+        logTriggers_.insert(motionDoneTrigger);
     }
 
     void TestDialog::includeAllGestures_()
@@ -187,7 +192,7 @@ namespace Gecon
 
     void TestDialog::includeActionTrigger_(ActionTriggerWrapper* trigger, bool isTestedTrigger)
     {
-        ActionTrigger* testTrigger = new ActionTrigger([=](){ qDebug("emit action"); emit actionTriggered(trigger->name(), isTestedTrigger); });
+        ControlInfo::ActionTrigger* testLogTrigger = new ControlInfo::ActionTrigger([=](){ qDebug("emit action"); emit actionTriggered(trigger->name(), isTestedTrigger); });
 
         for(int i = 0; i < trigger->onEvents().size(); ++i)
         {
@@ -198,17 +203,19 @@ namespace Gecon
                 rawOffEvent = trigger->offEvents().at(i)->rawEvent();
             }
 
-            testTrigger->addSwitch(rawOnEvent, rawOffEvent);
+            testLogTrigger->addSwitch(rawOnEvent, rawOffEvent);
         }
 
-        qDebug("insert trigger");
-        triggers_.insert(testTrigger);
+        std::cout << "insert trigger: " << testLogTrigger << std::endl;
+        actionTriggers_.insert(trigger->rawTrigger());
+        logTriggers_.insert(testLogTrigger);
     }
 
     void TestDialog::includeAllActionTriggers_()
     {
         for(ActionTriggerWrapper* trigger : actionTriggerModel_->triggers())
         {
+            std::cout << "include: " << trigger << std::endl;
             includeActionTrigger_(trigger, false);
         }
     }
@@ -217,18 +224,18 @@ namespace Gecon
     {
         connect(this, SIGNAL(gestureEventOccured(GestureWrapper*,QString,bool)), this, SLOT(logGestureEvent_(GestureWrapper*,QString,bool)), Qt::BlockingQueuedConnection);
         connect(this, SIGNAL(actionTriggered(QString,bool)), this, SLOT(logAction_(QString,bool)), Qt::BlockingQueuedConnection);
-        connect(control_.signaler().get(), SIGNAL(objectsRecognized(Image,Image,ObjectSet)), this, SLOT(displayImage_(Image,Image,ObjectSet)), Qt::BlockingQueuedConnection);
+        connect(control_.objectPolicySignaler(), SIGNAL(objectsRecognized(Image,Image,Objects)), this, SLOT(displayImage_(Image,Image,Objects)), Qt::BlockingQueuedConnection);
 
         control_.prepareObjects(objectModel_->rawObjects());
         control_.prepareGestures(gestures_);
-        control_.prepareActionTriggers(triggers_);
+        control_.prepareActionTriggers(logTriggers_);
 
         control_.start();
     }
 
     void TestDialog::stopCapture_()
     {
-        disconnect(control_.signaler().get(), SIGNAL(objectsRecognized(Image,Image,ObjectSet)), this, SLOT(displayImage_(Image,Image,ObjectSet)));
+        disconnect(control_.objectPolicySignaler(), SIGNAL(objectsRecognized(Image,Image,Objects)), this, SLOT(displayImage_(Image,Image,Objects)));
         disconnect(this, SIGNAL(actionTriggered(QString,bool)), this, SLOT(logAction_(QString,bool)));
         disconnect(this, SIGNAL(gestureEventOccured(GestureWrapper*,QString,bool)), this, SLOT(logGestureEvent_(GestureWrapper*,QString,bool)));
         QCoreApplication::processEvents();
@@ -236,7 +243,7 @@ namespace Gecon
         control_.stop();
     }
 
-    void TestDialog::displayImage_(TestDialog::Image original, TestDialog::Image segmented, TestDialog::ObjectSet objects)
+    void TestDialog::displayImage_(const Image &original, const Image &segmented, const ControlInfo::Objects& objects)
     {
         displayObjectsStates_();
         ui_->display->displayImage(original, objects);
@@ -258,25 +265,35 @@ namespace Gecon
             objectItem->setChild(0, 0, new QStandardItem("visibility:"));
             objectItem->setChild(1, 0, new QStandardItem("position:"));
             objectItem->setChild(2, 0, new QStandardItem("angle:"));
+            objectItem->setChild(3, 0, new QStandardItem("area:"));
+            objectItem->setChild(4, 0, new QStandardItem("aspect ratio:"));
 
             bool isVisible = rawObject->isVisible();
             objectItem->setChild(0, 1, new QStandardItem(isVisible ? "visible" : "hidden"));
 
             if(isVisible)
             {
-                objectItem->setChild(1, 1, new QStandardItem(QString("[%1; %2]").arg((int)rawObject->position().x).arg((int)rawObject->position().y)));
+                objectItem->setChild(1, 1, new QStandardItem(QString("[%1 \%; %2 \%]").arg(int(rawObject->position().x * 100)).arg(int(rawObject->position().y * 100))));
                 objectItem->setChild(2, 1, new QStandardItem(QString(tr("%1 degrees")).arg(rawObject->angle())));
+                objectItem->setChild(3, 1, new QStandardItem(QString(tr("1 / %1")).arg(rawObject->areaSize().denominator)));
+                objectItem->setChild(4, 1, new QStandardItem(QString(tr("%1")).arg(QString::number(rawObject->aspectRatio(), 'f', 2))));
             }
             else
             {
                 objectItem->setChild(1, 1, new QStandardItem("?"));
                 objectItem->setChild(2, 1, new QStandardItem("?"));
+                objectItem->setChild(3, 1, new QStandardItem("?"));
+                objectItem->setChild(4, 1, new QStandardItem("?"));
 
                 QBrush brush(Qt::gray);
                 objectItem->child(1, 0)->setData(brush, Qt::ForegroundRole);
                 objectItem->child(1, 1)->setData(brush, Qt::ForegroundRole);
                 objectItem->child(2, 0)->setData(brush, Qt::ForegroundRole);
                 objectItem->child(2, 1)->setData(brush, Qt::ForegroundRole);
+                objectItem->child(3, 0)->setData(brush, Qt::ForegroundRole);
+                objectItem->child(3, 1)->setData(brush, Qt::ForegroundRole);
+                objectItem->child(4, 0)->setData(brush, Qt::ForegroundRole);
+                objectItem->child(4, 1)->setData(brush, Qt::ForegroundRole);
             }
 
             rootItem->appendRow(objectItem);
@@ -285,7 +302,24 @@ namespace Gecon
         ui_->objectsStates->expandAll();
     }
 
-    void TestDialog::close_()
+    void TestDialog::performActions(bool perform)
+    {
+        std::cout << "perform: " << perform << std::endl;
+
+        ControlInfo::ActionTriggers triggers;
+        triggers.insert(logTriggers_.begin(), logTriggers_.end());
+
+        if(perform)
+        {
+            triggers.insert(actionTriggers_.begin(), actionTriggers_.end());
+        }
+
+        control_.prepareActionTriggers(triggers);
+
+        QtConcurrent::run(&control_, &ControlInfo::Control::restart);
+    }
+
+    void TestDialog::beforeClose_()
     {
         stopCapture_();
         reset_();
@@ -297,11 +331,12 @@ namespace Gecon
         ui_->showActions->setChecked(false);
 
         gestures_.clear();
-        for(ActionTrigger* trigger : triggers_)
+        for(ControlInfo::ActionTrigger* trigger : logTriggers_)
         {
             delete trigger;
         }
-        triggers_.clear();
+        logTriggers_.clear();
+        actionTriggers_.clear();
 
         objectsStatesModel_->clear();
 
@@ -309,19 +344,7 @@ namespace Gecon
         ui_->log->clear();
     }
 
-    void TestDialog::reject()
-    {
-        close_();
-        QDialog::reject();
-    }
-
-    void TestDialog::accept()
-    {
-        close_();
-        QDialog::accept();
-    }
-
-    void TestDialog::setDevice(TestDialog::DeviceAdapter device)
+    void TestDialog::setDevice(ControlInfo::DeviceAdapter device)
     {
         control_.setDevice(device);
     }
@@ -333,14 +356,10 @@ namespace Gecon
 
         ui_->showGestureEvents->setChecked(true);
         ui_->showActions->setChecked(true);
+        ui_->performActions->setChecked(false);
 
         startCapture_();
 
         QDialog::exec();
-    }
-
-    void TestDialog::closeEvent(QCloseEvent *)
-    {
-        close_();
     }
 } // namespace Gecon

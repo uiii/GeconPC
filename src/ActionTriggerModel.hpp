@@ -32,7 +32,6 @@ namespace Gecon
 
     public:
         typedef QList<ActionTriggerWrapper*> ActionTriggerWrappers;
-        typedef QList<ActionTriggerWrapper::RawActionTrigger*> RawActionTriggers;
 
         explicit ActionTriggerModel();
         virtual ~ActionTriggerModel();
@@ -48,11 +47,11 @@ namespace Gecon
         void removeTrigger(const QModelIndex& index);
 
         const ActionTriggerWrappers& triggers() const;
-        const RawActionTriggers& rawTriggers() const;
+        const ControlInfo::ActionTriggers& rawTriggers() const;
 
     private:
         ActionTriggerWrappers triggers_;
-        RawActionTriggers rawTriggers_;
+        ControlInfo::ActionTriggers rawTriggers_;
     };
 } // namespace Gecon
 

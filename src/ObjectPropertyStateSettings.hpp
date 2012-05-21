@@ -23,6 +23,7 @@
 #include <QWidget>
 #include <QComboBox>
 #include <QSpinBox>
+#include <QDoubleSpinBox>
 #include <QLabel>
 
 #include <functional>
@@ -38,8 +39,6 @@ namespace Gecon
     class ObjectStateSettings
     {
     public:
-        typedef ObjectStateGesture<ControlInfo::ObjectPolicy::Object> RawGesture;
-
         ObjectStateSettings(const QString& propertyName, QWidget* widget);
         virtual ~ObjectStateSettings();
 
@@ -52,7 +51,7 @@ namespace Gecon
 
         virtual ObjectStateSettings* clone() const = 0;
 
-        virtual RawGesture* toGesture(ObjectWrapper* object) = 0;
+        virtual ControlInfo::StateGesture* toGesture(ObjectWrapper* object) = 0;
 
     private:
         QWidget* widget_;
@@ -78,7 +77,7 @@ namespace Gecon
 
         ObjectStateSettings* clone() const;
 
-        RawGesture* toGesture(ObjectWrapper* object);
+        ControlInfo::StateGesture* toGesture(ObjectWrapper* object);
 
     private:
         int visibilityOptionsIndex_;
@@ -114,11 +113,11 @@ namespace Gecon
 
         ObjectStateSettings* clone() const;
 
-        RawGesture* toGesture(ObjectWrapper* object);
+        ControlInfo::StateGesture* toGesture(ObjectWrapper* object);
 
     private:
         typedef Point PropertyReturnType;
-        typedef RawGesture::Relation<PropertyReturnType> RelationType;
+        typedef ControlInfo::StateGesture::Relation<PropertyReturnType> RelationType;
 
         QList<RelationType> relations_;
 
@@ -150,11 +149,11 @@ namespace Gecon
 
         ObjectStateSettings* clone() const;
 
-        RawGesture* toGesture(ObjectWrapper* object);
+        ControlInfo::StateGesture* toGesture(ObjectWrapper* object);
 
     private:
         typedef int PropertyReturnType;
-        typedef RawGesture::Relation<PropertyReturnType> RelationType;
+        typedef ControlInfo::StateGesture::Relation<PropertyReturnType> RelationType;
 
         QList<RelationType> relations_;
 
@@ -164,6 +163,73 @@ namespace Gecon
         AngleStateSettingsWidget* widget_;
     };
 
+    class AreaSizeStateSettingsWidget : public QWidget
+    {
+    public:
+        AreaSizeStateSettingsWidget(QWidget* parent);
+
+        QComboBox* relation;
+        QSpinBox* area;
+    };
+
+    class AreaSizeStateSettings : public ObjectStateSettings
+    {
+    public:
+        AreaSizeStateSettings(QWidget* parent = 0);
+
+        void reset();
+        void save();
+        void load();
+
+        ObjectStateSettings* clone() const;
+
+        ControlInfo::StateGesture* toGesture(ObjectWrapper* object);
+
+    private:
+        typedef int PropertyReturnType;
+        typedef ControlInfo::StateGesture::Relation<PropertyReturnType> RelationType;
+
+        QList<RelationType> relations_;
+
+        int relationIndex_;
+        int areaValue_;
+
+        AreaSizeStateSettingsWidget* widget_;
+    };
+
+    class AspectRatioStateSettingsWidget : public QWidget
+    {
+    public:
+        AspectRatioStateSettingsWidget(QWidget* parent);
+
+        QComboBox* relation;
+        QDoubleSpinBox* aspectRatio;
+    };
+
+    class AspectRatioStateSettings : public ObjectStateSettings
+    {
+    public:
+        AspectRatioStateSettings(QWidget* parent = 0);
+
+        void reset();
+        void save();
+        void load();
+
+        ObjectStateSettings* clone() const;
+
+        ControlInfo::StateGesture* toGesture(ObjectWrapper* object);
+
+    private:
+        typedef double PropertyReturnType;
+        typedef ControlInfo::StateGesture::Relation<PropertyReturnType> RelationType;
+
+        QList<RelationType> relations_;
+
+        int relationIndex_;
+        double aspectRatioValue_;
+
+        AspectRatioStateSettingsWidget* widget_;
+    };
 } // namespace Gecon
 
 #endif // GECON_OBJECTPROPERTYSTATESETTINGS_HPP

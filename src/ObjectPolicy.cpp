@@ -26,21 +26,21 @@ namespace Gecon
     {
     }
 
-    ColorObjectPolicy::ObjectSet ObjectPolicy::recognizeObjects(const Image& image)
+    ColorObjectPolicy::Objects ObjectPolicy::recognizeObjects(const Image& image)
     {
-        ObjectSet objects = ColorObjectPolicy::recognizeObjects(image);
+        Objects objects = ColorObjectPolicy::recognizeObjects(image);
 
-        emit signaler_->emitObjectsRecognized(image, ColorObjectPolicy::image(), objects); // TODO segmented image
+        signaler_->emitObjectsRecognized(image, ColorObjectPolicy::segmentedImage(), objects);
 
         return objects;
     }
 
-    const std::shared_ptr<ObjectPolicySignaler>& ObjectPolicy::signaler() const
+    ObjectPolicySignaler* ObjectPolicy::objectPolicySignaler() const
     {
-        return signaler_;
+        return signaler_.get();
     }
 
-    void ObjectPolicySignaler::emitObjectsRecognized(ObjectPolicySignaler::Image original, ObjectPolicySignaler::Image segmented, const ObjectPolicySignaler::ObjectSet &objects)
+    void ObjectPolicySignaler::emitObjectsRecognized(const Image &original, const Image &segmented, const ObjectPolicySignaler::Objects &objects)
     {
         emit objectsRecognized(original, segmented, objects);
     }

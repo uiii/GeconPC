@@ -24,7 +24,7 @@
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="standardButtons">
-      <set>QDialogButtonBox::Apply</set>
+      <set>QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

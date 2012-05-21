@@ -32,19 +32,18 @@ namespace Gecon
 {
     class MotionRecorderSignaler; // forward declaration
 
-    class MotionRecorder : public ObjectMotionGesture<ControlInfo::ObjectPolicy::Object>
+    class MotionRecorder : public ControlInfo::MotionGesture
     {
     public:
-        typedef ControlInfo::ObjectPolicy::Object Object;
-
-        MotionRecorder(Object* object = 0); // TODO!!!
+        MotionRecorder(ControlInfo::Object* object = 0); // TODO!!!
+        virtual ~MotionRecorder();
 
         Events check();
 
         const std::shared_ptr<MotionRecorderSignaler>& signaler() const;
 
     protected:
-        bool checkMotion_(const Motion& motion);
+        void processRecord_(MotionRecord& record, const Size& motionSize);
 
     private:
         std::shared_ptr<MotionRecorderSignaler> signaler_;

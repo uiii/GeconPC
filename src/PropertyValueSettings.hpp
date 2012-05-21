@@ -24,6 +24,7 @@
 #include <QSpinBox>
 #include <QComboBox>
 
+#include <Gecon/Fraction.hpp>
 #include <Gecon/Point.hpp>
 
 #include "ObjectWrapper.hpp"
@@ -68,6 +69,61 @@ namespace Gecon
 
     private:
         int value_;
+
+        Widget* widget_;
+    };
+
+    template<>
+    class PropertyValueSettings<Fraction>
+    {
+    public:
+        class Widget : public QWidget
+        {
+        public:
+            Widget();
+
+            QSpinBox* nominator;
+            QSpinBox* denominator;
+        };
+
+        PropertyValueSettings();
+
+        Fraction value() const;
+        QWidget* widget() const;
+
+        void load();
+        void save();
+        void reset();
+
+    private:
+        Fraction value_;
+
+        Widget* widget_;
+    };
+
+    template<>
+    class PropertyValueSettings<double>
+    {
+    public:
+        class Widget : public QWidget
+        {
+        public:
+            Widget();
+
+            QDoubleSpinBox* value;
+        };
+
+        PropertyValueSettings();
+
+        double value() const;
+        QWidget* widget() const;
+
+        void load();
+        void save();
+        void reset();
+
+    private:
+        double value_;
 
         Widget* widget_;
     };

@@ -35,12 +35,12 @@ namespace Gecon
 
     public:
         typedef Gecon::Image<RGB> Image;
-        typedef ColorObjectPolicy::ObjectSet ObjectSet;
+        typedef ColorObjectPolicy::Objects Objects;
 
-        void emitObjectsRecognized(Image original, Image segmented, const ObjectSet& objects);
+        void emitObjectsRecognized(const Image& original, const Image& segmented, const Objects& objects);
 
     signals:
-        void objectsRecognized(Image original, Image segmented, const ObjectSet& objects);
+        void objectsRecognized(const Image& original, const Image& segmented, const Objects& objects);
     };
 
     class ObjectPolicy : public ColorObjectPolicy
@@ -50,9 +50,9 @@ namespace Gecon
 
         ObjectPolicy();
 
-        ObjectSet recognizeObjects(const Image& image);
+        Objects recognizeObjects(const Image& image);
 
-        const std::shared_ptr<ObjectPolicySignaler>& signaler() const;
+        ObjectPolicySignaler* objectPolicySignaler() const; // TODO prejmenovat na objectPolicySignaler
 
     private:
         std::shared_ptr<ObjectPolicySignaler> signaler_;

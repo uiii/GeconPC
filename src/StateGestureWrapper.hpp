@@ -34,8 +34,6 @@ namespace Gecon
     class StateGestureWrapper : public GestureWrapper
     {
     public:
-        typedef ObjectStateGesture<ControlInfo::ObjectPolicy::Object> RawGesture;
-
         static StateGestureDialog* dialog;
 
         StateGestureWrapper(const QString& name, ObjectWrapper* object, ObjectState* state);
@@ -47,9 +45,12 @@ namespace Gecon
         ObjectWrapper* object();
         ObjectState* state();
 
+        void setObject(ObjectWrapper* object);
+        void setState(ObjectState* state);
+
         void edit();
 
-        RawGesture* rawGesture();
+        ControlInfo::StateGesture* rawGesture();
 
     private:
         Events events_;
@@ -57,7 +58,7 @@ namespace Gecon
         ObjectWrapper* object_;
         ObjectState* state_;
 
-        RawGesture* rawGesture_;
+        ControlInfo::StateGesture* rawGesture_;
     };
 } // namespace Gecon
 

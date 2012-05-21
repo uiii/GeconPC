@@ -26,22 +26,23 @@
 #include <QtTest/QTest>
 
 #include "ObjectModel.hpp"
+#include "ObjectWrapper.hpp"
 
 namespace Gecon
 {
     ObjectDialog::ObjectDialog(ObjectModel* objectModel, QWidget *parent):
-        QDialog(parent),
-        colorGrabbed_(false),
+        DialogBase(parent),
+        rawObject_(0),
+        editedObject_(0),
         objectModel_(objectModel),
         ui_(new Ui::ObjectDialog)
     {
         ui_->setupUi(this);
 
-        connect(this, SIGNAL(finished(int)), this, SLOT(stopCapture()));
-        connect(ui_->buttonBox, SIGNAL(accepted()), this, SLOT(addObject()));
+        connect(ui_->buttonBox, SIGNAL(accepted()), this, SLOT(addObject_()));
+        connect(ui_->deleteButton, SIGNAL(clicked()), this, SLOT(deleteObject_()));
 
-        connect(control_.signaler().get(), SIGNAL(objectsRecognized(Image,Image,ObjectSet)), this, SLOT(displayImage(Image,Image,ObjectSet)), Qt::BlockingQueuedConnection);
-        connect(ui_->display, SIGNAL(imageDisplayed()), this, SLOT(firstImageDisplayed()));
+        reset_();
     }
 
     ObjectDialog::~ObjectDialog()
@@ -54,18 +55,38 @@ namespace Gecon
         return QDialog::Rejected;
     }
 
+    void ObjectDialog::beforeClose_()
+    {
+        stopCapture_();
+        reset_();
+    }
+
     int ObjectDialog::newObject()
     {
-        reset();
-
-        startCapture();
+        startCapture_();
 
         return QDialog::exec();
     }
 
-    void ObjectDialog::addObject()
+    int ObjectDialog::editObject(ObjectWrapper *object)
     {
-        if(! colorGrabbed_)
+        editedObject_ = object;
+        rawObject_ = editedObject_->rawObject();
+
+        ui_->objectName->setText(object->name());
+        ui_->deleteButton->setVisible(true);
+
+        disconnect(ui_->buttonBox, SIGNAL(accepted()), this, 0);
+        connect(ui_->buttonBox, SIGNAL(accepted()), this, SLOT(updateObject_()));
+
+        startCapture_();
+
+        return QDialog::exec();
+    }
+
+    void ObjectDialog::addObject_()
+    {
+        if(! rawObject_)
         {
             QMessageBox::critical(this, "Color object error", "No object selected!", QMessageBox::Ok);
             return;
@@ -73,13 +94,44 @@ namespace Gecon
 
         try
         {
-            objectModel_->addObject(ui_->objectName->text(), objectColor_);
+            objectModel_->addObject(ui_->objectName->text(), rawObject_->color());
 
             accept();
         }
-        catch(...)
+        catch(const std::exception& e)
         {
-            // TODO
+            QMessageBox::critical(this, "Color object error", e.what(), QMessageBox::Ok);
+        }
+    }
+
+    void ObjectDialog::updateObject_()
+    {
+        try
+        {
+            QModelIndex index = objectModel_->index(editedObject_);
+            objectModel_->editObject(index, ui_->objectName->text(), rawObject_->color());
+
+            accept();
+        }
+        catch(const std::exception& e)
+        {
+            QMessageBox::critical(this, "Color object error", e.what(), QMessageBox::Ok);
+        }
+    }
+
+    void ObjectDialog::deleteObject_()
+    {
+        QMessageBox::StandardButton button = QMessageBox::question(this, tr("Delete question"),
+            tr("Do you really want to delete object '%1'").arg(editedObject_->name()), QMessageBox::Ok | QMessageBox::Cancel);
+
+        if(button == QMessageBox::Ok)
+        {
+            stopCapture_();
+
+            QModelIndex index = objectModel_->index(editedObject_);
+            objectModel_->removeObject(index);
+
+            accept();
         }
     }
 
@@ -88,49 +140,79 @@ namespace Gecon
         control_.setDevice(device);
     }
 
-    void ObjectDialog::reset()
+    void ObjectDialog::reset_()
     {
-        colorGrabbed_ = false;
+        if(! editedObject_)
+        {
+            delete rawObject_;
+        }
+
+        rawObject_ = 0;
+        editedObject_ = 0;
+
+        rawImage_ = Image();
+
         ui_->objectName->setText(QString());
+        ui_->deleteButton->setVisible(false);
+
+        disconnect(ui_->buttonBox, SIGNAL(accepted()), this, 0);
+        connect(ui_->buttonBox, SIGNAL(accepted()), this, SLOT(addObject_()));
     }
 
-    void ObjectDialog::startCapture()
+    void ObjectDialog::startCapture_()
     {
+        connect(control_.objectPolicySignaler(), SIGNAL(objectsRecognized(Image,Image,Objects)), this, SLOT(displayImage_(Image,Image,Objects)), Qt::BlockingQueuedConnection);
+        connect(ui_->display, SIGNAL(imageDisplayed()), this, SLOT(firstImageDisplayed_()));
+
         ui_->display->reset();
 
-        control_.prepareObjects(ObjectSet());
+        ControlInfo::Objects objects;
+        if(rawObject_)
+        {
+            objects.insert(rawObject_);
+        }
+
+        control_.prepareObjects(objects);
         control_.start();
     }
 
-    void ObjectDialog::stopCapture()
+    void ObjectDialog::stopCapture_()
     {
-        QtConcurrent::run(&control_, &ControlInfo::Control::stop);
+        if(! control_.isRunning())
+        {
+            return;
+        }
+
+        disconnect(ui_->display, SIGNAL(clicked(QPoint)), this, SLOT(grabColor_(QPoint)));
+        disconnect(control_.objectPolicySignaler(), SIGNAL(objectsRecognized(Image,Image,Objects)), this, SLOT(displayImage_(Image,Image,Objects)));
+        QCoreApplication::processEvents();
+
+        control_.stop();
     }
 
-    void ObjectDialog::displayImage(Image original, Image segmented, ObjectSet objects)
+    void ObjectDialog::displayImage_(const Image &original, const Image &segmented, const ControlInfo::Objects &objects)
     {
         rawImage_ = original;
 
         ui_->display->displayImage(rawImage_, objects);
+        //ui_->display->displayImage(segmented, objects);
     }
 
-    void ObjectDialog::firstImageDisplayed()
+    void ObjectDialog::firstImageDisplayed_()
     {
-        disconnect(ui_->display, SIGNAL(imageDisplayed()), this, SLOT(firstImageDisplayed()));
-        connect(ui_->display, SIGNAL(clicked(QPoint)), this, SLOT(grabColor(QPoint)));
+        disconnect(ui_->display, SIGNAL(imageDisplayed()), this, SLOT(firstImageDisplayed_()));
+        connect(ui_->display, SIGNAL(clicked(QPoint)), this, SLOT(grabColor_(QPoint)));
     }
 
-    void ObjectDialog::grabColor(QPoint position)
+    void ObjectDialog::grabColor_(QPoint position)
     {
-        objectColor_ = rawImage_.at(position.x(), position.y());
+        ControlInfo::Object::Color objectColor = rawImage_.at(position.x(), position.y());
+        rawObject_ = new ControlInfo::Object(objectColor);
 
-        ControlInfo::ObjectPolicy::ObjectSet objects;
-        object_ = Object(objectColor_);
-        objects.insert(&object_);
+        ControlInfo::Objects objects;
+        objects.insert(rawObject_);
         control_.prepareObjects(objects);
 
         QtConcurrent::run(&control_, &ControlInfo::Control::restart);
-
-        colorGrabbed_ = true;
     }
 } // namespace Gecon

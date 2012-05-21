@@ -19,6 +19,7 @@
 
 #include "PropertyValueSettings.hpp"
 
+#include <QLabel>
 #include <QHBoxLayout>
 
 namespace Gecon
@@ -62,6 +63,101 @@ namespace Gecon
     void PropertyValueSettings<int>::reset()
     {
         widget_->value->setValue(0);
+    }
+
+    PropertyValueSettings<double>::Widget::Widget():
+        value(new QDoubleSpinBox)
+    {
+        value->setMaximum(10000);
+        value->setDecimals(2);
+        value->setSingleStep(0.1);
+
+        QHBoxLayout* layout = new QHBoxLayout(this);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->addWidget(value);
+    }
+
+    PropertyValueSettings<double>::PropertyValueSettings():
+        value_(0.0),
+        widget_(new Widget)
+    {
+    }
+
+    double PropertyValueSettings<double>::value() const
+    {
+        return value_;
+    }
+
+    QWidget *PropertyValueSettings<double>::widget() const
+    {
+        return widget_;
+    }
+
+    void PropertyValueSettings<double>::load()
+    {
+        widget_->value->setValue(value_);
+    }
+
+    void PropertyValueSettings<double>::save()
+    {
+        value_ = widget_->value->value();
+    }
+
+    void PropertyValueSettings<double>::reset()
+    {
+        widget_->value->setValue(0.0);
+    }
+
+    PropertyValueSettings<Fraction>::Widget::Widget():
+        nominator(new QSpinBox),
+        denominator(new QSpinBox)
+    {
+        nominator->setMaximum(10000);
+        nominator->setMinimum(1);
+        denominator->setMaximum(10000);
+        denominator->setMinimum(1);
+
+        QHBoxLayout* layout = new QHBoxLayout(this);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->addWidget(nominator);
+        layout->addWidget(new QLabel("/"));
+        layout->addWidget(denominator);
+    }
+
+    PropertyValueSettings<Fraction>::PropertyValueSettings():
+        value_(Fraction(1,1)),
+        widget_(new Widget)
+    {
+    }
+
+    Fraction PropertyValueSettings<Fraction>::value() const
+    {
+        return value_;
+    }
+
+    QWidget *PropertyValueSettings<Fraction>::widget() const
+    {
+        return widget_;
+    }
+
+    void PropertyValueSettings<Fraction>::load()
+    {
+        widget_->nominator->setValue(value_.nominator);
+        widget_->denominator->setValue(value_.denominator);
+    }
+
+    void PropertyValueSettings<Fraction>::save()
+    {
+        value_ = Fraction(
+            widget_->nominator->value(),
+            widget_->denominator->value()
+        );
+    }
+
+    void PropertyValueSettings<Fraction>::reset()
+    {
+        widget_->nominator->setValue(1);
+        widget_->denominator->setValue(1);
     }
 
     PropertyValueSettings<bool>::Widget::Widget():

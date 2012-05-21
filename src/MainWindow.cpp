@@ -69,13 +69,22 @@ namespace Gecon
 
         connect(settingsDialog_, SIGNAL(finished(int)), this, SLOT(updateDialogs()));
 
+        connect(ui_->objectView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editObject(QModelIndex)));
         connect(ui_->gestureView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editGesture(QModelIndex)));
         connect(ui_->eventTriggerView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editActionTrigger(QModelIndex)));
+
+        connect(ui_->actionStart_control, SIGNAL(triggered(bool)), this, SLOT(toggleControl(bool)));
     }
 
     MainWindow::~MainWindow()
     {
         delete ui_;
+    }
+
+    void MainWindow::editObject(const QModelIndex &index)
+    {
+        ObjectWrapper* object = objectModel_.data(index, Qt::UserRole).value<ObjectWrapper*>();
+        objectDialog_->editObject(object);
     }
 
     void MainWindow::editGesture(const QModelIndex& index)
@@ -95,6 +104,30 @@ namespace Gecon
         objectDialog_->setDevice(control_.device());
         motionGestureDialog_->setDevice(control_.device());
         gestureTestDialog_->setDevice(control_.device());
+    }
+
+    void MainWindow::toggleControl(bool start)
+    {
+        if(start)
+        {
+            control_.prepareObjects(objectModel_.rawObjects());
+            control_.prepareGestures(gestureModel_.rawGestures());
+            control_.prepareActionTriggers(actionTriggerModel_.rawTriggers());
+
+            control_.start();
+
+            ui_->actionStart_control->setText("Stop control");
+        }
+        else
+        {
+            control_.stop();
+
+            control_.prepareObjects(ControlInfo::Objects());
+            control_.prepareGestures(ControlInfo::Gestures());
+            control_.prepareActionTriggers(ControlInfo::ActionTriggers());
+
+            ui_->actionStart_control->setText("Start control");
+        }
     }
 
     void MainWindow::initNewGestureMenu()

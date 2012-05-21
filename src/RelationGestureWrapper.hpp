@@ -34,8 +34,6 @@ namespace Gecon
     class RelationGestureWrapper : public GestureWrapper
     {
     public:
-        typedef ObjectRelationGesture<ControlInfo::ObjectPolicy::Object> RawGesture;
-
         static RelationGestureDialog* dialog;
 
         RelationGestureWrapper(const QString& name, ObjectWrapper* leftObject, ObjectWrapper* rightObject, ObjectRelation* relation);
@@ -49,9 +47,13 @@ namespace Gecon
         ObjectWrapper* rightObject();
         ObjectRelation* relation();
 
+        void setLeftObject(ObjectWrapper* object);
+        void setRightObject(ObjectWrapper* object);
+        void setRelation(ObjectRelation* relation);
+
         void edit();
 
-        RawGesture* rawGesture();
+        ControlInfo::RelationGesture* rawGesture();
 
     public:
         Events events_;
@@ -60,7 +62,7 @@ namespace Gecon
         ObjectWrapper* right_;
         ObjectRelation* relation_;
 
-        RawGesture* rawGesture_;
+        ControlInfo::RelationGesture* rawGesture_;
     };
 } // namespace Gecon
 

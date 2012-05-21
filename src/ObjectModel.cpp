@@ -75,14 +75,8 @@ namespace Gecon
         return objects_.size();
     }
 
-    void ObjectModel::addObject(const QString& name, RawObject::Color color)
+    void ObjectModel::addObject(const QString& name, ControlInfo::Object::Color color)
     {
-        // TODO
-        /*if(objects_.find(object->color()) != objects_.end())
-        {
-            // throw
-        }*/
-
         QString objectName = name.isEmpty()
                 ? "Object " + QString::number(objects_.size() + 1)
                 : name;
@@ -91,7 +85,41 @@ namespace Gecon
 
         rawObjects_.insert(object->rawObject());
 
-        ObjectWrapperList::iterator it = std::find_if(objects_.begin(), objects_.end(),
+        ObjectWrappers::iterator it = std::find_if(objects_.begin(), objects_.end(),
+            [&](ObjectWrapper* item){ return QString::localeAwareCompare(object->name(), item->name()) < 0; }
+        );
+
+        beginInsertRows(QModelIndex(), it - objects_.begin(), it - objects_.begin());
+
+        objects_.insert(it, object);
+
+        endInsertRows();
+    }
+
+    void ObjectModel::editObject(const QModelIndex& index, const QString& name, ControlInfo::Object::Color color)
+    {
+        if(! index.isValid() || index.row() >= objects_.size())
+        {
+            return;
+        }
+
+        QString objectName = name.isEmpty()
+                ? "Object " + QString::number(objects_.size() + 1)
+                : name;
+
+        ObjectWrapper* object = objects_.at(index.row());
+        object->setName(objectName);
+        object->setColor(color);
+
+        rawObjects_.update(object->rawObject());
+
+        beginRemoveRows(QModelIndex(), index.row(), index.row());
+
+        objects_.removeAt(index.row());
+
+        endRemoveRows();
+
+        ObjectWrappers::iterator it = std::find_if(objects_.begin(), objects_.end(),
             [&](ObjectWrapper* item){ return QString::localeAwareCompare(object->name(), item->name()) < 0; }
         );
 
@@ -106,25 +134,27 @@ namespace Gecon
     {
         if(! index.isValid() || index.row() >= objects_.size())
         {
-            // throw
+            return;
         }
 
-        // TODO
-        /*auto it = objects_.find(visualData.second);
-        if(it == objects_.end())
-        {
-            // throw
-        }
+        ObjectWrapper* object = objects_.at(index.row());
+        rawObjects_.remove(object->rawObject());
 
-        objects_.erase(it);*/
+        delete object;
+
+        beginRemoveRows(QModelIndex(), index.row(), index.row());
+
+        objects_.removeAt(index.row());
+
+        endRemoveRows();
     }
 
-    const ObjectModel::ObjectWrapperList &ObjectModel::objects() const
+    const ObjectModel::ObjectWrappers &ObjectModel::objects() const
     {
         return objects_;
     }
 
-    const ObjectModel::RawObjectSet &ObjectModel::rawObjects() const
+    const ControlInfo::Objects &ObjectModel::rawObjects() const
     {
         return rawObjects_;
     }

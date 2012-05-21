@@ -320,6 +320,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="saveButton">
+        <property name="text">
+         <string>Save - REMOVE</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_3">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>

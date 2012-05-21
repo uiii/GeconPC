@@ -22,6 +22,7 @@
 
 #include <QFormLayout>
 
+#include <Gecon/ColorObjectPolicy.hpp>
 #include <Gecon/ObjectMotionGesture.hpp>
 #include "ObjectWrapper.hpp"
 
@@ -37,11 +38,13 @@ namespace Gecon
         minimalGestureSide_ = new QSpinBox;
         minimalMotionSize_ = new QSpinBox;
         maximalSameGestureDistance_ = new QSpinBox;
+        minimalObjectSizeFraction_ = new QSpinBox;
 
         motionTimeout_->setMaximum(10000);
         minimalGestureSide_->setMaximum(10000);
         minimalMotionSize_->setMaximum(10000);
         maximalSameGestureDistance_->setMaximum(10000);
+        minimalObjectSizeFraction_->setMaximum(10000);
 
         QFormLayout* layout = new QFormLayout(ui_->configVariables);
         layout->setContentsMargins(0, 0, 0, 0);
@@ -49,11 +52,13 @@ namespace Gecon
         layout->addRow(tr("minimalGestureSide"),minimalGestureSide_);
         layout->addRow(tr("minimalMotionSize"),minimalMotionSize_);
         layout->addRow(tr("maximalSameGestureDistance"),maximalSameGestureDistance_);
+        layout->addRow(tr("minimalObjectSizeFraction"),minimalObjectSizeFraction_);
 
         motionTimeout_->setValue(ObjectMotionGesture<ObjectWrapper::RawObject>::MOTION_TIMEOUT);
         minimalGestureSide_->setValue(ObjectMotionGesture<ObjectWrapper::RawObject>::MINIMAL_GESTURE_SIDE);
-        minimalMotionSize_->setValue(ObjectMotionGesture<ObjectWrapper::RawObject>::MINIMAL_MOTION_SIZE);
+        minimalMotionSize_->setValue(ObjectMotionGesture<ObjectWrapper::RawObject>::NOT_MOTION_TOLERANCE);
         maximalSameGestureDistance_->setValue(ObjectMotionGesture<ObjectWrapper::RawObject>::MAXIMAL_SAME_GESTURE_DISTANCE);
+        minimalObjectSizeFraction_->setValue(ColorObjectPolicy::MINIMAL_OBJECT_SIZE_FRACTION);
 
         connect(ui_->buttonBox, SIGNAL(accepted()), this, SLOT(apply()));
     }
@@ -65,9 +70,12 @@ namespace Gecon
 
     void DebugDialog::apply()
     {
+        qDebug("apply");
         ObjectMotionGesture<ObjectWrapper::RawObject>::MOTION_TIMEOUT = motionTimeout_->value();
         ObjectMotionGesture<ObjectWrapper::RawObject>::MINIMAL_GESTURE_SIDE = minimalGestureSide_->value();
-        ObjectMotionGesture<ObjectWrapper::RawObject>::MINIMAL_MOTION_SIZE = minimalMotionSize_->value();
+        ObjectMotionGesture<ObjectWrapper::RawObject>::NOT_MOTION_TOLERANCE = minimalMotionSize_->value();
         ObjectMotionGesture<ObjectWrapper::RawObject>::MAXIMAL_SAME_GESTURE_DISTANCE = maximalSameGestureDistance_->value();
+        ColorObjectPolicy::MINIMAL_OBJECT_SIZE_FRACTION = minimalObjectSizeFraction_->value();
+        std::cout << ColorObjectPolicy::MINIMAL_OBJECT_SIZE_FRACTION << std::endl;
     }
 } // namespace Gecon

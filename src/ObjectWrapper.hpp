@@ -24,28 +24,35 @@
 #include <QColor>
 #include <QMetaType>
 
+#include <Gecon/Fraction.hpp>
 #include <Gecon/ColorObjectPolicy.hpp>
+
+#include "ControlInfo.hpp"
 
 namespace Gecon
 {
     class ObjectWrapper
     {
     public:
-        typedef ColorObjectPolicy::Object RawObject;
-        typedef ColorObjectPolicy::ObjectPtr RawObjectPtr;
+        typedef ControlInfo::Object RawObject;
 
         ObjectWrapper();
-        ObjectWrapper(const QString& name, RawObject::Color color);
+        ObjectWrapper(const QString& name, const RawObject::Color& color);
+        virtual ~ObjectWrapper();
 
         const QString& name() const;
         QColor color() const;
-        RawObjectPtr rawObject() const;
+
+        void setName(const QString& name);
+        void setColor(const RawObject::Color& color);
+
+        RawObject* rawObject() const;
 
     private:
         QString name_;
         QColor color_;
 
-        RawObjectPtr rawObject_;
+        RawObject* rawObject_;
     };
 
     template< typename PropertyType >
@@ -69,6 +76,8 @@ namespace Gecon
 
     template<> const QList<ObjectPropertyWrapper<bool> > ObjectProperties<bool>::list;
     template<> const QList<ObjectPropertyWrapper<int> > ObjectProperties<int>::list;
+    template<> const QList<ObjectPropertyWrapper<double> > ObjectProperties<double>::list;
+    template<> const QList<ObjectPropertyWrapper<Fraction> > ObjectProperties<Fraction>::list;
     template<> const QList<ObjectPropertyWrapper<Point> > ObjectProperties<Point>::list;
 
     bool operator==(const ObjectWrapper& left, const ObjectWrapper& right);

@@ -39,8 +39,6 @@ namespace Gecon
 
         events_.push_back(new EventWrapper("relation enter", rawGesture_->relationEnterEvent(), this));
         events_.push_back(new EventWrapper("relation leave", rawGesture_->relationLeaveEvent(), this));
-        events_.push_back(new EventWrapper("in relation", rawGesture_->inRelationEvent(), this));
-        events_.push_back(new EventWrapper("not in relation", rawGesture_->notInRelationEvent(), this));
     }
 
     RelationGestureWrapper::RelationGestureWrapper(const RelationGestureWrapper& another):
@@ -78,6 +76,22 @@ namespace Gecon
         return relation_;
     }
 
+    void RelationGestureWrapper::setLeftObject(ObjectWrapper* object)
+    {
+        left_ = object;
+    }
+
+    void RelationGestureWrapper::setRightObject(ObjectWrapper* object)
+    {
+        right_ = object;
+    }
+
+    void RelationGestureWrapper::setRelation(ObjectRelation* relation)
+    {
+        delete relation_;
+        relation_ = relation->clone();
+    }
+
     void RelationGestureWrapper::edit()
     {
         if(dialog)
@@ -86,7 +100,7 @@ namespace Gecon
         }
     }
 
-    RelationGestureWrapper::RawGesture *RelationGestureWrapper::rawGesture()
+    ControlInfo::RelationGesture* RelationGestureWrapper::rawGesture()
     {
         return rawGesture_;
     }

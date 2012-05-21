@@ -26,6 +26,7 @@
 #include <QPainter>
 
 #include "ControlInfo.hpp"
+#include "DialogBase.hpp"
 
 #include <Gecon/ObjectStateGesture.hpp>
 
@@ -37,50 +38,55 @@ namespace Gecon
     }
 
     class ObjectModel; // forward declaration
+    class ObjectWrapper;
 
-    class ObjectDialog : public QDialog
+    class ObjectDialog : public DialogBase
     {
         Q_OBJECT
 
     public:
-        typedef ControlInfo::ObjectPolicy::Object Object;
-        typedef ControlInfo::GesturePolicy::Gesture Gesture;
+        typedef ControlInfo::Objects Objects;
         typedef ControlInfo::DevicePolicy::DeviceAdapter DeviceAdapter;
         typedef ControlInfo::DevicePolicy::Snapshot Snapshot;
         typedef Gecon::Image<RGB> Image;
-        typedef ControlInfo::ObjectPolicy::ObjectSet ObjectSet;
 
         explicit ObjectDialog(ObjectModel* objectModel, QWidget *parent = 0);
         ~ObjectDialog();
 
-    public slots:
-        int newObject();
-
-        void addObject();
-
-        void startCapture();
-        void stopCapture();
-
-        void displayImage(Image original, Image segmented, ObjectSet objects);
-        void firstImageDisplayed();
-
-        void grabColor(QPoint position);
-
         void setDevice(DeviceAdapter device);
 
-        void reset();
+    public slots:
+        int newObject();
+        int editObject(ObjectWrapper* object);
 
         int exec();
+
+    protected slots:
+        void beforeClose_();
+
+    private slots:
+        void addObject_();
+        void updateObject_();
+        void deleteObject_();
+
+        void startCapture_();
+        void stopCapture_();
+
+        void displayImage_(const Image& original, const Image& segmented, const Objects& objects);
+        void firstImageDisplayed_();
+
+        void grabColor_(QPoint position);
+
+        void reset_();
 
     private:
         ControlInfo::Control control_;
 
         Snapshot rawImage_;
 
-        Object::Color objectColor_;
-        bool colorGrabbed_;
+        ControlInfo::Object* rawObject_;
 
-        Object object_;
+        ObjectWrapper* editedObject_;
 
         ObjectModel* objectModel_;
 

@@ -327,6 +327,13 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="performActions">
+        <property name="text">
+         <string>Perform actions</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QDialogButtonBox" name="buttonBox">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>

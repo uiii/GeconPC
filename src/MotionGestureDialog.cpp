@@ -31,6 +31,8 @@
 
 #include "TestDialog.hpp"
 
+#include <fstream> // TODO remove
+
 namespace Gecon
 {
     MotionGestureDialog::MotionGestureDialog(GestureModel* gestureModel, ObjectModel *objectModel, TestDialog *testDialog, QWidget *parent) :
@@ -57,6 +59,9 @@ namespace Gecon
         connect(ui_->buttonBox, SIGNAL(accepted()), this, SLOT(addGesture()));
         connect(ui_->deleteButton, SIGNAL(clicked()), this, SLOT(deleteGesture()));
         connect(ui_->testButton, SIGNAL(clicked()), this, SLOT(testGesture()));
+
+        //TODO remove
+        connect(ui_->saveButton, SIGNAL(clicked()), this, SLOT(save()));
     }
     
     MotionGestureDialog::~MotionGestureDialog()
@@ -172,7 +177,7 @@ namespace Gecon
         ui_->object->setEnabled(false);
 
         connect(ui_->display, SIGNAL(imageDisplayed()), this, SLOT(firstImageDisplayed()));
-        connect(control_.signaler().get(), SIGNAL(objectsRecognized(Image,Image,ObjectSet)), this, SLOT(displayImage(Image,Image,ObjectSet)), Qt::BlockingQueuedConnection);
+        connect(control_.objectPolicySignaler(), SIGNAL(objectsRecognized(Image,Image,Objects)), this, SLOT(displayImage(Image,Image,Objects)), Qt::BlockingQueuedConnection);
 
         control_.start();
     }
@@ -187,7 +192,7 @@ namespace Gecon
             stopRecording();
         }
 
-        disconnect(control_.signaler().get(), SIGNAL(objectsRecognized(Image,Image,ObjectSet)), this, SLOT(displayImage(Image,Image,ObjectSet)));
+        disconnect(control_.objectPolicySignaler(), SIGNAL(objectsRecognized(Image,Image,Objects)), this, SLOT(displayImage(Image,Image,Objects)));
 
         QCoreApplication::processEvents();
 
@@ -255,12 +260,14 @@ namespace Gecon
             recordedMotion_ = motion;
             recordedMoves_ = moves;
 
+            std::cout << "moves count: " << moves.size() << std::endl;
+
             stopRecording();
             stopCapture();
         }
     }
 
-    void MotionGestureDialog::displayImage(Image original, Image segmented, ObjectSet obejcts)
+    void MotionGestureDialog::displayImage(const Image &original, const Image &segmented, const ControlInfo::Objects &obejcts)
     {
         ui_->display->displayImage(original, obejcts, currentlyRecordedMotion_);
     }
@@ -303,6 +310,40 @@ namespace Gecon
             painter.drawPolyline(motion);
             painter.restore();
 
+            QPolygonF moves;
+            QPointF point(0,0);
+            std::cout << "moves count: " << recordedMoves_.size() << std::endl;
+            for(auto move : recordedMoves_)
+            {
+                point = point + QPointF(std::cos(move * PI/4.0) * 20, -std::sin(move * PI/4.0) * 20);
+                std::cout << "point: " << point.x() << " " << point.y() << std::endl;
+                //moves << point;
+                //point = point + QPoint(1,1);
+                moves << point;
+            }
+
+            ratio = 1.0;
+            if(moves.boundingRect().height() > moves.boundingRect().width())
+            {
+                ratio = 0.9 * ui_->display->height() / moves.boundingRect().height();
+            }
+            else
+            {
+                ratio = 0.9 * ui_->display->height() / moves.boundingRect().width();
+            }
+
+            moves.translate(- moves.boundingRect().topLeft());
+
+            moveX = (ui_->display->width() - ratio * moves.boundingRect().width()) / 2;
+            moveY = (ui_->display->height() - ratio * moves.boundingRect().height()) / 2;
+
+            painter.save();
+            painter.translate(moveX, moveY);
+            painter.scale(ratio, ratio);
+            painter.setPen(QPen(Qt::green, 2.0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            painter.drawPolyline(moves);
+            painter.restore();
+
             ui_->display->displayImage(img);
         }
     }
@@ -327,7 +368,7 @@ namespace Gecon
 
         object_ = ui_->object->itemData(ui_->object->currentIndex()).value<ObjectWrapper*>();
 
-        ObjectSet objects;
+        ControlInfo::Objects objects;
         objects.insert(object_->rawObject());
         control_.prepareObjects(objects);
     }
@@ -342,7 +383,8 @@ namespace Gecon
         testedGesture_ = new MotionGestureWrapper(
             "Tested gesture",
             ui_->object->itemData(ui_->object->currentIndex()).value<ObjectWrapper*>(),
-            recordedMotion_
+            recordedMotion_,
+            gestureModel_->motionStorage()
         );
 
         connect(testDialog_, SIGNAL(finished(int)), this, SLOT(deleteTestedGesture()));
@@ -371,6 +413,27 @@ namespace Gecon
     int MotionGestureDialog::exec()
     {
         return QDialog::Rejected;
+    }
+
+    void MotionGestureDialog::save()
+    {
+        // TODO remove
+        QString motionsFile = QString("/mnt/uloziste/Pracoviste/Projekty/GeconFramework/tmp/gesta-pismena/") + ui_->gestureName->text() + ".motions";
+        QString movesFile = QString("/mnt/uloziste/Pracoviste/Projekty/GeconFramework/tmp/gesta-pismena/") + ui_->gestureName->text() + ".moves";
+        std::ofstream motionsOut(motionsFile.toAscii().data(), std::ios_base::app);
+        std::ofstream movesOut(movesFile.toAscii().data(), std::ios_base::app);
+        for(auto point : recordedMotion_)
+        {
+            motionsOut << point.x << " " << point.y << " ";
+        }
+        motionsOut << "\n";
+        std::cout << "moves count: " << recordedMoves_.size() << std::endl;
+        for(auto move : recordedMoves_)
+        {
+            std::cout << "move: " << move << std::endl;
+            movesOut << move << " ";
+        }
+        movesOut << "\n";
     }
 
     void MotionGestureDialog::initReadyButton_()

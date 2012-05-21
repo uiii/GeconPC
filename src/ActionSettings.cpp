@@ -19,6 +19,8 @@
 
 #include "ActionSettings.hpp"
 
+#include <QApplication>
+#include <QDesktopWidget>
 #include <QHBoxLayout>
 
 #include <FakeInput/mouse.hpp>
@@ -102,11 +104,18 @@ namespace Gecon
 
     ActionTriggerWrapper::RawActionTrigger* MouseMotionActionSettings::toTrigger(const Events &onEvents, const Events &offEvents) const
     {
+        qDebug("make mouse move trigger");
         ActionTriggerWrapper::RawActionTrigger* trigger = new ActionTriggerWrapper::RawActionTrigger([=](){
             qDebug("mouse move");
             ObjectWrapper::RawObject* object = object_->rawObject();
-            FakeInput::Mouse::moveTo(object->position().x, object->position().y);
-        });
+            double x = object->position().x * 1.5 - 0.25 * V4L2VideoDeviceCapture::SNAPSHOT_WIDTH;
+            double y = object->position().y * 1.5 - 0.25 * V4L2VideoDeviceCapture::SNAPSHOT_HEIGHT;
+
+            x = x / V4L2VideoDeviceCapture::SNAPSHOT_WIDTH * QApplication::desktop()->screenGeometry().width();
+            y = y / V4L2VideoDeviceCapture::SNAPSHOT_HEIGHT * QApplication::desktop()->screenGeometry().height();
+
+            FakeInput::Mouse::moveTo(x, y);
+        }, true);
 
         addSwitches_(trigger, onEvents, offEvents);
 
@@ -125,9 +134,9 @@ namespace Gecon
         layout->setContentsMargins(0, 0, 0, 0);
         layout->addWidget(button);
 
-        button->addItem("Left button", QVariant::fromValue(FakeInput::Mouse_Left));
-        button->addItem("Middle button", QVariant::fromValue(FakeInput::Mouse_Middle));
-        button->addItem("Right button", QVariant::fromValue(FakeInput::Mouse_Right));
+        button->addItem("left button", QVariant::fromValue(FakeInput::Mouse_Left));
+        button->addItem("middle button", QVariant::fromValue(FakeInput::Mouse_Middle));
+        button->addItem("right button", QVariant::fromValue(FakeInput::Mouse_Right));
     }
 
     MouseButtonActionSettings::MouseButtonActionSettings():

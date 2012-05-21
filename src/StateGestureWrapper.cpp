@@ -34,8 +34,6 @@ namespace Gecon
 
         events_.push_back(new EventWrapper("state enter", rawGesture_->stateEnterEvent(), this));
         events_.push_back(new EventWrapper("state leave", rawGesture_->stateLeaveEvent(), this));
-        events_.push_back(new EventWrapper("in state", rawGesture_->inStateEvent(), this));
-        events_.push_back(new EventWrapper("not in state", rawGesture_->notInStateEvent(), this));
     }
 
     StateGestureWrapper::StateGestureWrapper(const StateGestureWrapper& another):
@@ -68,6 +66,17 @@ namespace Gecon
         return state_;
     }
 
+    void StateGestureWrapper::setObject(ObjectWrapper* object)
+    {
+        object_ = object;
+    }
+
+    void StateGestureWrapper::setState(ObjectState* state)
+    {
+        delete state_;
+        state_ = state->clone();
+    }
+
     void StateGestureWrapper::edit()
     {
         if(dialog)
@@ -76,7 +85,7 @@ namespace Gecon
         }
     }
 
-    StateGestureWrapper::RawGesture *StateGestureWrapper::rawGesture()
+    ControlInfo::StateGesture* StateGestureWrapper::rawGesture()
     {
         return rawGesture_;
     }

@@ -26,6 +26,7 @@
 #include <QMetaType>
 
 #include <Gecon/Point.hpp>
+#include <Gecon/Fraction.hpp>
 
 #define DECLARE_SIMPLE_RELATION(ClassName, name, relation) \
     template< typename PropertyType > \
@@ -177,6 +178,20 @@ namespace Gecon
         not_equal_to<int>,
         less<int>,
         greater<int>
+    )
+
+    DECLARE_RELATION_LIST(double,
+        equal_to<double>,
+        not_equal_to<double>,
+        less<double>,
+        greater<double>
+    )
+
+    DECLARE_RELATION_LIST(Fraction,
+        equal_to<Fraction>,
+        not_equal_to<Fraction>,
+        less<Fraction>,
+        greater<Fraction>
     )
 
     DECLARE_RELATION_LIST(bool,

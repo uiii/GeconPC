@@ -44,10 +44,9 @@ namespace Gecon
         Q_OBJECT
         
     public:
+        typedef ControlInfo::Objects Objects;
         typedef ControlInfo::DevicePolicy::DeviceAdapter DeviceAdapter;
         typedef Gecon::Image<RGB> Image;
-        typedef ControlInfo::ObjectPolicy::Object Object;
-        typedef ControlInfo::ObjectPolicy::ObjectSet ObjectSet;
 
         explicit MotionGestureDialog(GestureModel* gestureModel, ObjectModel* objectModel, TestDialog* testDialog, QWidget *parent = 0);
         ~MotionGestureDialog();
@@ -69,7 +68,7 @@ namespace Gecon
         void motionUpdated(const MotionRecorder::Motion& motion);
         void motionRecorded(const MotionRecorder::Motion& motion, const MotionRecorder::MoveSequence& moves);
 
-        void displayImage(Image original, Image segmented, ObjectSet obejcts);
+        void displayImage(const Image& original, const Image& segmented, const Objects& obejcts);
         void displayRecordedMotion();
 
         void firstImageDisplayed();
@@ -84,6 +83,9 @@ namespace Gecon
         void reset();
 
         int exec();
+
+        // TODO remove
+        void save();
 
     private:
         void initReadyButton_();

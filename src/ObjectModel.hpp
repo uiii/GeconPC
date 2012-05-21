@@ -33,11 +33,7 @@ namespace Gecon
         Q_OBJECT
 
     public:
-        typedef ControlInfo::ObjectPolicy::ObjectPtr ObjectPtr;
-        typedef ControlInfo::ObjectPolicy::Object RawObject;
-        typedef ControlInfo::ObjectPolicy::ObjectSet RawObjectSet;
-
-        typedef QList<ObjectWrapper*> ObjectWrapperList;
+        typedef QList<ObjectWrapper*> ObjectWrappers;
 
         ObjectModel();
         virtual ~ObjectModel();
@@ -46,20 +42,21 @@ namespace Gecon
         QVariant data(const QModelIndex& index, int role) const;
 
         QModelIndex index(ObjectWrapper* object) const;
-        QModelIndex index(ObjectWrapper::RawObject* object) const;
+        QModelIndex index(ControlInfo::Object* object) const;
 
         int size() const;
 
-        void addObject(const QString& name, RawObject::Color color);
+        void addObject(const QString& name, ControlInfo::Object::Color color);
+        void editObject(const QModelIndex& index, const QString& name, ControlInfo::Object::Color color);
         void removeObject(const QModelIndex& index);
 
-        const ObjectWrapperList& objects() const;
-        const RawObjectSet& rawObjects() const;
+        const ObjectWrappers& objects() const;
+        const ControlInfo::Objects& rawObjects() const;
 
     private:
-        ObjectWrapperList objects_;
+        ObjectWrappers objects_;
 
-        RawObjectSet rawObjects_;
+        ControlInfo::Objects rawObjects_;
     };
 } // namespace Gecon
 

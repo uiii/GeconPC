@@ -23,8 +23,12 @@
 #include <Gecon/Control.hpp>
 #include <Gecon/Image.hpp>
 #include <Gecon/V4L2VideoDevicePolicy.hpp>
-#include <Gecon/GesturePolicy.hpp>
+#include <Gecon/ObjectGesturePolicy.hpp>
 #include <Gecon/ActionPolicy.hpp>
+
+#include <Gecon/ObjectStateGesture.hpp>
+#include <Gecon/ObjectRelationGesture.hpp>
+#include <Gecon/ObjectMotionGesture.hpp>
 
 #include "ObjectPolicy.hpp"
 
@@ -34,10 +38,25 @@ namespace Gecon
     {
         typedef Gecon::V4L2VideoDevicePolicy<Gecon::Image<Gecon::RGB> > DevicePolicy;
         typedef Gecon::ObjectPolicy ObjectPolicy;
-        typedef Gecon::GesturePolicy<ObjectPolicy::Object> GesturePolicy;
+        typedef Gecon::ObjectGesturePolicy<ObjectPolicy::Object, ObjectPolicy::Objects> GesturePolicy;
         typedef Gecon::ActionPolicy<GesturePolicy::Event> ActionPolicy;
 
         typedef Gecon::Control<DevicePolicy, ObjectPolicy, GesturePolicy, ActionPolicy> Control;
+
+        typedef DevicePolicy::DeviceAdapter DeviceAdapter;
+
+        typedef ObjectPolicy::Object Object;
+        typedef ObjectPolicy::Objects Objects;
+
+        typedef GesturePolicy::Gesture Gesture;
+        typedef GesturePolicy::Gestures Gestures;
+
+        typedef ObjectStateGesture<Object> StateGesture;
+        typedef ObjectRelationGesture<Object> RelationGesture;
+        typedef ObjectMotionGesture<Object> MotionGesture;
+
+        typedef ActionPolicy::ActionTrigger ActionTrigger;
+        typedef ActionPolicy::ActionTriggers ActionTriggers;
     };
 }
 
