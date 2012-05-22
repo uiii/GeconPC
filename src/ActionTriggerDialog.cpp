@@ -35,7 +35,7 @@ namespace Gecon
 {
     ActionTriggerDialog::ActionTriggerDialog(ActionTriggerModel* eventTriggerModel, GestureModel* gestureModel, ObjectModel* objectModel, QWidget *parent) :
         QDialog(parent),
-        eventTriggerModel_(eventTriggerModel),
+        actionTriggerModel_(eventTriggerModel),
         gestureModel_(gestureModel),
         objectModel_(objectModel),
         eventDialog_(new GestureEventDialog(gestureModel, this)),
@@ -47,7 +47,10 @@ namespace Gecon
         ui_->setupUi(this);
 
         actions_.push_back(new MouseMotionActionSettings(objectModel));
-        actions_.push_back(new MouseButtonActionSettings());
+        actions_.push_back(new MouseButtonActionSettings);
+        actions_.push_back(new MouseWheelActionSettings);
+        actions_.push_back(new KeyActionSettings);
+        actions_.push_back(new CommandActionSettings);
 
         for(ActionSettings* action : actions_)
         {
@@ -135,7 +138,7 @@ namespace Gecon
 
         try
         {
-            eventTriggerModel_->addTrigger(
+            actionTriggerModel_->addTrigger(
                 ui_->actionName->text(),
                 onEvents_,
                 offEvents_,
@@ -159,9 +162,9 @@ namespace Gecon
 
         try
         {
-            QModelIndex index = eventTriggerModel_->index(editedTrigger_);
-            eventTriggerModel_->removeTrigger(index);
-            eventTriggerModel_->addTrigger(
+            QModelIndex index = actionTriggerModel_->index(editedTrigger_);
+            actionTriggerModel_->removeTrigger(index);
+            actionTriggerModel_->addTrigger(
                 ui_->actionName->text(),
                 onEvents_,
                 offEvents_,
@@ -172,7 +175,7 @@ namespace Gecon
         }
         catch(...)
         {
-            eventTriggerModel_->addTrigger(triggerBackup.name(), triggerBackup.onEvents(), triggerBackup.offEvents(), triggerBackup.action());
+            actionTriggerModel_->addTrigger(triggerBackup.name(), triggerBackup.onEvents(), triggerBackup.offEvents(), triggerBackup.action());
 
             // TODO
         }
@@ -185,10 +188,11 @@ namespace Gecon
 
         if(button == QMessageBox::Ok)
         {
-            QModelIndex index = eventTriggerModel_->index(editedTrigger_);
-            eventTriggerModel_->removeTrigger(index);
-
-            accept();
+            QModelIndex index = actionTriggerModel_->index(editedTrigger_);
+            if(actionTriggerModel_->removeTrigger(index))
+            {
+                accept();
+            }
         }
     }
 
@@ -251,5 +255,10 @@ namespace Gecon
         switchModel_->clear();
         ui_->action->setCurrentIndex(0);
         ui_->actionName->setText(QString());
+
+        for(ActionSettings* action : actions_)
+        {
+            action->reset();
+        }
     }
 }

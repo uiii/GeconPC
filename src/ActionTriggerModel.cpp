@@ -92,23 +92,25 @@ namespace Gecon
         endInsertRows();
     }
 
-    void ActionTriggerModel::removeTrigger(const QModelIndex &index)
+    bool ActionTriggerModel::removeTrigger(const QModelIndex &index)
     {
         if(! index.isValid() || index.row() >= size())
         {
-            return;
+            return false;
         }
 
         ActionTriggerWrapper* trigger = triggers_.at(index.row());
 
         rawTriggers_.erase(trigger->rawTrigger());
-        delete trigger;
 
         beginRemoveRows(QModelIndex(), index.row(), index.row());
 
+        delete trigger;
         triggers_.removeAt(index.row());
 
         endRemoveRows();
+
+        return true;
     }
 
     const ActionTriggerModel::ActionTriggerWrappers& ActionTriggerModel::triggers() const

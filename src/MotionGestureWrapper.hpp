@@ -61,6 +61,7 @@ namespace Gecon
 
         ObjectWrapper* object_;
         ControlInfo::MotionGesture::Motion motion_;
+        ControlInfo::MotionGesture::MotionStorage* motionStorage_;
 
         ControlInfo::MotionGesture* rawGesture_;
     };

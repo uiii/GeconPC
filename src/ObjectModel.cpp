@@ -19,9 +19,15 @@
 
 #include "ObjectModel.hpp"
 
+#include <QMessageBox>
+
+#include "GestureWrapper.hpp"
+#include "GestureModel.hpp"
+
 namespace Gecon
 {
-    ObjectModel::ObjectModel()
+    ObjectModel::ObjectModel(GestureModel* gestureModel):
+        gestureModel_(gestureModel)
     {
     }
 
@@ -130,23 +136,53 @@ namespace Gecon
         endInsertRows();
     }
 
-    void ObjectModel::removeObject(const QModelIndex& index)
+    bool ObjectModel::removeObject(const QModelIndex& index)
     {
         if(! index.isValid() || index.row() >= objects_.size())
         {
-            return;
+            return false;
         }
 
         ObjectWrapper* object = objects_.at(index.row());
-        rawObjects_.remove(object->rawObject());
 
-        delete object;
+        if(! object->gestures().empty())
+        {
+            QMessageBox message(QMessageBox::Warning, tr("Delete gestures question"),
+                tr("There are %1 gestures defined for this object. Gestures will be deleted too.").arg(object->gestures().size()), QMessageBox::Ok | QMessageBox::Cancel);
+
+            QString detailedText;
+            for(GestureWrapper* gesture : object->gestures())
+            {
+                detailedText.append(gesture->name() + "\n");
+            }
+            message.setDetailedText(detailedText);
+
+            int button = message.exec();
+
+            if(button != QMessageBox::Ok)
+            {
+                return false;
+            }
+
+            for(GestureWrapper* gesture : object->gestures())
+            {
+                if(! gestureModel_->removeGesture(gestureModel_->index(gesture)))
+                {
+                    return false;
+                }
+            }
+        }
+
+        rawObjects_.remove(object->rawObject());
 
         beginRemoveRows(QModelIndex(), index.row(), index.row());
 
+        delete object;
         objects_.removeAt(index.row());
 
         endRemoveRows();
+
+        return true;
     }
 
     const ObjectModel::ObjectWrappers &ObjectModel::objects() const

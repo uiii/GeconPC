@@ -24,6 +24,8 @@
 #include <QColor>
 #include <QMetaType>
 
+#include <set>
+
 #include <Gecon/Fraction.hpp>
 #include <Gecon/ColorObjectPolicy.hpp>
 
@@ -31,6 +33,8 @@
 
 namespace Gecon
 {
+    class GestureWrapper;
+
     class ObjectWrapper
     {
     public:
@@ -48,11 +52,17 @@ namespace Gecon
 
         RawObject* rawObject() const;
 
+        void addGesture(GestureWrapper* gesture);
+        void removeGesture(GestureWrapper* gesture);
+        const std::set<GestureWrapper *> &gestures();
+
     private:
         QString name_;
         QColor color_;
 
         RawObject* rawObject_;
+
+        std::set<GestureWrapper*> gestures_;
     };
 
     template< typename PropertyType >

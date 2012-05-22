@@ -129,9 +129,10 @@ namespace Gecon
             stopCapture_();
 
             QModelIndex index = objectModel_->index(editedObject_);
-            objectModel_->removeObject(index);
-
-            accept();
+            if(objectModel_->removeObject(index))
+            {
+                accept();
+            }
         }
     }
 

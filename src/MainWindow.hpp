@@ -65,9 +65,9 @@ namespace Gecon
 
         ControlInfo::Control control_;
 
-        ObjectModel objectModel_;
-        GestureModel gestureModel_;
-        ActionTriggerModel actionTriggerModel_;
+        ActionTriggerModel* actionTriggerModel_;
+        GestureModel* gestureModel_;
+        ObjectModel* objectModel_;
 
         SettingsDialog* settingsDialog_;
         ObjectDialog* objectDialog_;

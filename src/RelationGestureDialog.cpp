@@ -159,15 +159,12 @@ namespace Gecon {
 
     void RelationGestureDialog::updateGesture()
     {
-        RelationGestureWrapper gestureBackup(*editedGesture_);
-
         currentRelation_->save();
 
         try
         {
-            QModelIndex index = gestureModel_->index(editedGesture_);
-            gestureModel_->removeGesture(index);
-            gestureModel_->addRelationGesture(
+            gestureModel_->editRelationGesture(
+                gestureModel_->index(editedGesture_),
                 ui_->gestureName->text(),
                 ui_->leftObject->itemData(ui_->leftObject->currentIndex()).value<ObjectWrapper*>(),
                 ui_->rightObject->itemData(ui_->rightObject->currentIndex()).value<ObjectWrapper*>(),
@@ -176,15 +173,9 @@ namespace Gecon {
 
             accept();
         }
-        catch(...)
+        catch(const std::exception& e)
         {
-            gestureModel_->addRelationGesture(
-                gestureBackup.name(),
-                gestureBackup.leftObject(),
-                gestureBackup.rightObject(),
-                gestureBackup.relation());
-
-            // TODO
+            QMessageBox::critical(this, "Relation gesture error", e.what(), QMessageBox::Ok);
         }
     }
 
@@ -196,9 +187,10 @@ namespace Gecon {
         if(button == QMessageBox::Ok)
         {
             QModelIndex index = gestureModel_->index(editedGesture_);
-            gestureModel_->removeGesture(index);
-
-            accept();
+            if(gestureModel_->removeGesture(index))
+            {
+                accept();
+            }
         }
     }
 

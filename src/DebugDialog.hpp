@@ -46,6 +46,10 @@ namespace Gecon {
         QSpinBox* minimalMotionSize_;
         QSpinBox* maximalSameGestureDistance_;
         QSpinBox* minimalObjectSizeFraction_;
+        QSpinBox* yRange_;
+        QSpinBox* cbRange_;
+        QSpinBox* crRange_;
+        QSpinBox* mouseMotionBufferSize_;
 
         Ui::DebugDialog *ui_;
     };

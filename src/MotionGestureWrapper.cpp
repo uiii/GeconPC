@@ -32,9 +32,10 @@ namespace Gecon
             ControlInfo::MotionGesture::MotionStorage* motionStorage):
         GestureWrapper(name, {object}),
         object_(object),
-        motion_(motion)
+        motion_(motion),
+        motionStorage_(motionStorage)
     {
-        rawGesture_ = new ObjectMotionGesture<ObjectWrapper::RawObject>(object_->rawObject(), motion_, motionStorage);
+        rawGesture_ = new ObjectMotionGesture<ObjectWrapper::RawObject>(object_->rawObject(), motion_, motionStorage_);
 
         events_.push_back(new EventWrapper("motion done", rawGesture_->motionDoneEvent(), this));
     }
@@ -65,11 +66,17 @@ namespace Gecon
     void MotionGestureWrapper::setObject(ObjectWrapper* object)
     {
         object_ = object;
+
+        setObjects({object_});
+
+        *rawGesture_ = ObjectMotionGesture<ObjectWrapper::RawObject>(object_->rawObject(), motion_, motionStorage_);
     }
 
     void MotionGestureWrapper::setMotion(const ControlInfo::MotionGesture::Motion& motion)
     {
         motion_ = motion;
+
+        *rawGesture_ = ObjectMotionGesture<ObjectWrapper::RawObject>(object_->rawObject(), motion_, motionStorage_);
     }
 
     void MotionGestureWrapper::edit()

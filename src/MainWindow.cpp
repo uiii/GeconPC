@@ -35,13 +35,16 @@ namespace Gecon
 {
     MainWindow::MainWindow(QWidget *parent):
         QMainWindow(parent),
+        actionTriggerModel_(new ActionTriggerModel),
+        gestureModel_(new GestureModel(actionTriggerModel_)),
+        objectModel_(new ObjectModel(gestureModel_)),
         settingsDialog_(new SettingsDialog(&control_, this)),
-        objectDialog_(new ObjectDialog(&objectModel_, this)),
-        gestureTestDialog_(new TestDialog(&objectModel_, &gestureModel_, &actionTriggerModel_, this)),
-        stateGestureDialog_(new StateGestureDialog(&gestureModel_, &objectModel_, gestureTestDialog_, this)),
-        relationGestureDialog_(new RelationGestureDialog(&gestureModel_, &objectModel_, gestureTestDialog_, this)),
-        motionGestureDialog_(new MotionGestureDialog(&gestureModel_, &objectModel_, gestureTestDialog_, this)),
-        eventTriggerDialog_(new ActionTriggerDialog(&actionTriggerModel_, &gestureModel_, &objectModel_, this)),
+        objectDialog_(new ObjectDialog(objectModel_, this)),
+        gestureTestDialog_(new TestDialog(objectModel_, gestureModel_, actionTriggerModel_, this)),
+        stateGestureDialog_(new StateGestureDialog(gestureModel_, objectModel_, gestureTestDialog_, this)),
+        relationGestureDialog_(new RelationGestureDialog(gestureModel_, objectModel_, gestureTestDialog_, this)),
+        motionGestureDialog_(new MotionGestureDialog(gestureModel_, objectModel_, gestureTestDialog_, this)),
+        eventTriggerDialog_(new ActionTriggerDialog(actionTriggerModel_, gestureModel_, objectModel_, this)),
         ui_(new Ui::MainWindow)
     {
         DebugDialog* debug = new DebugDialog(this); // TODO
@@ -53,9 +56,9 @@ namespace Gecon
 
         ui_->setupUi(this);
 
-        ui_->objectView->setModel(&objectModel_);
-        ui_->gestureView->setModel(&gestureModel_);
-        ui_->eventTriggerView->setModel(&actionTriggerModel_);
+        ui_->objectView->setModel(objectModel_);
+        ui_->gestureView->setModel(gestureModel_);
+        ui_->eventTriggerView->setModel(actionTriggerModel_);
 
         updateDialogs();
 
@@ -78,24 +81,28 @@ namespace Gecon
 
     MainWindow::~MainWindow()
     {
+        delete actionTriggerModel_;
+        delete gestureModel_;
+        delete objectModel_;
+
         delete ui_;
     }
 
     void MainWindow::editObject(const QModelIndex &index)
     {
-        ObjectWrapper* object = objectModel_.data(index, Qt::UserRole).value<ObjectWrapper*>();
+        ObjectWrapper* object = objectModel_->data(index, Qt::UserRole).value<ObjectWrapper*>();
         objectDialog_->editObject(object);
     }
 
     void MainWindow::editGesture(const QModelIndex& index)
     {
-        GestureWrapper* gesture = gestureModel_.data(index, Qt::UserRole).value<GestureWrapper*>();
+        GestureWrapper* gesture = gestureModel_->data(index, Qt::UserRole).value<GestureWrapper*>();
         gesture->edit();
     }
 
     void MainWindow::editActionTrigger(const QModelIndex &index)
     {
-        ActionTriggerWrapper* trigger = actionTriggerModel_.data(index, Qt::UserRole).value<ActionTriggerWrapper*>();
+        ActionTriggerWrapper* trigger = actionTriggerModel_->data(index, Qt::UserRole).value<ActionTriggerWrapper*>();
         eventTriggerDialog_->editTrigger(trigger);
     }
 
@@ -110,9 +117,9 @@ namespace Gecon
     {
         if(start)
         {
-            control_.prepareObjects(objectModel_.rawObjects());
-            control_.prepareGestures(gestureModel_.rawGestures());
-            control_.prepareActionTriggers(actionTriggerModel_.rawTriggers());
+            control_.prepareObjects(objectModel_->rawObjects());
+            control_.prepareGestures(gestureModel_->rawGestures());
+            control_.prepareActionTriggers(actionTriggerModel_->rawTriggers());
 
             control_.start();
 

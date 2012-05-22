@@ -44,7 +44,7 @@ namespace Gecon
         Q_OBJECT
 
     public:
-        explicit ActionTriggerDialog(ActionTriggerModel* eventTriggerModel_, GestureModel* gestureModel, ObjectModel *objectModel, QWidget *parent);
+        explicit ActionTriggerDialog(ActionTriggerModel* actionTriggerModel_, GestureModel* gestureModel, ObjectModel *objectModel, QWidget *parent);
         ~ActionTriggerDialog();
 
     public slots:
@@ -68,7 +68,7 @@ namespace Gecon
         void reset_();
 
     private:
-        ActionTriggerModel* eventTriggerModel_;
+        ActionTriggerModel* actionTriggerModel_;
         GestureModel* gestureModel_;
         ObjectModel* objectModel_;
 

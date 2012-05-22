@@ -79,17 +79,27 @@ namespace Gecon
     void RelationGestureWrapper::setLeftObject(ObjectWrapper* object)
     {
         left_ = object;
+
+        setObjects({left_, right_});
+
+        *rawGesture_ = *(relation_->toGesture(left_, right_));
     }
 
     void RelationGestureWrapper::setRightObject(ObjectWrapper* object)
     {
         right_ = object;
+
+        setObjects({left_, right_});
+
+        *rawGesture_ = *(relation_->toGesture(left_, right_));
     }
 
     void RelationGestureWrapper::setRelation(ObjectRelation* relation)
     {
         delete relation_;
         relation_ = relation->clone();
+
+        *rawGesture_ = *(relation_->toGesture(left_, right_));
     }
 
     void RelationGestureWrapper::edit()

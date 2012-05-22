@@ -137,15 +137,12 @@ namespace Gecon {
 
     void StateGestureDialog::updateGesture()
     {
-        StateGestureWrapper gestureBackup(*editedGesture_);
-
         currentState_->save();
 
         try
         {
-            QModelIndex index = gestureModel_->index(editedGesture_);
-            gestureModel_->removeGesture(index);
-            gestureModel_->addStateGesture(
+            gestureModel_->editStateGesture(
+                gestureModel_->index(editedGesture_),
                 ui_->gestureName->text(),
                 ui_->object->itemData(ui_->object->currentIndex()).value<ObjectWrapper*>(),
                 currentState_
@@ -153,11 +150,9 @@ namespace Gecon {
 
             accept();
         }
-        catch(...)
+        catch(const std::exception& e)
         {
-            gestureModel_->addStateGesture(gestureBackup.name(), gestureBackup.object(), gestureBackup.state());
-
-            // TODO
+            QMessageBox::critical(this, "State gesture error", e.what(), QMessageBox::Ok);
         }
     }
 
@@ -169,9 +164,10 @@ namespace Gecon {
         if(button == QMessageBox::Ok)
         {
             QModelIndex index = gestureModel_->index(editedGesture_);
-            gestureModel_->removeGesture(index);
-
-            accept();
+            if(gestureModel_->removeGesture(index))
+            {
+                accept();
+            }
         }
     }
 

@@ -21,6 +21,7 @@
 
 #include "EventWrapper.hpp"
 #include "ActionSettings.hpp"
+#include "GestureWrapper.hpp"
 
 namespace Gecon
 {
@@ -31,6 +32,19 @@ namespace Gecon
         action_(action->clone())
     {
         rawTrigger_ = action_->toTrigger(onEvents_, offEvents_);
+
+        for(EventWrapper* event : onEvents_)
+        {
+            event->gesture()->addActionTrigger(this);
+        }
+
+        for(EventWrapper* event : offEvents_)
+        {
+            if(event)
+            {
+                event->gesture()->addActionTrigger(this);
+            }
+        }
     }
 
     ActionTriggerWrapper::ActionTriggerWrapper(const ActionTriggerWrapper &another):
@@ -41,6 +55,19 @@ namespace Gecon
     ActionTriggerWrapper::~ActionTriggerWrapper()
     {
         delete rawTrigger_;
+
+        for(EventWrapper* event : onEvents_)
+        {
+            event->gesture()->removeActionTrigger(this);
+        }
+
+        for(EventWrapper* event : offEvents_)
+        {
+            if(event)
+            {
+                event->gesture()->removeActionTrigger(this);
+            }
+        }
     }
 
     const QString &ActionTriggerWrapper::name() const

@@ -22,10 +22,21 @@
 
 #include <QString>
 #include <QComboBox>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QHBoxLayout>
 
 #include "ObjectModel.hpp"
 #include "EventWrapper.hpp"
 #include "ActionTriggerWrapper.hpp"
+
+#include <FakeInput/key.hpp>
+#include <FakeInput/mouse.hpp>
+#include <FakeInput/actions/actionsequence.hpp>
 
 namespace Gecon
 {
@@ -59,6 +70,8 @@ namespace Gecon
     class MouseMotionActionSettings : public ActionSettings
     {
     public:
+        static config_variable<int> BUFFER_SIZE;
+
         struct Widget : public QWidget
         {
             Widget();
@@ -105,6 +118,102 @@ namespace Gecon
 
     private:
         int buttonIndex_;
+
+        Widget* widget_;
+    };
+
+    class MouseWheelActionSettings : public ActionSettings
+    {
+    public:
+        struct Widget : public QWidget
+        {
+            Widget();
+
+            QComboBox* wheelMove;
+        };
+
+        MouseWheelActionSettings();
+
+        void load();
+        void save();
+        void reset();
+
+        ActionTriggerWrapper::RawActionTrigger* toTrigger(const Events& onEvents, const Events& offEvents) const;
+
+        ActionSettings* clone() const;
+
+    private:
+        int wheelMoveIndex_;
+
+        Widget* widget_;
+    };
+
+    class KeyActionSettingsWidget : public QWidget
+    {
+        Q_OBJECT
+
+    public:
+        KeyActionSettingsWidget();
+
+        QComboBox* keyAction;
+        QLabel* keyLabel;
+        FakeInput::Key key;
+        QPushButton* grabKeyButton;
+
+    protected slots:
+        void grab();
+        void ungrab();
+
+    protected:
+        void hideEvent(QHideEvent *);
+        bool x11Event(XEvent* event);
+
+    private:
+        bool grabbing_;
+    };
+
+    class KeyActionSettings : public ActionSettings
+    {
+    public:
+        KeyActionSettings();
+
+        void load();
+        void save();
+        void reset();
+
+        ActionTriggerWrapper::RawActionTrigger* toTrigger(const Events& onEvents, const Events& offEvents) const;
+
+        ActionSettings* clone() const;
+
+    private:
+        int keyActionIndex_;
+        FakeInput::Key key_;
+
+        KeyActionSettingsWidget* widget_;
+    };
+
+    class CommandActionSettings : public ActionSettings
+    {
+    public:
+        struct Widget : public QWidget
+        {
+            Widget();
+
+            QLineEdit* command;
+        };
+
+        CommandActionSettings();
+
+        void load();
+        void save();
+        void reset();
+
+        ActionTriggerWrapper::RawActionTrigger* toTrigger(const Events& onEvents, const Events& offEvents) const;
+
+        ActionSettings* clone() const;
+
+    private:
+        QString command_;
 
         Widget* widget_;
     };

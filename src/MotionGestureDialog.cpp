@@ -134,15 +134,12 @@ namespace Gecon
 
     void MotionGestureDialog::updateGesture()
     {
-        MotionGestureWrapper gestureBackup(*editedGesture_);
-
         QString name = ui_->gestureName->text();
 
         try
         {
-            QModelIndex index = gestureModel_->index(editedGesture_);
-            gestureModel_->removeGesture(index);
-            gestureModel_->addMotionGesture(
+            gestureModel_->editMotionGesture(
+                gestureModel_->index(editedGesture_),
                 name,
                 ui_->object->itemData(ui_->object->currentIndex()).value<ObjectWrapper*>(),
                 recordedMotion_
@@ -150,11 +147,9 @@ namespace Gecon
 
             accept();
         }
-        catch(...)
+        catch(const std::exception& e)
         {
-            gestureModel_->addMotionGesture(gestureBackup.name(), gestureBackup.object(), gestureBackup.motion());
-
-            // TODO
+            QMessageBox::critical(this, "Motion gesture error", e.what(), QMessageBox::Ok);
         }
     }
 
@@ -166,9 +161,10 @@ namespace Gecon
         if(button == QMessageBox::Ok)
         {
             QModelIndex index = gestureModel_->index(editedGesture_);
-            gestureModel_->removeGesture(index);
-
-            accept();
+            if(gestureModel_->removeGesture(index))
+            {
+                accept();
+            }
         }
     }
 
@@ -179,12 +175,14 @@ namespace Gecon
         connect(ui_->display, SIGNAL(imageDisplayed()), this, SLOT(firstImageDisplayed()));
         connect(control_.objectPolicySignaler(), SIGNAL(objectsRecognized(Image,Image,Objects)), this, SLOT(displayImage(Image,Image,Objects)), Qt::BlockingQueuedConnection);
 
+        qDebug("dialog: start capture");
+
         control_.start();
     }
 
     void MotionGestureDialog::stopCapture()
     {
-        disconnect(ui_->recordMotionButton, SIGNAL(clicked()), this, SLOT(stopCapture()));
+        disconnect(ui_->recordMotionButton, SIGNAL(clicked()), this, 0);
         connect(ui_->recordMotionButton, SIGNAL(clicked()), this, SLOT(startCapture()));
 
         if(recording_)
@@ -352,7 +350,7 @@ namespace Gecon
     {
         disconnect(ui_->display, SIGNAL(imageDisplayed()), this, SLOT(firstImageDisplayed()));
 
-        disconnect(ui_->recordMotionButton, SIGNAL(clicked()), this, SLOT(startCapture()));
+        disconnect(ui_->recordMotionButton, SIGNAL(clicked()), this, 0);
         connect(ui_->recordMotionButton, SIGNAL(clicked()), this, SLOT(stopCapture()));
 
         readyLabel_->show();

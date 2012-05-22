@@ -19,11 +19,15 @@
 
 #include "GestureModel.hpp"
 
+#include <QMessageBox>
+
+#include "ActionTriggerModel.hpp"
+
 namespace Gecon
 {
-    GestureModel::GestureModel(QObject *parent) :
-        QAbstractListModel(parent),
-        motionStorage_(new ControlInfo::MotionGesture::MotionStorage)
+    GestureModel::GestureModel(ActionTriggerModel* actionTriggerModel) :
+        motionStorage_(new ControlInfo::MotionGesture::MotionStorage),
+        actionTriggerModel_(actionTriggerModel)
     {
     }
 
@@ -351,11 +355,11 @@ namespace Gecon
         return rawGestures;
     }
 
-    void GestureModel::removeGesture(const QModelIndex &index)
+    bool GestureModel::removeGesture(const QModelIndex &index)
     {
         if(! index.isValid() || index.row() >= size())
         {
-            return;
+            return false;
         }
 
         beginRemoveRows(QModelIndex(), index.row(), index.row());
@@ -366,6 +370,36 @@ namespace Gecon
         std::cout << "state: " << stateGestures_.size() << std::endl;
         std::cout << "relation: " << relationGestures_.size() << std::endl;
         std::cout << "motion: " << motionGestures_.size() << std::endl;
+
+        GestureWrapper* gesture = data(index, Qt::UserRole).value<GestureWrapper*>();
+
+        if(! gesture->actionTriggers().empty())
+        {
+            QMessageBox message(QMessageBox::Warning, tr("Delete action trigger question"),
+                tr("There are %1 action triggers defined for this gesture's events. Action triggers will be deleted too.").arg(gesture->actionTriggers().size()), QMessageBox::Ok | QMessageBox::Cancel);
+
+            QString detailedText;
+            for(ActionTriggerWrapper* trigger : gesture->actionTriggers())
+            {
+                detailedText.append(trigger->name() + "\n");
+            }
+            message.setDetailedText(detailedText);
+
+            int button = message.exec();
+
+            if(button != QMessageBox::Ok)
+            {
+                return false;
+            }
+
+            for(ActionTriggerWrapper* trigger : gesture->actionTriggers())
+            {
+                if(! actionTriggerModel_->removeTrigger(actionTriggerModel_->index(trigger)))
+                {
+                    return false;
+                }
+            }
+        }
 
         if(row < stateGestures_.size())
         {
@@ -387,6 +421,8 @@ namespace Gecon
         }
 
         endRemoveRows();
+
+        return true;
     }
 
     ControlInfo::MotionGesture::MotionStorage *GestureModel::motionStorage()

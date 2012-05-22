@@ -25,10 +25,12 @@ namespace Gecon
         name_(name),
         objects_(objects)
     {
+        addGestureToObjects_();
     }
 
     GestureWrapper::~GestureWrapper()
     {
+        removeGestureFromObjects_();
     }
 
     const QString &GestureWrapper::name() const
@@ -44,5 +46,43 @@ namespace Gecon
     void GestureWrapper::setName(const QString& name)
     {
         name_ = name;
+    }
+
+    void GestureWrapper::setObjects(const GestureWrapper::Objects &objects)
+    {
+        removeGestureFromObjects_();
+        objects_ = objects;
+        addGestureToObjects_();
+    }
+
+    void GestureWrapper::addActionTrigger(ActionTriggerWrapper *trigger)
+    {
+        actionTriggers_.insert(trigger);
+    }
+
+    void GestureWrapper::removeActionTrigger(ActionTriggerWrapper *trigger)
+    {
+        actionTriggers_.erase(trigger);
+    }
+
+    const std::set<ActionTriggerWrapper*>& GestureWrapper::actionTriggers()
+    {
+        return actionTriggers_;
+    }
+
+    void GestureWrapper::addGestureToObjects_()
+    {
+        for(ObjectWrapper* object : objects_)
+        {
+            object->addGesture(this);
+        }
+    }
+
+    void GestureWrapper::removeGestureFromObjects_()
+    {
+        for(ObjectWrapper* object : objects_)
+        {
+            object->removeGesture(this);
+        }
     }
 } // namespace Gecon

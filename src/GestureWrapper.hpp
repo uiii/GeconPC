@@ -28,9 +28,12 @@
 #include "ControlInfo.hpp"
 #include "ObjectWrapper.hpp"
 #include "EventWrapper.hpp"
+#include <ActionTriggerWrapper.hpp>
 
 namespace Gecon
 {
+    class ActionTriggerWrapper;
+
     class GestureWrapper
     {
     public:
@@ -45,14 +48,24 @@ namespace Gecon
         virtual const Events& events() const = 0;
 
         virtual void setName(const QString& name);
+        virtual void setObjects(const Objects& objects);
 
         virtual void edit() = 0;
 
         virtual ControlInfo::Gesture* rawGesture() = 0;
 
+        void addActionTrigger(ActionTriggerWrapper* trigger);
+        void removeActionTrigger(ActionTriggerWrapper* trigger);
+        const std::set<ActionTriggerWrapper*>& actionTriggers();
+
     private:
         QString name_;
         Objects objects_;
+
+        void addGestureToObjects_();
+        void removeGestureFromObjects_();
+
+        std::set<ActionTriggerWrapper*> actionTriggers_;
     };
 } // namespace Gecon
 

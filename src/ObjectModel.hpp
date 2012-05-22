@@ -28,6 +28,8 @@
 
 namespace Gecon
 {
+    class GestureModel;
+
     class ObjectModel : public QAbstractListModel
     {
         Q_OBJECT
@@ -35,7 +37,7 @@ namespace Gecon
     public:
         typedef QList<ObjectWrapper*> ObjectWrappers;
 
-        ObjectModel();
+        ObjectModel(GestureModel* gestureModel);
         virtual ~ObjectModel();
 
         int rowCount(const QModelIndex& parent) const;
@@ -48,7 +50,7 @@ namespace Gecon
 
         void addObject(const QString& name, ControlInfo::Object::Color color);
         void editObject(const QModelIndex& index, const QString& name, ControlInfo::Object::Color color);
-        void removeObject(const QModelIndex& index);
+        bool removeObject(const QModelIndex& index);
 
         const ObjectWrappers& objects() const;
         const ControlInfo::Objects& rawObjects() const;
@@ -57,6 +59,8 @@ namespace Gecon
         ObjectWrappers objects_;
 
         ControlInfo::Objects rawObjects_;
+
+        GestureModel* gestureModel_;
     };
 } // namespace Gecon
 

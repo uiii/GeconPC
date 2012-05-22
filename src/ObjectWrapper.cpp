@@ -19,6 +19,8 @@
 
 #include "ObjectWrapper.hpp"
 
+#include "GestureWrapper.hpp"
+
 namespace Gecon
 {
     ObjectWrapper::ObjectWrapper():
@@ -63,6 +65,21 @@ namespace Gecon
     ObjectWrapper::RawObject* ObjectWrapper::rawObject() const
     {
         return rawObject_;
+    }
+
+    void ObjectWrapper::addGesture(GestureWrapper* gesture)
+    {
+        gestures_.insert(gesture);
+    }
+
+    void ObjectWrapper::removeGesture(GestureWrapper* gesture)
+    {
+        gestures_.erase(gesture);
+    }
+
+    const std::set<GestureWrapper*> &ObjectWrapper::gestures()
+    {
+        return gestures_;
     }
 
     bool operator==(const ObjectWrapper& left, const ObjectWrapper& right)

@@ -44,7 +44,7 @@ namespace Gecon
         int size() const;
 
         void addTrigger(const QString& name, const ActionTriggerWrapper::Events& onEvents, const ActionTriggerWrapper::Events& offEvents, ActionSettings* action);
-        void removeTrigger(const QModelIndex& index);
+        bool removeTrigger(const QModelIndex& index);
 
         const ActionTriggerWrappers& triggers() const;
         const ControlInfo::ActionTriggers& rawTriggers() const;

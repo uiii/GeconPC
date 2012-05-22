@@ -69,12 +69,18 @@ namespace Gecon
     void StateGestureWrapper::setObject(ObjectWrapper* object)
     {
         object_ = object;
+
+        setObjects({object});
+
+        *rawGesture_ = *(state_->toGesture(object_));
     }
 
     void StateGestureWrapper::setState(ObjectState* state)
     {
         delete state_;
         state_ = state->clone();
+
+        *rawGesture_ = *(state_->toGesture(object_));
     }
 
     void StateGestureWrapper::edit()

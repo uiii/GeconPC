@@ -30,6 +30,8 @@
 
 namespace Gecon
 {
+    class ActionTriggerModel;
+
     class GestureModel : public QAbstractListModel
     {
         Q_OBJECT
@@ -43,7 +45,7 @@ namespace Gecon
         typedef QList<ControlInfo::RelationGesture*> RawRelationGestures;
         typedef QList<ControlInfo::MotionGesture*> RawMotionGestures;
 
-        explicit GestureModel(QObject *parent = 0);
+        explicit GestureModel(ActionTriggerModel* actionTriggerModel);
         virtual ~GestureModel();
 
         int rowCount(const QModelIndex& parent) const;
@@ -62,7 +64,7 @@ namespace Gecon
         void editRelationGesture(const QModelIndex& index, const QString& name, ObjectWrapper* leftObject, ObjectWrapper* rightObject, ObjectRelation* relationSettings);
         void editMotionGesture(const QModelIndex& index, const QString& name, ObjectWrapper* object, const ControlInfo::MotionGesture::Motion& motion);
 
-        void removeGesture(const QModelIndex& index);
+        bool removeGesture(const QModelIndex& index);
 
         const StateGestureWrappers& stateGestures() const;
         const RelationGestureWrappers& relationGestures() const;
@@ -86,6 +88,8 @@ namespace Gecon
         RawMotionGestures rawMotionGestures_;
 
         ControlInfo::MotionGesture::MotionStorage* motionStorage_;
+
+        ActionTriggerModel* actionTriggerModel_;
     };
 } // namespace Gecon
 

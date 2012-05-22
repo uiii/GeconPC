@@ -22,9 +22,12 @@
 
 #include <QFormLayout>
 
+#include "ObjectWrapper.hpp"
+
 #include <Gecon/ColorObjectPolicy.hpp>
 #include <Gecon/ObjectMotionGesture.hpp>
-#include "ObjectWrapper.hpp"
+
+#include "ActionSettings.hpp"
 
 namespace Gecon
 {
@@ -39,12 +42,20 @@ namespace Gecon
         minimalMotionSize_ = new QSpinBox;
         maximalSameGestureDistance_ = new QSpinBox;
         minimalObjectSizeFraction_ = new QSpinBox;
+        yRange_ = new QSpinBox;
+        cbRange_ = new QSpinBox;
+        crRange_ = new QSpinBox;
+        mouseMotionBufferSize_ = new QSpinBox;
 
         motionTimeout_->setMaximum(10000);
         minimalGestureSide_->setMaximum(10000);
         minimalMotionSize_->setMaximum(10000);
         maximalSameGestureDistance_->setMaximum(10000);
         minimalObjectSizeFraction_->setMaximum(10000);
+        yRange_->setMaximum(10000);
+        cbRange_->setMaximum(10000);
+        crRange_->setMaximum(10000);
+        mouseMotionBufferSize_->setMaximum(10000);
 
         QFormLayout* layout = new QFormLayout(ui_->configVariables);
         layout->setContentsMargins(0, 0, 0, 0);
@@ -53,12 +64,20 @@ namespace Gecon
         layout->addRow(tr("minimalMotionSize"),minimalMotionSize_);
         layout->addRow(tr("maximalSameGestureDistance"),maximalSameGestureDistance_);
         layout->addRow(tr("minimalObjectSizeFraction"),minimalObjectSizeFraction_);
+        layout->addRow(tr("Y range"),yRange_);
+        layout->addRow(tr("CB range"),cbRange_);
+        layout->addRow(tr("CR range"),crRange_);
+        layout->addRow(tr("mouse motion buffer size"),mouseMotionBufferSize_);
 
         motionTimeout_->setValue(ObjectMotionGesture<ObjectWrapper::RawObject>::MOTION_TIMEOUT);
         minimalGestureSide_->setValue(ObjectMotionGesture<ObjectWrapper::RawObject>::MINIMAL_GESTURE_SIDE);
         minimalMotionSize_->setValue(ObjectMotionGesture<ObjectWrapper::RawObject>::NOT_MOTION_TOLERANCE);
         maximalSameGestureDistance_->setValue(ObjectMotionGesture<ObjectWrapper::RawObject>::MAXIMAL_SAME_GESTURE_DISTANCE);
         minimalObjectSizeFraction_->setValue(ColorObjectPolicy::MINIMAL_OBJECT_SIZE_FRACTION);
+        yRange_->setValue(ControlInfo::Objects::Y_RANGE);
+        cbRange_->setValue(ControlInfo::Objects::CB_RANGE);
+        crRange_->setValue(ControlInfo::Objects::CR_RANGE);
+        mouseMotionBufferSize_->setValue(MouseMotionActionSettings::BUFFER_SIZE);
 
         connect(ui_->buttonBox, SIGNAL(accepted()), this, SLOT(apply()));
     }
@@ -76,6 +95,9 @@ namespace Gecon
         ObjectMotionGesture<ObjectWrapper::RawObject>::NOT_MOTION_TOLERANCE = minimalMotionSize_->value();
         ObjectMotionGesture<ObjectWrapper::RawObject>::MAXIMAL_SAME_GESTURE_DISTANCE = maximalSameGestureDistance_->value();
         ColorObjectPolicy::MINIMAL_OBJECT_SIZE_FRACTION = minimalObjectSizeFraction_->value();
-        std::cout << ColorObjectPolicy::MINIMAL_OBJECT_SIZE_FRACTION << std::endl;
+        ControlInfo::Objects::Y_RANGE = yRange_->value();
+        ControlInfo::Objects::CB_RANGE = cbRange_->value();
+        ControlInfo::Objects::CR_RANGE = crRange_->value();
+        MouseMotionActionSettings::BUFFER_SIZE = mouseMotionBufferSize_->value();
     }
 } // namespace Gecon

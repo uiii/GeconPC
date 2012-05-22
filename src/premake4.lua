@@ -10,6 +10,7 @@ project "GeconPC"
     require_pkg_config()
     require_pkg("GeconFramework")
     require_pkg("FakeInput")
+    require_pkg("x11")
 
     includedirs { "./" }
 
