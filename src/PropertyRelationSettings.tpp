@@ -24,6 +24,8 @@
 
 #include <iostream>
 
+#include "Gecon/Point.hpp"
+
 namespace Gecon
 {
     template< typename PropertyType >

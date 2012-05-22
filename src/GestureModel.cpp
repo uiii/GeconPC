@@ -213,6 +213,25 @@ namespace Gecon
 
         MotionGestureWrapper* motionGesture = new MotionGestureWrapper(gestureName, object, motion, motionStorage_);
 
+        MotionGestureWrapper* tooSimilarGesture = 0;
+        for(MotionGestureWrapper* gesture : motionGestures_)
+        {
+            std::size_t maxDistance = ControlInfo::MotionGesture::MAXIMAL_SAME_GESTURE_DISTANCE * 2;
+            std::size_t distance = gestureDistance(gesture->rawGesture(), motionGesture->rawGesture(), maxDistance);
+            if(distance < maxDistance)
+            {
+                std::cout << "too similar distance: " << distance << std::endl;
+                tooSimilarGesture = gesture;
+                break;
+            }
+        }
+
+        if(tooSimilarGesture)
+        {
+            delete motionGesture;
+            throw std::logic_error(QString("Too similar gesture already exists: %1").arg(tooSimilarGesture->name()).toAscii().data());
+        }
+
         MotionGestureWrappers::iterator it = std::find_if(motionGestures_.begin(), motionGestures_.end(),
             [&](const MotionGestureWrapper* item){ return QString::localeAwareCompare(motionGesture->name(), item->name()) < 0; }
         );

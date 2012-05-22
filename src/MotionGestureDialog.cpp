@@ -96,6 +96,7 @@ namespace Gecon
         ui_->gestureName->setText(editedGesture_->name());
 
         recordedMotion_ = gesture->motion();
+        recordedMoves_ = gesture->rawGesture()->moves();
         displayRecordedMotion();
 
         ui_->deleteButton->show();
@@ -126,9 +127,9 @@ namespace Gecon
 
             accept();
         }
-        catch(...)
+        catch(const std::exception& e)
         {
-            // TODO
+            QMessageBox::critical(this, "Motion gesture error", e.what(), QMessageBox::Ok);
         }
     }
 
@@ -401,6 +402,7 @@ namespace Gecon
     void MotionGestureDialog::reset()
     {
         recordedMotion_.clear();
+        recordedMoves_.clear();
 
         ui_->display->reset();
         ui_->object->setCurrentIndex(0);
