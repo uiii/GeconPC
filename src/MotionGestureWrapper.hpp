@@ -39,8 +39,7 @@ namespace Gecon
         MotionGestureWrapper(
                 const QString& name,
                 ObjectWrapper* object,
-                const ControlInfo::MotionGesture::Motion& motion,
-                ControlInfo::MotionGesture::MotionStorage* motionStorage
+                const ControlInfo::MotionGesture::Motion& motion
         );
         virtual ~MotionGestureWrapper();
 
@@ -61,7 +60,6 @@ namespace Gecon
 
         ObjectWrapper* object_;
         ControlInfo::MotionGesture::Motion motion_;
-        ControlInfo::MotionGesture::MotionStorage* motionStorage_;
 
         ControlInfo::MotionGesture* rawGesture_;
     };

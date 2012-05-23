@@ -69,10 +69,10 @@ namespace Gecon
         layout->addRow(tr("CR range"),crRange_);
         layout->addRow(tr("mouse motion buffer size"),mouseMotionBufferSize_);
 
-        motionTimeout_->setValue(ObjectMotionGesture<ObjectWrapper::RawObject>::MOTION_TIMEOUT);
-        minimalGestureSide_->setValue(ObjectMotionGesture<ObjectWrapper::RawObject>::MINIMAL_GESTURE_SIDE);
-        minimalMotionSize_->setValue(ObjectMotionGesture<ObjectWrapper::RawObject>::NOT_MOTION_TOLERANCE);
-        maximalSameGestureDistance_->setValue(ObjectMotionGesture<ObjectWrapper::RawObject>::MAXIMAL_SAME_GESTURE_DISTANCE);
+        motionTimeout_->setValue(ObjectMotionGestureChecker<ObjectWrapper::RawObject>::MOTION_TIMEOUT);
+        minimalGestureSide_->setValue(ObjectMotionGestureChecker<ObjectWrapper::RawObject>::MINIMAL_GESTURE_SIDE);
+        minimalMotionSize_->setValue(ObjectMotionGestureChecker<ObjectWrapper::RawObject>::NOT_MOTION_TOLERANCE);
+        maximalSameGestureDistance_->setValue(ObjectMotionGestureChecker<ObjectWrapper::RawObject>::MAXIMAL_SAME_GESTURE_DISTANCE);
         minimalObjectSizeFraction_->setValue(ColorObjectPolicy::MINIMAL_OBJECT_SIZE_FRACTION);
         yRange_->setValue(ControlInfo::Objects::Y_RANGE);
         cbRange_->setValue(ControlInfo::Objects::CB_RANGE);
@@ -90,10 +90,10 @@ namespace Gecon
     void DebugDialog::apply()
     {
         qDebug("apply");
-        ObjectMotionGesture<ObjectWrapper::RawObject>::MOTION_TIMEOUT = motionTimeout_->value();
-        ObjectMotionGesture<ObjectWrapper::RawObject>::MINIMAL_GESTURE_SIDE = minimalGestureSide_->value();
-        ObjectMotionGesture<ObjectWrapper::RawObject>::NOT_MOTION_TOLERANCE = minimalMotionSize_->value();
-        ObjectMotionGesture<ObjectWrapper::RawObject>::MAXIMAL_SAME_GESTURE_DISTANCE = maximalSameGestureDistance_->value();
+        ObjectMotionGestureChecker<ObjectWrapper::RawObject>::MOTION_TIMEOUT = motionTimeout_->value();
+        ObjectMotionGestureChecker<ObjectWrapper::RawObject>::MINIMAL_GESTURE_SIDE = minimalGestureSide_->value();
+        ObjectMotionGestureChecker<ObjectWrapper::RawObject>::NOT_MOTION_TOLERANCE = minimalMotionSize_->value();
+        ObjectMotionGestureChecker<ObjectWrapper::RawObject>::MAXIMAL_SAME_GESTURE_DISTANCE = maximalSameGestureDistance_->value();
         ColorObjectPolicy::MINIMAL_OBJECT_SIZE_FRACTION = minimalObjectSizeFraction_->value();
         ControlInfo::Objects::Y_RANGE = yRange_->value();
         ControlInfo::Objects::CB_RANGE = cbRange_->value();

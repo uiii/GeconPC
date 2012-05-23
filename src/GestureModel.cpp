@@ -26,7 +26,9 @@
 namespace Gecon
 {
     GestureModel::GestureModel(ActionTriggerModel* actionTriggerModel) :
-        motionStorage_(new ControlInfo::MotionGesture::MotionStorage),
+        stateGestureChecker_(new ControlInfo::StateGestureChecker),
+        relationGestureChecker_(new ControlInfo::RelationGestureChecker),
+        motionGestureChecker_(new ControlInfo::MotionGestureChecker),
         actionTriggerModel_(actionTriggerModel)
     {
     }
@@ -48,7 +50,9 @@ namespace Gecon
             delete motionGesture;
         }
 
-        delete motionStorage_;
+        delete stateGestureChecker_;
+        delete relationGestureChecker_;
+        delete motionGestureChecker_;
     }
 
     int GestureModel::rowCount(const QModelIndex &parent) const
@@ -119,49 +123,6 @@ namespace Gecon
         return createIndex(index, 0);
     }
 
-    /*QModelIndex GestureModel::index(GestureWrapper::RawGesture* rawGesture) const
-    {
-        int index = -1;
-        int offset = 0;
-
-        auto hasSameRawGestures = [&](const GestureWrapper* item) -> bool
-        {
-                return rawGesture == item->rawGesture();
-        };
-
-        StateGestureWrapperList::iterator it = std::find_if(
-            stateGestures_.begin(), stateGestures_.end(), hasSameRawGestures);
-
-        if(it == stateGestures_.end())
-        {
-            offset += stateGestures_.size();
-
-            RelationGestureWrapperList::iterator it = std::find_if(
-                relationGestures_.begin(), relationGestures_.end(), hasSameRawGestures);
-
-            if(it == relationGestures_.end())
-            {
-                offset += relationGestures_.size();
-
-                MotionGestureWrapperList::iterator it = std::find_if(
-                    motionGestures_.begin(), motionGestures_.end(), hasSameRawGestures);
-
-                index = motionGestures_.indexOf(static_cast<MotionGestureWrapper*>(gesture));
-            }
-        }
-        else
-        {
-            index = it - stateGestures_.begin();
-        }
-
-        if(index != -1)
-        {
-            index += offset;
-        }
-
-        return createIndex(index, 0);
-    }*/
-
     int GestureModel::size() const
     {
         return stateGestures_.size() + relationGestures_.size() + motionGestures_.size();
@@ -174,6 +135,8 @@ namespace Gecon
                 : name;
 
         StateGestureWrapper* stateGesture = new StateGestureWrapper(gestureName, object, stateSettings);
+
+        stateGestureChecker_->addGesture(stateGesture->rawGesture());
 
         StateGestureWrappers::iterator it = std::find_if(stateGestures_.begin(), stateGestures_.end(),
             [&](const StateGestureWrapper* item){ return QString::localeAwareCompare(stateGesture->name(), item->name()) < 0; }
@@ -194,6 +157,8 @@ namespace Gecon
 
         RelationGestureWrapper* relationGesture = new RelationGestureWrapper(gestureName, leftObject, rightObject, relationSettings);
 
+        relationGestureChecker_->addGesture(relationGesture->rawGesture());
+
         RelationGestureWrappers::iterator it = std::find_if(relationGestures_.begin(), relationGestures_.end(),
             [&](const RelationGestureWrapper* item){ return QString::localeAwareCompare(relationGesture->name(), item->name()) < 0; }
         );
@@ -211,26 +176,9 @@ namespace Gecon
                 ? "Motion gesture " + QString::number(motionGestures_.size() + 1)
                 : name;
 
-        MotionGestureWrapper* motionGesture = new MotionGestureWrapper(gestureName, object, motion, motionStorage_);
+        MotionGestureWrapper* motionGesture = new MotionGestureWrapper(gestureName, object, motion);
 
-        MotionGestureWrapper* tooSimilarGesture = 0;
-        for(MotionGestureWrapper* gesture : motionGestures_)
-        {
-            std::size_t maxDistance = ControlInfo::MotionGesture::MAXIMAL_SAME_GESTURE_DISTANCE * 2;
-            std::size_t distance = gestureDistance(gesture->rawGesture(), motionGesture->rawGesture(), maxDistance);
-            if(distance < maxDistance)
-            {
-                std::cout << "too similar distance: " << distance << std::endl;
-                tooSimilarGesture = gesture;
-                break;
-            }
-        }
-
-        if(tooSimilarGesture)
-        {
-            delete motionGesture;
-            throw std::logic_error(QString("Too similar gesture already exists: %1").arg(tooSimilarGesture->name()).toAscii().data());
-        }
+        motionGestureChecker_->addGesture(motionGesture->rawGesture());
 
         MotionGestureWrappers::iterator it = std::find_if(motionGestures_.begin(), motionGestures_.end(),
             [&](const MotionGestureWrapper* item){ return QString::localeAwareCompare(motionGesture->name(), item->name()) < 0; }
@@ -319,10 +267,33 @@ namespace Gecon
                 ? "Motion gesture " + QString::number(motionGestures_.size() + 1)
                 : name;
 
+
         MotionGestureWrapper* motionGesture = motionGestures_.at(realIndex);
+
+        motionGestureChecker_->removeGesture(motionGesture->rawGesture());
+
+        QString oldName = motionGesture->name();
+        ObjectWrapper* oldObject = motionGesture->object();
+        ControlInfo::MotionGesture::Motion oldMotion = motionGesture->motion();
+
         motionGesture->setName(gestureName);
         motionGesture->setObject(object);
         motionGesture->setMotion(motion);
+
+        try
+        {
+            motionGestureChecker_->addGesture(motionGesture->rawGesture());
+        }
+        catch(...)
+        {
+            motionGesture->setName(oldName);
+            motionGesture->setObject(oldObject);
+            motionGesture->setMotion(oldMotion);
+
+            motionGestureChecker_->addGesture(motionGesture->rawGesture());
+
+            throw;
+        }
 
         beginRemoveRows(QModelIndex(), realIndex, realIndex);
         motionGestures_.removeAt(realIndex);
@@ -352,26 +323,15 @@ namespace Gecon
         return motionGestures_;
     }
 
-    ControlInfo::Gestures GestureModel::rawGestures()
+    ControlInfo::GestureCheckers GestureModel::checkers()
     {
-        ControlInfo::Gestures rawGestures;
+        ControlInfo::GestureCheckers checkers;
 
-        for(StateGestureWrapper* stateGesture : stateGestures_)
-        {
-            rawGestures.insert(stateGesture->rawGesture());
-        }
+        checkers.insert(stateGestureChecker_);
+        checkers.insert(relationGestureChecker_);
+        checkers.insert(motionGestureChecker_);
 
-        for(RelationGestureWrapper* relationGesture : relationGestures_)
-        {
-            rawGestures.insert(relationGesture->rawGesture());
-        }
-
-        for(MotionGestureWrapper* motionGesture : motionGestures_)
-        {
-            rawGestures.insert(motionGesture->rawGesture());
-        }
-
-        return rawGestures;
+        return checkers;
     }
 
     bool GestureModel::removeGesture(const QModelIndex &index)
@@ -420,32 +380,26 @@ namespace Gecon
             }
         }
 
+        delete gesture;
+
         if(row < stateGestures_.size())
         {
-            std::cout << "del row: " << row << std::endl;
-            delete stateGestures_.at(row);
+            stateGestureChecker_->removeGesture(dynamic_cast<StateGestureWrapper*>(gesture)->rawGesture());
             stateGestures_.removeAt(row);
         }
         else if((row -= stateGestures_.size()) < relationGestures_.size())
         {
-            std::cout << "del row: " << row << std::endl;
-            delete relationGestures_.at(row);
+            relationGestureChecker_->removeGesture(dynamic_cast<RelationGestureWrapper*>(gesture)->rawGesture());
             relationGestures_.removeAt(row);
         }
         else if((row -= relationGestures_.size()) < motionGestures_.size())
         {
-            std::cout << "del row: " << row << std::endl;
-            delete motionGestures_.at(row);
+            motionGestureChecker_->removeGesture(dynamic_cast<MotionGestureWrapper*>(gesture)->rawGesture());
             motionGestures_.removeAt(row);
         }
 
         endRemoveRows();
 
         return true;
-    }
-
-    ControlInfo::MotionGesture::MotionStorage *GestureModel::motionStorage()
-    {
-        return motionStorage_;
     }
 } // namespace Gecon

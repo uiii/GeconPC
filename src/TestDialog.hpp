@@ -100,7 +100,9 @@ namespace Gecon
     private:
         ControlInfo::Control control_;
 
-        ControlInfo::GesturePolicy::Gestures gestures_;
+        ControlInfo::StateGestureChecker stateGestureChecker_;
+        ControlInfo::RelationGestureChecker relationGestureChecker_;
+        ControlInfo::MotionGestureChecker motionGestureChecker_;
 
         ObjectModel* objectModel_;
         GestureModel* gestureModel_;

@@ -103,6 +103,7 @@ namespace Gecon
         {
             Widget();
 
+            QComboBox* buttonAction;
             QComboBox* button;
         };
 
@@ -117,6 +118,7 @@ namespace Gecon
         ActionSettings* clone() const;
 
     private:
+        int buttonActionIndex_;
         int buttonIndex_;
 
         Widget* widget_;

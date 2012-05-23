@@ -118,7 +118,7 @@ namespace Gecon
         if(start)
         {
             control_.prepareObjects(objectModel_->rawObjects());
-            control_.prepareGestures(gestureModel_->rawGestures());
+            control_.prepareGestureCheckers(gestureModel_->checkers());
             control_.prepareActionTriggers(actionTriggerModel_->rawTriggers());
 
             control_.start();
@@ -130,7 +130,7 @@ namespace Gecon
             control_.stop();
 
             control_.prepareObjects(ControlInfo::Objects());
-            control_.prepareGestures(ControlInfo::Gestures());
+            control_.prepareGestureCheckers(ControlInfo::GestureCheckers());
             control_.prepareActionTriggers(ControlInfo::ActionTriggers());
 
             ui_->actionStart_control->setText("Start control");

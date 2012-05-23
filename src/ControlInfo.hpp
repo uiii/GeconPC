@@ -30,6 +30,10 @@
 #include <Gecon/ObjectRelationGesture.hpp>
 #include <Gecon/ObjectMotionGesture.hpp>
 
+#include <Gecon/ObjectStateGestureChecker.hpp>
+#include <Gecon/ObjectRelationGestureChecker.hpp>
+#include <Gecon/ObjectMotionGestureChecker.hpp>
+
 #include "ObjectPolicy.hpp"
 
 namespace Gecon
@@ -48,9 +52,14 @@ namespace Gecon
         typedef ObjectPolicy::Object Object;
         typedef ObjectPolicy::Objects Objects;
 
-        typedef GesturePolicy::Gesture Gesture;
-        typedef GesturePolicy::Gestures Gestures;
+        typedef GesturePolicy::GestureChecker GestureChecker;
+        typedef GesturePolicy::GestureCheckers GestureCheckers;
 
+        typedef ObjectStateGestureChecker<Object, Objects> StateGestureChecker;
+        typedef ObjectRelationGestureChecker<Object, Objects> RelationGestureChecker;
+        typedef ObjectMotionGestureChecker<Object, Objects> MotionGestureChecker;
+
+        typedef ObjectGesture<Object> Gesture;
         typedef ObjectStateGesture<Object> StateGesture;
         typedef ObjectRelationGesture<Object> RelationGesture;
         typedef ObjectMotionGesture<Object> MotionGesture;

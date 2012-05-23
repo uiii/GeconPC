@@ -196,7 +196,7 @@ namespace Gecon
         QCoreApplication::processEvents();
 
         QtConcurrent::run(&control_, &ControlInfo::Control::stop);
-        control_.prepareGestures(ControlInfo::GesturePolicy::Gestures());
+        control_.prepareGestureCheckers(ControlInfo::GesturePolicy::GestureCheckers());
 
         readyLabel_->hide();
         readyButton_->hide();
@@ -218,9 +218,9 @@ namespace Gecon
         connect(motionRecorder_->signaler().get(), SIGNAL(motionRecorded(const MotionRecorder::Motion&, const MotionRecorder::MoveSequence&)),
                 this, SLOT(motionRecorded(const MotionRecorder::Motion&, const MotionRecorder::MoveSequence&)), Qt::BlockingQueuedConnection);
 
-        ControlInfo::GesturePolicy::Gestures gestures;
-        gestures.insert(motionRecorder_);
-        control_.prepareGestures(gestures);
+        ControlInfo::GesturePolicy::GestureCheckers checkers;
+        checkers.insert(motionRecorder_);
+        control_.prepareGestureCheckers(checkers);
 
         QtConcurrent::run(&control_, &ControlInfo::Control::restart);
 
@@ -315,7 +315,7 @@ namespace Gecon
             for(auto move : recordedMoves_)
             {
                 point = point + QPointF(std::cos(move * PI/4.0) * 20, -std::sin(move * PI/4.0) * 20);
-                std::cout << "point: " << point.x() << " " << point.y() << std::endl;
+                //std::cout << "point: " << point.x() << " " << point.y() << std::endl;
                 //moves << point;
                 //point = point + QPoint(1,1);
                 moves << point;
@@ -382,8 +382,7 @@ namespace Gecon
         testedGesture_ = new MotionGestureWrapper(
             "Tested gesture",
             ui_->object->itemData(ui_->object->currentIndex()).value<ObjectWrapper*>(),
-            recordedMotion_,
-            gestureModel_->motionStorage()
+            recordedMotion_
         );
 
         connect(testDialog_, SIGNAL(finished(int)), this, SLOT(deleteTestedGesture()));

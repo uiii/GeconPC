@@ -70,9 +70,7 @@ namespace Gecon
         const RelationGestureWrappers& relationGestures() const;
         const MotionGestureWrappers& motionGestures() const;
 
-        ControlInfo::Gestures rawGestures();
-
-        ControlInfo::MotionGesture::MotionStorage* motionStorage();
+        ControlInfo::GestureCheckers checkers();
 
     signals:
         
@@ -87,7 +85,9 @@ namespace Gecon
         RawRelationGestures rawRelationGestures_;
         RawMotionGestures rawMotionGestures_;
 
-        ControlInfo::MotionGesture::MotionStorage* motionStorage_;
+        ControlInfo::StateGestureChecker* stateGestureChecker_;
+        ControlInfo::RelationGestureChecker* relationGestureChecker_;
+        ControlInfo::MotionGestureChecker* motionGestureChecker_;
 
         ActionTriggerModel* actionTriggerModel_;
     };

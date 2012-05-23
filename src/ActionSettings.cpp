@@ -141,11 +141,17 @@ namespace Gecon
     }
 
     MouseButtonActionSettings::Widget::Widget():
+        buttonAction(new QComboBox),
         button(new QComboBox)
     {
         QHBoxLayout* layout = new QHBoxLayout(this);
         layout->setContentsMargins(0, 0, 0, 0);
+        layout->addWidget(buttonAction);
         layout->addWidget(button);
+
+        buttonAction->addItem("press", QVariant::fromValue(1));
+        buttonAction->addItem("release", QVariant::fromValue(2));
+        buttonAction->addItem("press & release", QVariant::fromValue(3));
 
         button->addItem("left button", QVariant::fromValue(FakeInput::Mouse_Left));
         button->addItem("middle button", QVariant::fromValue(FakeInput::Mouse_Middle));
@@ -160,25 +166,41 @@ namespace Gecon
 
     void MouseButtonActionSettings::load()
     {
+        widget_->buttonAction->setCurrentIndex(buttonActionIndex_);
         widget_->button->setCurrentIndex(buttonIndex_);
     }
 
     void MouseButtonActionSettings::save()
     {
+        buttonActionIndex_ = widget_->buttonAction->currentIndex();
         buttonIndex_ = widget_->button->currentIndex();
     }
 
     void MouseButtonActionSettings::reset()
     {
+        widget_->buttonAction->setCurrentIndex(0);
         widget_->button->setCurrentIndex(0);
     }
 
     ActionTriggerWrapper::RawActionTrigger *MouseButtonActionSettings::toTrigger(const ActionSettings::Events &onEvents, const ActionSettings::Events &offEvents) const
     {
+        int buttonAction = widget_->buttonAction->itemData(buttonActionIndex_).value<int>();
         FakeInput::MouseButton button = widget_->button->itemData(buttonIndex_).value<FakeInput::MouseButton>();
+
+        FakeInput::ActionSequence action;
+        if(buttonAction & 1)
+        {
+            action.press(button);
+        }
+
+        if(buttonAction & 2)
+        {
+            action.release(button);
+        }
+
         ActionTriggerWrapper::RawActionTrigger* trigger = new ActionTriggerWrapper::RawActionTrigger([=](){
-                qDebug("click");
-                FakeInput::ActionSequence().press(button).release(button).send();
+                qDebug("mouse button");
+                action.send();
         });
 
         addSwitches_(trigger, onEvents, offEvents);

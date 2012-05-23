@@ -25,17 +25,14 @@ namespace Gecon
 {
     MotionGestureDialog* MotionGestureWrapper::dialog = 0;
 
-    MotionGestureWrapper::MotionGestureWrapper(
-            const QString& name,
+    MotionGestureWrapper::MotionGestureWrapper(const QString& name,
             ObjectWrapper* object,
-            const ControlInfo::MotionGesture::Motion& motion,
-            ControlInfo::MotionGesture::MotionStorage* motionStorage):
+            const ControlInfo::MotionGesture::Motion& motion):
         GestureWrapper(name, {object}),
         object_(object),
-        motion_(motion),
-        motionStorage_(motionStorage)
+        motion_(motion)
     {
-        rawGesture_ = new ObjectMotionGesture<ObjectWrapper::RawObject>(object_->rawObject(), motion_, motionStorage_);
+        rawGesture_ = new ObjectMotionGesture<ObjectWrapper::RawObject>(object_->rawObject(), motion_);
 
         events_.push_back(new EventWrapper("motion done", rawGesture_->motionDoneEvent(), this));
     }
@@ -69,14 +66,14 @@ namespace Gecon
 
         setObjects({object_});
 
-        *rawGesture_ = ObjectMotionGesture<ObjectWrapper::RawObject>(object_->rawObject(), motion_, motionStorage_);
+        *rawGesture_ = ObjectMotionGesture<ObjectWrapper::RawObject>(object_->rawObject(), motion_);
     }
 
     void MotionGestureWrapper::setMotion(const ControlInfo::MotionGesture::Motion& motion)
     {
         motion_ = motion;
 
-        *rawGesture_ = ObjectMotionGesture<ObjectWrapper::RawObject>(object_->rawObject(), motion_, motionStorage_);
+        *rawGesture_ = ObjectMotionGesture<ObjectWrapper::RawObject>(object_->rawObject(), motion_);
     }
 
     void MotionGestureWrapper::edit()

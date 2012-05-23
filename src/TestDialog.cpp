@@ -134,7 +134,7 @@ namespace Gecon
     void TestDialog::includeGesture_(StateGestureWrapper* stateGesture, bool isTestedGesture)
     {
         ControlInfo::StateGesture* rawGesture = stateGesture->rawGesture();
-        gestures_.insert(rawGesture);
+        stateGestureChecker_.addGesture(rawGesture);
 
         ControlInfo::ActionTrigger* stateEnterTrigger = new ControlInfo::ActionTrigger([=](){ emit gestureEventOccured(stateGesture, "State enter", isTestedGesture); });
         ControlInfo::ActionTrigger* stateLeaveTrigger = new ControlInfo::ActionTrigger([=](){ emit gestureEventOccured(stateGesture, "State leave", isTestedGesture); });
@@ -149,7 +149,7 @@ namespace Gecon
     void TestDialog::includeGesture_(RelationGestureWrapper* relationGesture, bool isTestedGesture)
     {
         ControlInfo::RelationGesture* rawGesture = relationGesture->rawGesture();
-        gestures_.insert(rawGesture);
+        relationGestureChecker_.addGesture(rawGesture);
 
         ControlInfo::ActionTrigger* relationEnterTrigger = new ControlInfo::ActionTrigger([=](){ emit gestureEventOccured(relationGesture, "Relation enter", isTestedGesture); });
         ControlInfo::ActionTrigger* relationLeaveTrigger = new ControlInfo::ActionTrigger([=](){ emit gestureEventOccured(relationGesture, "Relation leave", isTestedGesture); });
@@ -164,7 +164,7 @@ namespace Gecon
     void TestDialog::includeGesture_(MotionGestureWrapper* motionGesture, bool isTestedGesture)
     {
         ControlInfo::MotionGesture* rawGesture = motionGesture->rawGesture();
-        gestures_.insert(rawGesture);
+        motionGestureChecker_.addGesture(rawGesture);
 
         ControlInfo::ActionTrigger* motionDoneTrigger = new ControlInfo::ActionTrigger([=](){ emit gestureEventOccured(motionGesture, "Motion done", isTestedGesture); });
         motionDoneTrigger->addSwitch(rawGesture->motionDoneEvent());
@@ -227,7 +227,13 @@ namespace Gecon
         connect(control_.objectPolicySignaler(), SIGNAL(objectsRecognized(Image,Image,Objects)), this, SLOT(displayImage_(Image,Image,Objects)), Qt::BlockingQueuedConnection);
 
         control_.prepareObjects(objectModel_->rawObjects());
-        control_.prepareGestures(gestures_);
+
+        ControlInfo::GestureCheckers checkers;
+        checkers.insert(&stateGestureChecker_);
+        checkers.insert(&relationGestureChecker_);
+        checkers.insert(&motionGestureChecker_);
+        control_.prepareGestureCheckers(checkers);
+
         control_.prepareActionTriggers(logTriggers_);
 
         control_.start();
@@ -330,7 +336,10 @@ namespace Gecon
         ui_->showGestureEvents->setChecked(false);
         ui_->showActions->setChecked(false);
 
-        gestures_.clear();
+        stateGestureChecker_.clear();
+        relationGestureChecker_.clear();
+        motionGestureChecker_.clear();
+
         for(ControlInfo::ActionTrigger* trigger : logTriggers_)
         {
             delete trigger;
