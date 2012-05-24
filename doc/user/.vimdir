@@ -1,0 +1,5 @@
+set guifont=DejaVu\ Sans\ Mono\ 12
+set textwidth=78
+
+map <F8> :make build<enter><enter>
+imap <F8> <esc><F8>A

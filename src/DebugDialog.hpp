@@ -50,6 +50,7 @@ namespace Gecon {
         QSpinBox* cbRange_;
         QSpinBox* crRange_;
         QSpinBox* mouseMotionBufferSize_;
+        QSpinBox* sleepTime_;
 
         Ui::DebugDialog *ui_;
     };

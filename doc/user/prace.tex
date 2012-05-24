@@ -1,0 +1,284 @@
+%%% Hlavní soubor. Zde se definují základní parametry a odkazuje se na ostatní části. %%%
+
+%% Verze pro jednostranný tisk:
+% Okraje: levý 40mm, pravý 25mm, horní a dolní 25mm
+% (ale pozor, LaTeX si sám přidává 1in)
+\documentclass[12pt,a4paper]{article}
+%\setlength\textwidth{145mm}
+%\setlength\textheight{247mm}
+%\setlength\oddsidemargin{15mm}
+%\setlength\evensidemargin{15mm}
+%\setlength\topmargin{0mm}
+%\setlength\headsep{0mm}
+%\setlength\headheight{0mm}
+% \openright zařídí, aby následující text začínal na pravé straně knihy
+\let\openright=\clearpage
+
+%% Pokud tiskneme oboustranně:
+% \documentclass[12pt,a4paper,twoside,openright]{report}
+% \setlength\textwidth{145mm}
+% \setlength\textheight{247mm}
+% \setlength\oddsidemargin{15mm}
+% \setlength\evensidemargin{0mm}
+% \setlength\topmargin{0mm}
+% \setlength\headsep{0mm}
+% \setlength\headheight{0mm}
+% \let\openright=\cleardoublepage
+
+%% Pokud používáte csLaTeX (doporučeno):
+\usepackage{czech}
+%% Pokud nikoliv:
+%\usepackage[czech]{babel}
+%\usepackage[T1]{fontenc}
+
+%% Použité kódování znaků: obvykle latin2, cp1250 nebo utf8:
+\usepackage[utf8]{inputenc}
+
+%% Ostatní balíčky
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{tikz-3dplot}
+
+\usetikzlibrary{patterns}
+\usetikzlibrary{decorations.pathreplacing}
+
+\usepackage{mathtools}
+\usepackage{listings}
+
+\usepackage{amsthm}
+\usepackage{amssymb}
+
+\usepackage{needspace}
+
+\newenvironment{priklad}{%
+    \par%
+    \vspace{1em}%
+    \leftskip=2\parindent
+    \rightskip=2\parindent
+    \small
+    \needspace{3\baselineskip}
+    \begin{sloppypar}%
+    \noindent\textit{\textbf{Příklad.}}%
+}{%
+    \end{sloppypar}%
+    \vspace{1em}%
+}
+
+\usepackage{array}
+\newcolumntype{t}{>{\tt}}
+
+\usepackage[disable, textsize=tiny]{todonotes}
+\usepackage[bottom, hang]{footmisc}
+
+\usepackage{caption}
+\usepackage[noend]{algpseudocode}
+\usepackage{algorithm}
+\floatname{algorithm}{Algoritmus}
+
+\newcommand{\var}[1]{\textit{#1}}
+\newcommand{\func}[2]{\mbox{\textsc{#1}}\ifx&#2&\else(#2)\fi}
+\newcommand{\keyword}[1]{\textbf{#1}}
+\newcommand{\NULL}{{\small NULL }}
+
+\newcommand{\class}[1]{\texttt{#1}}
+\newcommand{\method}[2]{\texttt{\mbox{#1}\ifx&#2&()\else(#2)\fi}}
+\newcommand{\function}[2]{\texttt{\mbox{#1}\ifx&#2&()\else(#2)\fi}}
+
+\usepackage{alltt}
+
+%\usepackage{showframe}
+
+%% Balíček hyperref, kterým jdou vyrábět klikací odkazy v PDF,
+%% ale hlavně ho používáme k uložení metadat do PDF (včetně obsahu).
+%% POZOR, nezapomeňte vyplnit jméno práce a autora.
+%\usepackage[ps2pdf,unicode]{hyperref}   % Musí být za všemi ostatními balíčky
+\usepackage[unicode]{hyperref}   % Musí být za všemi ostatními balíčky
+\hypersetup{
+    colorlinks,%
+    citecolor=black,%
+    filecolor=black,%
+    linkcolor=black,%
+    urlcolor=black
+}
+\hypersetup{pdftitle=Ovládání počítače pomocí jednobarevných objektů snímaných kamerou}
+\hypersetup{pdfauthor=Richard Jedlička}
+
+\usepackage[all]{hypcap}
+
+\newenvironment{itemize_compact}{\begin{list}{$\bullet$}{
+    \setlength{\parsep}{0mm}
+    \setlength{\itemsep}{0mm}
+}}{\end{list}}%
+
+\newcommand{\sectionline}{%
+  %\nointerlineskip 
+  %\vspace{\baselineskip}%
+  \begin{center}
+  \noindent\rule{\linewidth}{.5pt}%
+  \end{center}
+  %\par\nointerlineskip
+  %\par% \vspace{\baselineskip}
+}
+
+\usepackage{glossaries}
+\usepackage{xkeyval}
+\usepackage{xstring}
+
+\makeatletter
+
+\newcommand{\termdef}[2]{%
+    \csname term@#1@#2\endcsname%
+}
+
+\newcommand{\newterm}[2]{%
+    \define@cmdkeys{term}[term@#1@]{%
+        description,plural,sort,see,%
+        1pad,2pad,3pad,4pad,5pad,6pad,7pad%
+    }[none]
+    \setkeys{term}{#2}
+    \newglossaryentry{#1}{%
+        name={\termdef{#1}{1pad}},%
+        description={\termdef{#1}{description}},%
+        plural={\termdef{#1}{plural}},%
+        sort={\termdef{#1}{sort}},%
+        see={\termdef{#1}{see}},%
+        first={\itshape\termdef{#1}{1pad}}%
+    }
+}
+
+\newcommand{\term}[2][1pad]{%
+    \IfEq{#1}{1pad}{%
+        \gls{#2}%
+    }{%
+        \glslink{#2}{\termdef{#2}{#1}}%
+    }%
+}
+
+\newcommand{\Term}[2][1pad]{%
+    \IfEq{#1}{1pad}{%
+        \Gls{#2}%
+    }{%
+        \Glslink{#2}{\termdef{#2}{#1}}%
+    }%
+}
+
+\makeatother
+
+%%% Drobné úpravy stylu
+
+% Tato makra přesvědčují mírně ošklivým trikem LaTeX, aby hlavičky kapitol
+% sázel příčetněji a nevynechával nad nimi spoustu místa. Směle ignorujte.
+%\makeatletter
+%\def\@makechapterhead#1{
+  %{\parindent \z@ \raggedright \normalfont
+   %\Huge\bfseries \thechapter. #1
+   %\par\nobreak
+   %\vskip 20\p@
+%}}
+%\def\@makeschapterhead#1{
+  %{\parindent \z@ \raggedright \normalfont
+   %\Huge\bfseries #1
+   %\par\nobreak
+   %\vskip 20\p@
+%}}
+%\makeatother
+
+% Toto makro definuje kapitolu, která není očíslovaná, ale je uvedena v obsahu.
+%\def\chapwithtoc#1{
+%\chapter*{#1}
+%\addcontentsline{toc}{chapter}{#1}
+%}
+
+\linespread{1.3}
+
+\clubpenalty 10000
+\widowpenalty 10000
+
+\usepackage{encxvlna}
+\begin{document}
+
+% Trochu volnější nastavení dělení slov, než je default.
+%\lefthyphenmin=2
+%\righthyphenmin=2
+
+%%% Titulní strana práce
+
+\pagestyle{empty}
+\begin{center}
+
+\large
+
+Univerzita Karlova v Praze
+
+\medskip
+
+Matematicko-fyzikální fakulta
+
+%\centerline{\mbox{\includegraphics[width=60mm]{img/logo.pdf}}}
+
+\vfill
+%\vspace{5mm}
+
+{\large Richard Jedlička}
+
+\vspace{30mm}
+
+% Název práce přesně podle zadání
+{\LARGE\bfseries Ovládání počítače pomocí jednobarevných objektů snímaných kamerou}
+
+\vfill
+
+{\Huge Uživatelská dokumentace}
+% Název katedry nebo ústavu, kde byla práce oficiálně zadána
+% (dle Organizační struktury MFF UK)
+
+\vfill
+
+% Zde doplňte rok
+2012
+
+\end{center}
+
+\newpage
+
+%%% Následuje vevázaný list -- kopie podepsaného "Zadání bakalářské práce".
+%%% Toto zadání NENÍ součástí elektronické verze práce, nescanovat.
+
+%%% Na tomto místě mohou být napsána případná poděkování (vedoucímu práce,
+%%% konzultantovi, tomu, kdo zapůjčil software, literaturu apod.)
+
+\openright
+
+\newpage
+
+%%% Strana s automaticky generovaným obsahem bakalářské práce. U matematických
+%%% prací je přípustné, aby seznam tabulek a zkratek, existují-li, byl umístěn
+%%% na začátku práce, místo na jejím konci.
+
+\openright
+\pagestyle{plain}
+\setcounter{page}{1}
+\tableofcontents
+
+\thispagestyle{empty}
+
+%%% Jednotlivé kapitoly práce jsou pro přehlednost uloženy v samostatných souborech
+
+\input{instalace}
+
+%%% Tabulky v bakalářské práci, existují-li.
+%\chapter*{Seznam tabulek}
+%\addcontentsline{toc}{chapter}{Seznam tabulek}
+
+%%% Použité zkratky v bakalářské práci, existují-li, včetně jejich vysvětlení.
+%\chapter*{Seznam použitých zkratek}
+%\addcontentsline{toc}{chapter}{Seznam použitých zkratek}
+
+%%% Přílohy k bakalářské práci, existují-li (různé dodatky jako výpisy programů,
+%%% diagramy apod.). Každá příloha musí být alespoň jednou odkazována z vlastního
+%%% textu práce. Přílohy se číslují.
+%\chapter*{Přílohy}
+%\addcontentsline{toc}{chapter}{Přílohy}
+
+\openright
+\end{document}
