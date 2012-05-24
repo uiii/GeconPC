@@ -227,7 +227,8 @@ namespace Gecon
 
     Point PropertyValueSettings<Point>::value() const
     {
-        return value_;
+        std::cout << "value: " << value_.x << " " << value_.y << std::endl;
+        return Point(value_.x / 100.0, value_.y / 100.0);
     }
 
     QWidget *PropertyValueSettings<Point>::widget() const

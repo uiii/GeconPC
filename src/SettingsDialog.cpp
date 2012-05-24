@@ -20,6 +20,8 @@
 #include "SettingsDialog.hpp"
 #include "ui_SettingsDialog.hpp"
 
+#include "QMessageBox"
+
 namespace Gecon
 {
     SettingsDialog::SettingsDialog(ControlInfo::Control* control, QWidget *parent) :
@@ -53,14 +55,21 @@ namespace Gecon
 
         ControlInfo::DevicePolicy::DeviceAdapterList devices = devicePolicy_.getAvailableDevices();
 
+        bool any = false;
         for(DeviceAdapter& device : devices)
         {
+            any = true;
             ui->deviceList->addItem(device.name().c_str(), QVariant::fromValue(device));
 
             if(device == controlDevice)
             {
                 ui->deviceList->setCurrentIndex(ui->deviceList->count() - 1);
             }
+        }
+
+        if(! any)
+        {
+            QMessageBox::warning(this->parentWidget(), "Device error", "No available devices.", QMessageBox::Ok);
         }
     }
 

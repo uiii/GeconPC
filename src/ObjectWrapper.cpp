@@ -99,7 +99,7 @@ namespace Gecon
 
     template<>
     const QList<ObjectPropertyWrapper<double> > ObjectProperties<double>::list ={
-        { "aspect ratio", &ObjectWrapper::RawObject::aspectRatio }
+        { "aspect ratio", &ObjectWrapper::RawObject::sidesAspectRatio }
     };
 
     template<>

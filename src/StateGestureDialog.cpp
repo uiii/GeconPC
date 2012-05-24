@@ -50,7 +50,7 @@ namespace Gecon {
         states_.push_back(new ObjectStateSettings<Point>("position", &ObjectWrapper::RawObject::position));
         states_.push_back(new ObjectStateSettings<int>("angle", &ObjectWrapper::RawObject::angle));
         states_.push_back(new ObjectStateSettings<Fraction>("area", &ObjectWrapper::RawObject::areaSize));
-        states_.push_back(new ObjectStateSettings<double>("aspect ratio", &ObjectWrapper::RawObject::aspectRatio));
+        states_.push_back(new ObjectStateSettings<double>("sides aspect ratio", &ObjectWrapper::RawObject::sidesAspectRatio));
 
         ui_->object->setModel(objectModel);
 

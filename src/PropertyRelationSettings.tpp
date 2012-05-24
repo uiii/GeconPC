@@ -92,9 +92,9 @@ namespace Gecon
     {
         std::cout << "jo" << std::endl;
         return std::bind(
-            std::less<int>(),
+            std::less<double>(),
             std::bind(&distance, std::placeholders::_1, std::placeholders::_2),
-            distance_
+            distance_ / 100.0
         );
     }
 
@@ -129,9 +129,9 @@ namespace Gecon
     typename farther_than<PropertyType>::RawRelation farther_than<PropertyType>::rawRelation() const
     {
         return std::bind(
-            std::greater<int>(),
+            std::greater<double>(),
             std::bind(&distance, std::placeholders::_1, std::placeholders::_2),
-            distance_
+            distance_ / 100.0
         );
     }
 

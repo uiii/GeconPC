@@ -282,7 +282,7 @@ namespace Gecon
                 objectItem->setChild(1, 1, new QStandardItem(QString("[%1 \%; %2 \%]").arg(int(rawObject->position().x * 100)).arg(int(rawObject->position().y * 100))));
                 objectItem->setChild(2, 1, new QStandardItem(QString(tr("%1 degrees")).arg(rawObject->angle())));
                 objectItem->setChild(3, 1, new QStandardItem(QString(tr("1 / %1")).arg(rawObject->areaSize().denominator)));
-                objectItem->setChild(4, 1, new QStandardItem(QString(tr("%1")).arg(QString::number(rawObject->aspectRatio(), 'f', 2))));
+                objectItem->setChild(4, 1, new QStandardItem(QString(tr("%1")).arg(QString::number(rawObject->sidesAspectRatio(), 'f', 2))));
             }
             else
             {

@@ -74,7 +74,7 @@ namespace Gecon
 
         motionTimeout_->setValue(ControlInfo::MotionGestureChecker::MOTION_TIMEOUT);
         minimalGestureSide_->setValue(ControlInfo::MotionGestureChecker::MINIMAL_GESTURE_SIDE_FRACTION);
-        minimalMotionSize_->setValue(ControlInfo::MotionGestureChecker::NOT_MOTION_TOLERANCE);
+        minimalMotionSize_->setValue(ControlInfo::MotionGestureChecker::NOT_MOTION_TOLERANCE_FRACTION);
         maximalSameGestureDistance_->setValue(ControlInfo::MotionGestureChecker::MAXIMAL_SAME_GESTURE_DISTANCE);
         minimalObjectSizeFraction_->setValue(ColorObjectPolicy::MINIMAL_OBJECT_SIZE_FRACTION);
         yRange_->setValue(ControlInfo::Objects::Y_RANGE);
@@ -96,7 +96,7 @@ namespace Gecon
         qDebug("apply");
         ControlInfo::MotionGestureChecker::MOTION_TIMEOUT = motionTimeout_->value();
         ControlInfo::MotionGestureChecker::MINIMAL_GESTURE_SIDE_FRACTION = minimalGestureSide_->value();
-        ControlInfo::MotionGestureChecker::NOT_MOTION_TOLERANCE = minimalMotionSize_->value();
+        ControlInfo::MotionGestureChecker::NOT_MOTION_TOLERANCE_FRACTION = minimalMotionSize_->value();
         ControlInfo::MotionGestureChecker::MAXIMAL_SAME_GESTURE_DISTANCE = maximalSameGestureDistance_->value();
         ColorObjectPolicy::MINIMAL_OBJECT_SIZE_FRACTION = minimalObjectSizeFraction_->value();
         ControlInfo::Objects::Y_RANGE = yRange_->value();
