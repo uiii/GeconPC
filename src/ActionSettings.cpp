@@ -64,7 +64,7 @@ namespace Gecon
         }
     }
 
-    config_variable<int> MouseMotionActionSettings::BUFFER_SIZE = 4;
+    config_variable<int> MouseMotionActionSettings::BUFFER_SIZE = 3;
 
     MouseMotionActionSettings::Widget::Widget():
         object(new QComboBox(this))
