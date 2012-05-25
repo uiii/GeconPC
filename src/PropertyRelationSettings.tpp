@@ -90,7 +90,6 @@ namespace Gecon
     template< typename PropertyType >
     typename closer_than<PropertyType>::RawRelation closer_than<PropertyType>::rawRelation() const
     {
-        std::cout << "jo" << std::endl;
         return std::bind(
             std::less<double>(),
             std::bind(&distance, std::placeholders::_1, std::placeholders::_2),
@@ -174,7 +173,6 @@ namespace Gecon
     template< typename PropertyType >
     typename PropertyRelationSettings<PropertyType>::RawRelation PropertyRelationSettings<PropertyType>::relation() const
     {
-        std::cout << "rel: " << relations_.at(relationIndex_)->name().toAscii().data() << std::endl;
         return relations_.at(relationIndex_)->rawRelation();
     }
 

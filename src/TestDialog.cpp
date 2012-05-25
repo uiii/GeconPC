@@ -111,7 +111,6 @@ namespace Gecon
 
     void TestDialog::logAction_(const QString &triggerName, bool isTestedTrigger)
     {
-        qDebug("log action");
         bool shallLog = ui_->showActions->isChecked() || isTestedTrigger;
         if(! shallLog)
         {
@@ -192,7 +191,7 @@ namespace Gecon
 
     void TestDialog::includeActionTrigger_(ActionTriggerWrapper* trigger, bool isTestedTrigger)
     {
-        ControlInfo::ActionTrigger* testLogTrigger = new ControlInfo::ActionTrigger([=](){ qDebug("emit action"); emit actionTriggered(trigger->name(), isTestedTrigger); });
+        ControlInfo::ActionTrigger* testLogTrigger = new ControlInfo::ActionTrigger([=](){ emit actionTriggered(trigger->name(), isTestedTrigger); });
 
         for(int i = 0; i < trigger->onEvents().size(); ++i)
         {
@@ -206,7 +205,6 @@ namespace Gecon
             testLogTrigger->addSwitch(rawOnEvent, rawOffEvent);
         }
 
-        std::cout << "insert trigger: " << testLogTrigger << std::endl;
         actionTriggers_.insert(trigger->rawTrigger());
         logTriggers_.insert(testLogTrigger);
     }
@@ -215,7 +213,6 @@ namespace Gecon
     {
         for(ActionTriggerWrapper* trigger : actionTriggerModel_->triggers())
         {
-            std::cout << "include: " << trigger << std::endl;
             includeActionTrigger_(trigger, false);
         }
     }
@@ -310,8 +307,6 @@ namespace Gecon
 
     void TestDialog::performActions(bool perform)
     {
-        std::cout << "perform: " << perform << std::endl;
-
         ControlInfo::ActionTriggers triggers;
         triggers.insert(logTriggers_.begin(), logTriggers_.end());
 

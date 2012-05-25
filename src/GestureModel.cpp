@@ -345,11 +345,6 @@ namespace Gecon
 
         int row = index.row();
 
-        std::cout << "row: " << row << std::endl;
-        std::cout << "state: " << stateGestures_.size() << std::endl;
-        std::cout << "relation: " << relationGestures_.size() << std::endl;
-        std::cout << "motion: " << motionGestures_.size() << std::endl;
-
         GestureWrapper* gesture = data(index, Qt::UserRole).value<GestureWrapper*>();
 
         if(! gesture->actionTriggers().empty())

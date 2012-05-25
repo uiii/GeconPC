@@ -49,16 +49,12 @@ namespace Gecon
     {
         for(int i = 0; i < onEvents.size(); ++i)
         {
-            qDebug("add switch");
             EventWrapper::RawEvent* rawOnEvent = onEvents.at(i)->rawEvent();
             EventWrapper::RawEvent* rawOffEvent = 0;
             if(offEvents.at(i))
             {
                 rawOffEvent = offEvents.at(i)->rawEvent();
             }
-
-            std::cout << rawOnEvent << std::endl;
-            std::cout << rawOffEvent << std::endl;
 
             trigger->addSwitch(rawOnEvent, rawOffEvent);
         }
@@ -99,10 +95,8 @@ namespace Gecon
 
     ActionTriggerWrapper::RawActionTrigger* MouseMotionActionSettings::toTrigger(const Events &onEvents, const Events &offEvents) const
     {
-        qDebug("make mouse move trigger");
         ActionTriggerWrapper::RawActionTrigger* trigger = new ActionTriggerWrapper::RawActionTrigger([=](){
             static QList<Point> buffer;
-            qDebug("mouse move");
 
             ObjectWrapper::RawObject* object = object_->rawObject();
             double x = object->position().x * 1.5 - 0.25;
@@ -199,7 +193,6 @@ namespace Gecon
         }
 
         ActionTriggerWrapper::RawActionTrigger* trigger = new ActionTriggerWrapper::RawActionTrigger([=](){
-                qDebug("mouse button");
                 action.send();
         });
 
@@ -258,7 +251,6 @@ namespace Gecon
         }
 
         ActionTriggerWrapper::RawActionTrigger* trigger = new ActionTriggerWrapper::RawActionTrigger([=](){
-                qDebug("wheel");
                 action.send();
         });
 
@@ -378,7 +370,6 @@ namespace Gecon
         }
 
         ActionTriggerWrapper::RawActionTrigger* trigger = new ActionTriggerWrapper::RawActionTrigger([=](){
-                qDebug("key");
                 action.send();
         });
 
@@ -424,8 +415,6 @@ namespace Gecon
     ActionTriggerWrapper::RawActionTrigger *CommandActionSettings::toTrigger(const ActionSettings::Events &onEvents, const ActionSettings::Events &offEvents) const
     {
         ActionTriggerWrapper::RawActionTrigger* trigger = new ActionTriggerWrapper::RawActionTrigger([=](){
-                qDebug("command");
-                qDebug(command_.toAscii().data());
                 FakeInput::ActionSequence().runCommand(command_.toAscii().data()).send();
         });
 

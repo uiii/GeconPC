@@ -176,8 +176,6 @@ namespace Gecon
         connect(ui_->display, SIGNAL(imageDisplayed()), this, SLOT(firstImageDisplayed()));
         connect(control_.objectPolicySignaler(), SIGNAL(objectsRecognized(Image,Image,Objects)), this, SLOT(displayImage(Image,Image,Objects)), Qt::BlockingQueuedConnection);
 
-        qDebug("dialog: start capture");
-
         control_.start();
     }
 
@@ -254,12 +252,8 @@ namespace Gecon
     {
         if(recording_)
         {
-            std::cout << "motion recorded" << std::endl;
-
             recordedMotion_ = motion;
             recordedMoves_ = moves;
-
-            std::cout << "moves count: " << moves.size() << std::endl;
 
             stopRecording();
             stopCapture();
@@ -311,13 +305,9 @@ namespace Gecon
 
             QPolygonF moves;
             QPointF point(0,0);
-            std::cout << "moves count: " << recordedMoves_.size() << std::endl;
             for(auto move : recordedMoves_)
             {
                 point = point + QPointF(std::cos(move * PI/4.0) * 20, -std::sin(move * PI/4.0) * 20);
-                //std::cout << "point: " << point.x() << " " << point.y() << std::endl;
-                //moves << point;
-                //point = point + QPoint(1,1);
                 moves << point;
             }
 
@@ -426,10 +416,8 @@ namespace Gecon
             motionsOut << point.x << " " << point.y << " ";
         }
         motionsOut << "\n";
-        std::cout << "moves count: " << recordedMoves_.size() << std::endl;
         for(auto move : recordedMoves_)
         {
-            std::cout << "move: " << move << std::endl;
             movesOut << move << " ";
         }
         movesOut << "\n";

@@ -93,7 +93,6 @@ namespace Gecon
 
     void DebugDialog::apply()
     {
-        qDebug("apply");
         ControlInfo::MotionGestureChecker::MOTION_TIMEOUT = motionTimeout_->value();
         ControlInfo::MotionGestureChecker::MINIMAL_GESTURE_SIDE_FRACTION = minimalGestureSide_->value();
         ControlInfo::MotionGestureChecker::NOT_MOTION_TOLERANCE_FRACTION = minimalMotionSize_->value();

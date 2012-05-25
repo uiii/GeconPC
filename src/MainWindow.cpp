@@ -47,8 +47,8 @@ namespace Gecon
         eventTriggerDialog_(new ActionTriggerDialog(actionTriggerModel_, gestureModel_, objectModel_, this)),
         ui_(new Ui::MainWindow)
     {
-        DebugDialog* debug = new DebugDialog(this); // TODO
-        debug->show();
+        //DebugDialog* debug = new DebugDialog(this); // TODO
+        //debug->show();
 
         StateGestureWrapper::dialog = stateGestureDialog_;
         RelationGestureWrapper::dialog = relationGestureDialog_;

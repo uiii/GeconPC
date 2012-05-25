@@ -35,7 +35,6 @@ namespace Gecon
     {
         Events events = ControlInfo::MotionGestureChecker::check(objects);
 
-        std::cout << "motinon size: " << motionStorage_[object_].motion.size() << std::endl;
         signaler_->emitMotionUpdated(motionStorage_[object_].motion);
 
         return events;
@@ -48,8 +47,6 @@ namespace Gecon
 
     void MotionRecorder::motionDone_(MotionRecord& record)
     {
-        std::cout << "emit motion" << std::endl;
-
         ControlInfo::MotionGestureChecker::motionDone_(record);
         signaler_->emitMotionRecorded(record.motion, record.moves);
     }
