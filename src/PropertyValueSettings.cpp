@@ -169,7 +169,7 @@ namespace Gecon
     }
 
     PropertyValueSettings<bool>::PropertyValueSettings():
-        PropertyValueSettings<bool>("True", "False")
+        PropertyValueSettings<bool>("true", "false")
     {
     }
 

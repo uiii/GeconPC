@@ -380,8 +380,6 @@ namespace Gecon
             }
         }
 
-        delete gesture;
-
         if(row < stateGestures_.size())
         {
             stateGestureChecker_->removeGesture(dynamic_cast<StateGestureWrapper*>(gesture)->rawGesture());
@@ -397,6 +395,8 @@ namespace Gecon
             motionGestureChecker_->removeGesture(dynamic_cast<MotionGestureWrapper*>(gesture)->rawGesture());
             motionGestures_.removeAt(row);
         }
+
+        delete gesture;
 
         endRemoveRows();
 

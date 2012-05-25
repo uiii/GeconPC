@@ -64,7 +64,7 @@ namespace Gecon
         }
     }
 
-    config_variable<int> MouseMotionActionSettings::BUFFER_SIZE = 3;
+    config_variable<int> MouseMotionActionSettings::BUFFER_SIZE = 4;
 
     MouseMotionActionSettings::Widget::Widget():
         object(new QComboBox(this))
@@ -112,7 +112,7 @@ namespace Gecon
             y = y * QApplication::desktop()->screenGeometry().height();
 
             buffer.push_back(Point(x,y));
-            if(buffer.size() > BUFFER_SIZE)
+            while(buffer.size() > BUFFER_SIZE)
             {
                 buffer.pop_front();
             }

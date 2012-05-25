@@ -128,7 +128,7 @@
           <item>
            <widget class="QPushButton" name="newActionTriggerButton">
             <property name="text">
-             <string>New event trigger</string>
+             <string>New action trigger</string>
             </property>
            </widget>
           </item>

@@ -121,10 +121,10 @@ namespace Gecon
     DECLARE_SIMPLE_RELATION(less, "<", std::less<PropertyType>())
     DECLARE_SIMPLE_RELATION(greater, ">", std::greater<PropertyType>())
 
-    DECLARE_SIMPLE_RELATION(over, "over", &isOver)
-    DECLARE_SIMPLE_RELATION(under, "under", &isUnder)
-    DECLARE_SIMPLE_RELATION(on_the_left_of, "on the left of", &isOnTheLeftOf)
-    DECLARE_SIMPLE_RELATION(on_the_right_of, "on the right of", &isOnTheRightOf)
+    DECLARE_SIMPLE_RELATION(over, "is over", &isOver)
+    DECLARE_SIMPLE_RELATION(under, "is under", &isUnder)
+    DECLARE_SIMPLE_RELATION(on_the_left_of, "is on the left of", &isOnTheLeftOf)
+    DECLARE_SIMPLE_RELATION(on_the_right_of, "is on the right of", &isOnTheRightOf)
 
     struct DistanceWidget : public QWidget
     {

@@ -96,12 +96,13 @@ Aplikaci spustíme pomocí \texttt{make run}.
 
 \section{Práce s aplikací}
 V této sekci popíšeme, jak se pracuje s aplikací. Hlavní okno programu vypadá
-jako na obrázku 1.
+jako na obrázku \ref{fig:mainwindow}.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=\textwidth]{mainwindow.png}
 \caption{Hlavní okno}
+\label{fig:mainwindow}
 \end{figure}
 
 Je rozděleno na tři části: část pro objekty (vlevo), část pro gesta
@@ -119,6 +120,7 @@ pomocí dialogu nastavení \emph{Settings}. Nachází se v nabídce \emph{Edit}.
 \centering
 \includegraphics[width=0.7\textwidth]{settings.png}
 \caption{Výběr webové kamery}
+\label{fig:settings}
 \end{figure}
 
 Pokud nejsou k dispozici žádná zařízení, aplikace o tom dá vědět varovnou
@@ -128,7 +130,7 @@ ovládání).
 
 \subsection{Práce s objekty}
 Nový objekt se přidává před dialog, který se aktivuje kliknutím na tlačítko
-\emph{New object}. Dialog je vyobrazen na obrázku 2. Uprostřed je zobrazeno
+\emph{New object}. Dialog je vyobrazen na obrázku \ref{fig:newobject}. Uprostřed je zobrazeno
 video snímané kamerou. Pro získání barvy objektu, je třeba umístit objekt, tak
 aby byl vidět v záběru a po té na něj kliknout. Detekovaný objekt pak bude
 vyznačen oblastí vyplněnou modrými tečkami a zeleným konvexním obalem a
@@ -142,6 +144,7 @@ objektu je málo výrazná nebo se v pozdaní nachází příliš podobný objek
 \centering
 \includegraphics[width=\textwidth]{newobject.png}
 \caption{Dialog pro přidání nového objektu}
+\label{fig:newobject}
 \end{figure}
 
 Objekty vybírejte s pokud možno co nejsytější barvou. Osvětlení je vhodné
@@ -174,21 +177,211 @@ otevřete stejný dialog jako při přidávání objektu a úprava objektu prob�
 také stějně jako přidávání.
 
 Jediné co se v dialogu objeví navíc je tlačítko
-\emph{Delete}, kterým můžete objekt smazat. Pokud máte při odstraňování k
-objektu přidána nějaká gesta (viz dále), bude Vás aplikace varovat, že dojde i
-k jejich smazání.
+\emph{Delete}, kterým můžete objekt smazat. 
 
 \subsection{Práce s gesty}
-Pro práci s gesty slouží prostřední část hlavního okna. Pro přidání nového
-gesta klikněte na tlačítko \emph{New gesture}. Vyjede menu, kde si vybere
-jaké gesto chcete přidat. Jsou na výběr tři typy gest -- stavové, vztahové a
-pohybové.
-
-Začneme stavovým gestem. Dialog nového stavového gesta umožňuje nastavit
-podmínku, kterou musí splňovat vlastnost objektu.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.5\textwidth]{newgesturemenu.png}
 \caption{Menu pro výběr typu gesta pro přidání}
+\label{fig:newgesturemenu}
 \end{figure}
+
+Pro práci s gesty slouží prostřední část hlavního okna. Pro přidání nového
+gesta klikněte na tlačítko \emph{New gesture}. Vyjede menu, kde si vybere jaké
+gesto chcete přidat (viz obrázek \ref{fig:newgesturemenu}). Jsou na výběr tři
+typy gest -- stavové, vztahové a pohybové.
+
+Začneme \textbf{stavovým gestem}. Dialog nového stavového gesta umožňuje nastavit
+podmínku, kterou musí splňovat vlastnost objektu. Dialog obsahuje několik
+rozbalovacích seznamů. Jednotlivé prvky jsou za sebou poskládány tak, aby šlo
+podmínku stavět inutivně jako větu. Na prvním místě je výběr objektu, za ním
+vlastnost, dále následuje relace která se vztahuje k hodnotě na posledním
+místě. Prvky pro výběr relace a hodnoty se mění podle vybrané vlastnosti
+objektu.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=1.1\textwidth]{newstategesture.png}
+\caption{Dialog pro přidání nového stavového gesta}
+\label{fig:newstategesture}
+\end{figure}
+
+Vlastnosti na výběr jsou:
+\begin{itemize_compact}
+    \item \emph{viditelnost}
+    
+    Porovnává se vůči pravdivostní hodnotě \emph{prava/nepravda}, ve smyslu
+    \emph{je~viditelný / není~viditelný}. Obrázek \ref{fig:newstategesture}
+    ukazuje nastavení podmínky na \uv{objekt je viditelný}.
+
+    \item \emph{pozice}
+
+    Porovnává se vůči jiné pozici. Souřadnice pozice se zadávají v procentech.
+    Relace na výběr jsou \emph{nad/pod} pozicí, \emph{nalevo/napravo}
+    od pozice a \emph{blíže/dále} než zadaná vzdálenost od pozice.
+
+    \item \emph{sklon}\nopagebreak
+
+    Sklon se porovnává s číselnou hodnotou zadanou v úhlech. Hodnota úhlu má
+    smysl v rozmezí 0--179$^{\circ}$.
+
+    \item \emph{obsah}
+
+    Obsah se porovnává s hodnotu zadanou zlomkem. Zlomek určuje, jakou část
+    snímku objekt zbírá.
+
+    \item \emph{poměr stran}
+
+    Poměr stran se porovnává s číselnou reálnou hodnotou, vyjadřují podíl
+    \emph{delší strana} $/$ \emph{kratší strana}.
+\end{itemize_compact}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=1.1\textwidth]{newrelationgesture.png}
+\caption{Dialog pro přidání nového vztahového gesta}
+\label{fig:newrelationgesture}
+\end{figure}
+
+\textbf{Vztahové gesto} se zadává velmi podobně. Jediný rozdíl je v tom, že
+místo prvků pro zadání konkrétní hodnoty jsou zde prvky pro zadání vlastnosti
+druhého objektu.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\textwidth]{newmotiongesture1.png}
+\caption{Zaznamenávání trajektorie pohybu objektu}
+\label{fig:newrelationgesture1}
+\end{figure}
+
+Zadávání nového \textbf{pohybového gesta} se naopak úplně liší. Dialog slouží
+k zaznamenání trajektorie pohybu objektu. Nejprve vyberte objekt (vlevo dole),
+pro který chcete zaznamenat gesto. Pak stiskněte tlačítko \emph{Record
+motion}, tím se spustí video, ale ještě neprobíhá zaznamenávání. Přípravte si
+objekt na pozici, odkud chcete pohyb začít, a až budete připraveni, klikněte na
+\emph{Ready}. Nyní pohybujte objektem. Až dokončíte pohyb, držte objekt na
+jednom místě. Aplikace rozpozná, že jste dokončili pohyb přestane dále
+zaznamenávat. Poté zaznamenanou trajektorii zobrazí.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\textwidth]{newmotiongesture2.png}
+\caption{Zaznamenávání trajektorie pohybu objektu}
+\label{fig:newrelationgesture2}
+\end{figure}
+
+Pokud pohyb bude mít příliš malý rozhas pozic, nebo zaznamenán. Je potřeba aby
+rozsah krajních bodů (levého a pravého nebo horního a dolního), byl alespoň
+čtvrtina šírky snímku.
+
+Pokud chcete zaznamenat gesto znovu, opakujte postup popsany výše.
+
+Nyní lze zaznamenaou pozici uložit tlačítkem \emph{Save}. Pokud jste již dříve
+uložili gesto, které je hodně podobné nově zaznamenanému, aplikace ho odmítne
+uložit.
+
+\bigskip
+Všem gestů je možné nastavit název, pokud ho ale neuvedete, tak jako u objektů
+aplikace vybere vhodný unikátní identifikátor.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{gestures.png}
+\caption{Uložená gesta}
+\label{fig:gestures}
+\end{figure}
+
+\bigskip
+Uložená gesta se pak zobrazí v hlavním okně, v pořadí stavová gesta, vztahová
+gesta a nakonec pohybová gesta.
+
+Gesta je možné upravit dvojklikem na jejich název.
+
+\subsection{Práce s akcemi}
+Poslední část hlavního okna slouží akcím. Pro přidání nového spouštěče akce
+kliněte na \emph{New action trigger}. Dialog obsahuje pole pro seznam
+přepínačů a prvky pro nastavení akce.
+
+Nový přepínač přidáte kliknutím na talčítko \emph{Add switch}, což vyvolá
+další dialog pro nastavení zapínací a vypínací události přepínače.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{addswitch.png}
+\caption{Přidání nového přepínače}
+\label{fig:addswitch}
+\end{figure}
+
+Prvním rozbalovacím seznamem vyberete gesto, druhým událost. Pokud k zapínací
+události existuje logicky události opačná (např. \emph{stav začal platit} a
+\emph{stav přestal platit}), je rozumné ji přidat jako vypínací událost.
+Samozřejmě záleží čeho chcete dosáhnout. Přepínače fungují tak, že pokud mám
+nastaveny obě události, tak po zapnutí první událostí zůstává zapnutý, dokud
+ho druhá událost nevypne. Kdežto, pokud vypínací událost nemá, vypne se hned
+po proběhnutí kontroly spouštěče, to má smysl převážně u pohybových gest,
+protože mají pouze jednu událost.
+
+Pokud chcete některý přepínač změnit, musíte ho odstranit tlačítkem
+\emph{Remove switch} a znovu přidat v nové podobě.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1.1\textwidth]{newactiontrigger.png}
+\caption{Přidání nového spoučtěče akce}
+\label{fig:newactiontrigger}
+\end{figure}
+
+Co se týče akcí, máte na výběr \emph{pohyb myší}, \emph{stisk tlačítek myši} a
+\emph{otočení kolečkem}, \emph{stisk klávesy na klávesnici} nebo
+\emph{spuštění systémového příkazu}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1.1\textwidth]{keyaction.png}
+\caption{Zadávání akce klávesnice}
+\label{fig:keyaction}
+\end{figure}
+
+Nastavení akcí myši by mělo být zřejmé. Pozastavíme se u akce stisku klávesy.
+Zadání klávesy, které se akce bude týkat probíhá tak, že kliknete na tlačítko
+\emph{grab key}. V tu chvílí aplikace čeká na stisk klávesy (viz obrázek
+\ref{fig:keyaction}). Skiskněte klávesu na klávesnici a aplikace si ji zaznamená.
+
+Pro zadání systémového příkazu stačí konkrétní příkaz napsat. Jedná se o
+jakýkoli příkaz, který lze zapsat do příkazové řádky systému.
+
+\subsection{Testování gest}
+Před tím, než spustíte samotné ovládání, je vhodné si nejprve otestovat, zda
+vše funguje tak, jak předpokládáte. Můžete testovat buď jednotlivá gesta
+kliknutím na tlačítko \emph{Test gesture} v dialogu pro přidávání gesta, nebo
+můžete otestovat všechny najednou. Nástroj pro testování všech najednou
+naleznete v nabídce \emph{Tools} pod položkou \emph{Test control}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1.1\textwidth]{testgestures.png}
+\caption{Testování gest}
+\label{fig:testgestures}
+\end{figure}
+
+Dialog poskytuje spoustu užitečných informací. Vpravém sloupci zobrazje
+aktuální hodnoty vlastnosí objektů. Toho lze využít při navrhování gest, není
+třeba vymýšlet z hlavy konkrétní hodnoty pro podmínky.
+
+V dolní části jsou zobrazeny události, které tak jak nastávají za sebou.
+
+Úplně dole je několik zaškrtávacích políček. \emph{Show all gesture events}
+zajistí aby byli zobrazeny událost všech gest (smysl má při testování
+jednotlivých gest, ve výchozím stavu se totiž zobrazují pouze události
+testovaného gesta). \emph{Show all actions} zajistí, aby se zobrazovaly akce
+pokud nastanou potřebné události, akce se ale neprovedou, pouze se zobrazí
+informace, že by se za normálních okolností v ten okamžik provedly. Pokud ale
+chcete akce i provádět, zaškrtněte poslední políčko \emph{Perform actions}.
+
+\subsection{Ovládání}
+Nyní je vše připraveno pro samotné ovládání. Spustíte ho tlačítkem \emph{Start
+control} ve hlavním okně. Nyní se již nebudou nikde rozbrazovat žádné
+informace. Aplikaci je možné dát stranou (minimalizovat, přesunout na jinou
+plochu, ...). Ukončení ovládání se provede stejným tlačítkem.

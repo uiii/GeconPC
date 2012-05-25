@@ -80,7 +80,7 @@ namespace Gecon
 
     template< typename PropertyType >
     closer_than<PropertyType>::closer_than():
-        PropertyRelation<PropertyType>("closer than", RawRelation(), new DistanceWidget),
+        PropertyRelation<PropertyType>("is closer than", RawRelation(), new DistanceWidget),
         distance_(0),
         widget_(dynamic_cast<DistanceWidget*>(this->widget()))
     {
@@ -118,7 +118,7 @@ namespace Gecon
 
     template< typename PropertyType >
     farther_than<PropertyType>::farther_than():
-        PropertyRelation<PropertyType>("farther than", RawRelation(), new DistanceWidget),
+        PropertyRelation<PropertyType>("is farther than", RawRelation(), new DistanceWidget),
         distance_(0),
         widget_(dynamic_cast<DistanceWidget*>(this->widget()))
     {
